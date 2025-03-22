@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Mandalart, MandalartCell, MandalartBlock } from '@/types/mandalart';
+import { Mandalart, MandalartCell, MandalartBlock, MandalartCellWithChildren } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
 
 interface UseMandalartResult {
@@ -13,6 +13,11 @@ interface UseMandalartResult {
   createCell: (mandalartId: string, position: number, cellData: Partial<MandalartCell>) => Promise<string>;
   toggleCellCompletion: (cellId: string) => Promise<void>;
   deleteMandalart: (id: string) => Promise<void>;
+  navigationPath: MandalartCell[];
+  currentCell: MandalartCell | null;
+  navigateToCell: (cellId: string) => void;
+  navigateToParent: () => void;
+  loadChildrenForCell: (cellId: string) => Promise<void>;
 }
 
 /**
@@ -22,6 +27,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   const [mandalart, setMandalart] = useState<Mandalart | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!!mandalartId);
   const [error, setError] = useState<string | null>(null);
+  const [navigationPath, setNavigationPath] = useState<MandalartCell[]>([]);
+  const [currentCellId, setCurrentCellId] = useState<string | null>(null);
 
   // 셀 위치 매핑 유틸리티
   const mapPositionToBlockAndCell = (position: number): { blockIndex: number, cellIndex: number } => {
@@ -77,18 +84,22 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       updatedAt: mandalartData.updated_at,
       centerBlock: {
         id: 'center-block',
-        centerCell: { id: 'center-block-center', topic: '' },
+        centerCell: { id: 'center-block-center', topic: '', depth: 0, position: 0 },
         surroundingCells: Array(8).fill(null).map((_, i) => ({
           id: `center-block-cell-${i}`,
-          topic: ''
+          topic: '',
+          depth: 1,
+          position: i
         }))
       },
       surroundingBlocks: Array(8).fill(null).map((_, i) => ({
         id: `block-${i}`,
-        centerCell: { id: `block-${i}-center`, topic: '' },
+        centerCell: { id: `block-${i}-center`, topic: '', depth: 1, position: 0 },
         surroundingCells: Array(8).fill(null).map((_, j) => ({
           id: `block-${i}-cell-${j}`,
-          topic: ''
+          topic: '',
+          depth: 2, 
+          position: j
         }))
       }))
     };
@@ -101,25 +112,33 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       if (blockIndex === 4) {
         if (cellIndex === 4) {
           // 중앙 블록의 중앙 셀
-          result.centerBlock.centerCell = {
-            id: cell.id,
-            topic: cell.topic || '',
-            memo: cell.memo,
-            color: cell.color,
-            imageUrl: cell.image_url,
-            isCompleted: cell.is_completed
-          };
+          if (result.centerBlock) {
+            result.centerBlock.centerCell = {
+              id: cell.id,
+              topic: cell.topic || '',
+              memo: cell.memo,
+              color: cell.color,
+              imageUrl: cell.image_url,
+              isCompleted: cell.is_completed,
+              depth: cell.depth || 0,
+              position: cell.position || 0
+            };
+          }
         } else {
           // 중앙 블록의 주변 셀
           const surroundingIndex = cellIndex > 4 ? cellIndex - 1 : cellIndex;
-          result.centerBlock.surroundingCells[surroundingIndex] = {
-            id: cell.id,
-            topic: cell.topic || '',
-            memo: cell.memo,
-            color: cell.color,
-            imageUrl: cell.image_url,
-            isCompleted: cell.is_completed
-          };
+          if (result.centerBlock) {
+            result.centerBlock.surroundingCells[surroundingIndex] = {
+              id: cell.id,
+              topic: cell.topic || '',
+              memo: cell.memo,
+              color: cell.color,
+              imageUrl: cell.image_url,
+              isCompleted: cell.is_completed,
+              depth: cell.depth || 1,
+              position: cell.position || surroundingIndex
+            };
+          }
         }
       } else {
         // 주변 블록
@@ -127,25 +146,33 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         
         if (cellIndex === 4) {
           // 주변 블록의 중앙 셀
-          result.surroundingBlocks[blockIndexAdjusted].centerCell = {
-            id: cell.id,
-            topic: cell.topic || '',
-            memo: cell.memo,
-            color: cell.color,
-            imageUrl: cell.image_url,
-            isCompleted: cell.is_completed
-          };
+          if (result.surroundingBlocks) {
+            result.surroundingBlocks[blockIndexAdjusted].centerCell = {
+              id: cell.id,
+              topic: cell.topic || '',
+              memo: cell.memo,
+              color: cell.color,
+              imageUrl: cell.image_url,
+              isCompleted: cell.is_completed,
+              depth: cell.depth || 1,
+              position: cell.position || 0
+            };
+          }
         } else {
           // 주변 블록의 주변 셀
           const surroundingIndex = cellIndex > 4 ? cellIndex - 1 : cellIndex;
-          result.surroundingBlocks[blockIndexAdjusted].surroundingCells[surroundingIndex] = {
-            id: cell.id,
-            topic: cell.topic || '',
-            memo: cell.memo,
-            color: cell.color,
-            imageUrl: cell.image_url,
-            isCompleted: cell.is_completed
-          };
+          if (result.surroundingBlocks) {
+            result.surroundingBlocks[blockIndexAdjusted].surroundingCells[surroundingIndex] = {
+              id: cell.id,
+              topic: cell.topic || '',
+              memo: cell.memo,
+              color: cell.color,
+              imageUrl: cell.image_url,
+              isCompleted: cell.is_completed,
+              depth: cell.depth || 2,
+              position: cell.position || surroundingIndex
+            };
+          }
         }
       }
     });
@@ -276,7 +303,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         const newMandalart = { ...prev };
         
         // 중앙 블록 검사
-        if (cellId === newMandalart.centerBlock.centerCell.id) {
+        if (newMandalart.centerBlock && cellId === newMandalart.centerBlock.centerCell.id) {
           newMandalart.centerBlock = {
             ...newMandalart.centerBlock,
             centerCell: {
@@ -287,36 +314,40 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         }
 
         // 중앙 블록의 주변 셀 검사
-        const centerSurroundingIndex = newMandalart.centerBlock.surroundingCells.findIndex(cell => cell.id === cellId);
-        if (centerSurroundingIndex !== -1) {
-          newMandalart.centerBlock.surroundingCells[centerSurroundingIndex] = {
-            ...updatedCell
-          };
-          return newMandalart;
-        }
-
-        // 주변 블록 검사
-        for (let i = 0; i < newMandalart.surroundingBlocks.length; i++) {
-          const block = newMandalart.surroundingBlocks[i];
-          
-          // 블록 중앙 셀 검사
-          if (block.centerCell.id === cellId) {
-            newMandalart.surroundingBlocks[i] = {
-              ...block,
-              centerCell: {
-                ...updatedCell
-              }
-            };
-            return newMandalart;
-          }
-
-          // 블록 주변 셀 검사
-          const surroundingIndex = block.surroundingCells.findIndex(cell => cell.id === cellId);
-          if (surroundingIndex !== -1) {
-            newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex] = {
+        if (newMandalart.centerBlock) {
+          const centerSurroundingIndex = newMandalart.centerBlock.surroundingCells.findIndex(cell => cell.id === cellId);
+          if (centerSurroundingIndex !== -1) {
+            newMandalart.centerBlock.surroundingCells[centerSurroundingIndex] = {
               ...updatedCell
             };
             return newMandalart;
+          }
+        }
+
+        // 주변 블록 검사
+        if (newMandalart.surroundingBlocks) {
+          for (let i = 0; i < newMandalart.surroundingBlocks.length; i++) {
+            const block = newMandalart.surroundingBlocks[i];
+            
+            // 블록 중앙 셀 검사
+            if (block.centerCell.id === cellId) {
+              newMandalart.surroundingBlocks[i] = {
+                ...block,
+                centerCell: {
+                  ...updatedCell
+                }
+              };
+              return newMandalart;
+            }
+
+            // 블록 주변 셀 검사
+            const surroundingIndex = block.surroundingCells.findIndex(cell => cell.id === cellId);
+            if (surroundingIndex !== -1) {
+              newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex] = {
+                ...updatedCell
+              };
+              return newMandalart;
+            }
           }
         }
 
@@ -412,15 +443,19 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       let currentCell: MandalartCell | null = null;
       
       // 중앙 블록의 중앙 셀 확인
-      if (mandalart.centerBlock.centerCell.id === cellId) {
+      if (mandalart.centerBlock && mandalart.centerBlock.centerCell.id === cellId) {
         currentCell = mandalart.centerBlock.centerCell;
       } else {
         // 중앙 블록의 주변 셀 확인
-        const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find(cell => cell.id === cellId);
-        if (centerSurroundingCell) {
-          currentCell = centerSurroundingCell;
-        } else {
-          // 주변 블록들 확인
+        if (mandalart.centerBlock) {
+          const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find(cell => cell.id === cellId);
+          if (centerSurroundingCell) {
+            currentCell = centerSurroundingCell;
+          }
+        }
+        
+        // 주변 블록들 확인
+        if (!currentCell && mandalart.surroundingBlocks) {
           for (const block of mandalart.surroundingBlocks) {
             // 블록의 중앙 셀 확인
             if (block.centerCell.id === cellId) {
@@ -465,7 +500,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         const newMandalart = { ...prev };
         
         // 중앙 블록의 중앙 셀 업데이트
-        if (newMandalart.centerBlock.centerCell.id === cellId) {
+        if (newMandalart.centerBlock && newMandalart.centerBlock.centerCell.id === cellId) {
           newMandalart.centerBlock = {
             ...newMandalart.centerBlock,
             centerCell: {
@@ -477,39 +512,43 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         }
         
         // 중앙 블록의 주변 셀 업데이트
-        const centerSurroundingIndex = newMandalart.centerBlock.surroundingCells.findIndex(cell => cell.id === cellId);
-        if (centerSurroundingIndex !== -1) {
-          newMandalart.centerBlock.surroundingCells[centerSurroundingIndex] = {
-            ...newMandalart.centerBlock.surroundingCells[centerSurroundingIndex],
-            isCompleted: newCompletionStatus
-          };
-          return newMandalart;
-        }
-        
-        // 주변 블록 업데이트
-        for (let i = 0; i < newMandalart.surroundingBlocks.length; i++) {
-          const block = newMandalart.surroundingBlocks[i];
-          
-          // 블록 중앙 셀 업데이트
-          if (block.centerCell.id === cellId) {
-            newMandalart.surroundingBlocks[i] = {
-              ...block,
-              centerCell: {
-                ...block.centerCell,
-                isCompleted: newCompletionStatus
-              }
-            };
-            return newMandalart;
-          }
-          
-          // 블록 주변 셀 업데이트
-          const surroundingIndex = block.surroundingCells.findIndex(cell => cell.id === cellId);
-          if (surroundingIndex !== -1) {
-            newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex] = {
-              ...newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex],
+        if (newMandalart.centerBlock) {
+          const centerSurroundingIndex = newMandalart.centerBlock.surroundingCells.findIndex(cell => cell.id === cellId);
+          if (centerSurroundingIndex !== -1) {
+            newMandalart.centerBlock.surroundingCells[centerSurroundingIndex] = {
+              ...newMandalart.centerBlock.surroundingCells[centerSurroundingIndex],
               isCompleted: newCompletionStatus
             };
             return newMandalart;
+          }
+        }
+        
+        // 주변 블록 업데이트
+        if (newMandalart.surroundingBlocks) {
+          for (let i = 0; i < newMandalart.surroundingBlocks.length; i++) {
+            const block = newMandalart.surroundingBlocks[i];
+            
+            // 블록 중앙 셀 업데이트
+            if (block.centerCell.id === cellId) {
+              newMandalart.surroundingBlocks[i] = {
+                ...block,
+                centerCell: {
+                  ...block.centerCell,
+                  isCompleted: newCompletionStatus
+                }
+              };
+              return newMandalart;
+            }
+            
+            // 블록 주변 셀 업데이트
+            const surroundingIndex = block.surroundingCells.findIndex(cell => cell.id === cellId);
+            if (surroundingIndex !== -1) {
+              newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex] = {
+                ...newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex],
+                isCompleted: newCompletionStatus
+              };
+              return newMandalart;
+            }
           }
         }
         
@@ -569,6 +608,250 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     }
   }, [mandalartId]);
 
+  // 계층 구조 데이터 로드 헬퍼 함수
+  const loadHierarchicalData = async (mandalartId: string, parentId: string | null = null, depth: number = 0): Promise<MandalartCellWithChildren> => {
+    const supabase = createClient();
+    
+    // 해당 부모의 직접 자식 셀 로드
+    const query = supabase
+      .from('mandalart_cells')
+      .select('*')
+      .eq('mandalart_id', mandalartId);
+      
+    if (parentId === null) {
+      // 루트 셀 로드 (parent_id가 null)
+      query.is('parent_id', null);
+    } else {
+      // 특정 셀의 자식 로드
+      query.eq('parent_id', parentId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    // 부모 셀을 찾거나 루트 셀 생성
+    let parentCell: MandalartCellWithChildren;
+    
+    if (parentId === null) {
+      // 루트 셀
+      if (data && data.length > 0) {
+        const rootData = data[0];
+        parentCell = {
+          id: rootData.id,
+          topic: rootData.topic || '',
+          memo: rootData.memo,
+          color: rootData.color,
+          imageUrl: rootData.image_url,
+          isCompleted: rootData.is_completed,
+          parentId: null,
+          depth: 0,
+          position: 0,
+          children: []
+        };
+      } else {
+        throw new Error('루트 셀을 찾을 수 없습니다');
+      }
+    } else {
+      // 부모 셀 로드
+      const { data: parentData, error: parentError } = await supabase
+        .from('mandalart_cells')
+        .select('*')
+        .eq('id', parentId)
+        .single();
+      
+      if (parentError) {
+        throw new Error(parentError.message);
+      }
+      
+      parentCell = {
+        id: parentData.id,
+        topic: parentData.topic || '',
+        memo: parentData.memo,
+        color: parentData.color,
+        imageUrl: parentData.image_url,
+        isCompleted: parentData.is_completed,
+        parentId: parentData.parent_id,
+        depth: parentData.depth || depth,
+        position: parentData.position || 0,
+        children: []
+      };
+    }
+    
+    // 자식 셀 로드 (첫 번째 부모의 직접 자식이 아닌 경우)
+    if (parentId !== null) {
+      const { data: childrenData, error: childrenError } = await supabase
+        .from('mandalart_cells')
+        .select('*')
+        .eq('parent_id', parentId);
+      
+      if (childrenError) {
+        throw new Error(childrenError.message);
+      }
+      
+      // 자식 셀 처리
+      const children = childrenData || [];
+      parentCell.children = children.map(child => ({
+        id: child.id,
+        topic: child.topic || '',
+        memo: child.memo,
+        color: child.color,
+        imageUrl: child.image_url,
+        isCompleted: child.is_completed,
+        parentId: child.parent_id,
+        depth: child.depth || (parentCell.depth + 1),
+        position: child.position || 0,
+        children: [] // 기본적으로 빈 배열로 설정
+      }));
+    }
+    
+    return parentCell;
+  };
+
+  // 특정 셀의 자식 셀 로드
+  const loadChildrenForCell = useCallback(async (cellId: string) => {
+    if (!mandalart || !mandalartId) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // 이미 로드된 셀인지 확인
+      const targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+      
+      // 이미 자식이 로드되어 있으면 그대로 사용
+      if (targetCell && 'children' in targetCell && targetCell.children && targetCell.children.length > 0) {
+        setCurrentCellId(cellId);
+        
+        // 네비게이션 경로 업데이트
+        updateNavigationPath(cellId);
+        
+        setIsLoading(false);
+        return;
+      }
+      
+      // 자식 셀 로드
+      const cellWithChildren = await loadHierarchicalData(mandalartId, cellId);
+      
+      // 만다라트 업데이트
+      setMandalart(prev => {
+        if (!prev || !prev.rootCell) return prev;
+        
+        return {
+          ...prev,
+          rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, cellWithChildren.children)
+        };
+      });
+      
+      setCurrentCellId(cellId);
+      
+      // 네비게이션 경로 업데이트
+      updateNavigationPath(cellId);
+    } catch (err) {
+      console.error('자식 셀 로드 실패:', err);
+      setError(err instanceof Error ? err.message : '자식 셀 로드에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mandalart, mandalartId]);
+  
+  // 특정 셀 찾기 헬퍼 함수
+  const findCellInHierarchy = (root: MandalartCellWithChildren | undefined, cellId: string): MandalartCell | null => {
+    if (!root) return null;
+    
+    if (root.id === cellId) {
+      return root;
+    }
+    
+    for (const child of root.children) {
+      if (child.id === cellId) {
+        return child;
+      }
+      
+      if ('children' in child && child.children && child.children.length > 0) {
+        const found = findCellInHierarchy(child as MandalartCellWithChildren, cellId);
+        if (found) return found;
+      }
+    }
+    
+    return null;
+  };
+  
+  // 특정 셀의 자식 업데이트 헬퍼 함수
+  const updateCellChildrenInHierarchy = (
+    root: MandalartCellWithChildren,
+    cellId: string,
+    children: MandalartCell[]
+  ): MandalartCellWithChildren => {
+    if (root.id === cellId) {
+      return { ...root, children };
+    }
+    
+    return {
+      ...root,
+      children: root.children.map(child => {
+        if ('children' in child) {
+          return updateCellChildrenInHierarchy(child as MandalartCellWithChildren, cellId, children);
+        }
+        
+        if (child.id === cellId) {
+          return { ...child, children } as MandalartCellWithChildren;
+        }
+        
+        return child;
+      })
+    };
+  };
+  
+  // 네비게이션 경로 업데이트
+  const updateNavigationPath = (cellId: string) => {
+    if (!mandalart || !mandalart.rootCell) return;
+    
+    // 경로에 이미 있는지 확인
+    const existingIndex = navigationPath.findIndex(cell => cell.id === cellId);
+    
+    if (existingIndex >= 0) {
+      // 이미 경로에 있는 경우 그 위치까지 잘라냄
+      setNavigationPath(prev => prev.slice(0, existingIndex + 1));
+      return;
+    }
+    
+    // 경로에 없는 경우 현재 셀 정보 가져오기
+    const targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+    
+    if (targetCell) {
+      // 새 셀 추가
+      setNavigationPath(prev => [...prev, targetCell]);
+    }
+  };
+  
+  // 상위 셀로 이동
+  const navigateToParent = useCallback(() => {
+    if (navigationPath.length <= 1) return;
+    
+    const parentCell = navigationPath[navigationPath.length - 2];
+    setCurrentCellId(parentCell.id);
+    setNavigationPath(prev => prev.slice(0, prev.length - 1));
+  }, [navigationPath]);
+  
+  // 특정 셀로 이동
+  const navigateToCell = useCallback((cellId: string) => {
+    const index = navigationPath.findIndex(cell => cell.id === cellId);
+    
+    if (index >= 0) {
+      setCurrentCellId(cellId);
+      setNavigationPath(prev => prev.slice(0, index + 1));
+    }
+  }, [navigationPath]);
+  
+  // 현재 활성화된 셀 가져오기
+  const getCurrentCell = useCallback(() => {
+    if (!mandalart || !mandalart.rootCell || !currentCellId) return null;
+    
+    return findCellInHierarchy(mandalart.rootCell, currentCellId) as MandalartCellWithChildren;
+  }, [mandalart, currentCellId]);
+
   return {
     mandalart,
     isLoading,
@@ -579,7 +862,12 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     fetchMandalart,
     createCell,
     toggleCellCompletion,
-    deleteMandalart
+    deleteMandalart,
+    navigationPath,
+    currentCell: getCurrentCell(),
+    navigateToCell,
+    navigateToParent,
+    loadChildrenForCell
   };
 };
 
