@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Mandalart, MandalartCell } from '@/types/mandalart';
+import { createClient } from '@/utils/supabase/client';
 
 interface UseMandalartResult {
   mandalart: Mandalart | null;
@@ -148,18 +149,29 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
 
   // 만다라트 목록 조회
   const fetchMandalartList = useCallback(async (): Promise<Array<{id: string, title: string, createdAt: string, updatedAt: string}>> => {
-    // 실제로는 API 호출
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const now = new Date().toISOString();
-        // 샘플 데이터
-        resolve([
-          { id: 'sample-1', title: '2024년 목표', createdAt: now, updatedAt: now },
-          { id: 'sample-2', title: '자기계발 계획', createdAt: now, updatedAt: now },
-          { id: 'sample-3', title: '프로젝트 관리', createdAt: now, updatedAt: now }
-        ]);
-      }, 500);
-    });
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('mandalarts')
+        .select('id, title, created_at, updated_at')
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Supabase에서 반환된 데이터 형식을 조정
+      return data.map(item => ({
+        id: item.id,
+        title: item.title,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
+    } catch (err) {
+      console.error('만다라트 목록 조회 실패:', err);
+      setError('만다라트 목록을 불러오는데 실패했습니다.');
+      return [];
+    }
   }, []);
 
   return {
