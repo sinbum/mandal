@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MobileLayout from '@/components/layout/MobileLayout';
 import HeaderBar from '@/components/layout/HeaderBar';
@@ -9,91 +9,76 @@ import InputField from '@/components/ui/InputField';
 import Toast from '@/components/ui/Toast';
 import { createClient } from '@/utils/supabase/client';
 
-export default function AuthPage() {
+export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info' | 'warning'} | null>(null);
-
-  // 이미 로그인되어 있는지 확인
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getSession();
-        
-        if (data.session) {
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('세션 확인 오류:', error);
-      }
-    };
-    
-    checkSession();
-  }, [router]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     
     // 간단한 유효성 검사
-    if (!email || !password) {
-      setError('이메일과 비밀번호를 모두 입력해주세요.');
+    if (!email || !password || !confirmPassword) {
+      setError('모든 필드를 입력해주세요.');
+      setIsLoading(false);
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError('비밀번호가 일치하지 않습니다.');
       setIsLoading(false);
       return;
     }
     
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login/confirm`
+        }
       });
       
       if (error) {
         throw error;
       }
       
-      if (!data || !data.session) {
-        throw new Error('로그인은 성공했지만 세션이 생성되지 않았습니다.');
-      }
-      
       setToast({
-        message: '로그인 성공!',
+        message: '회원가입 성공! 이메일 확인을 통해 계정을 활성화해주세요.',
         type: 'success'
       });
       
-      // 즉시 대시보드로 이동
-      router.push('/dashboard');
+      // 로그인 페이지로 이동
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
     } catch (err: any) {
-      console.error('로그인 오류:', err);
-      setError(err.message || '로그인 중 오류가 발생했습니다.');
+      setError(err.message || '회원가입 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleSignUp = () => {
-    router.push('/signup');
-  };
-
+  
   return (
     <MobileLayout
-      header={<HeaderBar title="로그인" />}
+      header={<HeaderBar title="회원가입" showBackButton onBackClick={() => router.push('/login')} />}
     >
       <div className="p-6 flex flex-col h-full">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">만다라트 플래너</h1>
           <p className="text-gray-600">
-            목표를 체계적으로 관리하는 만다라트 기법 플래너
+            새 계정 만들기
           </p>
         </div>
         
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleSignUp} className="space-y-4">
           <InputField
             id="email"
             label="이메일"
@@ -114,8 +99,21 @@ export default function AuthPage() {
             onChange={(value: string) => {
               setPassword(value);
               setError(null);
-            }}        
+            }}
             placeholder="비밀번호 입력"
+            type="password"
+            required
+          />
+          
+          <InputField
+            id="confirmPassword"
+            label="비밀번호 확인"
+            value={confirmPassword}
+            onChange={(value: string) => {
+              setConfirmPassword(value);
+              setError(null);
+            }}
+            placeholder="비밀번호 재입력"
             type="password"
             required
           />
@@ -133,18 +131,18 @@ export default function AuthPage() {
               fullWidth
               disabled={isLoading}
             >
-              {isLoading ? '로그인 중...' : '로그인'}
+              {isLoading ? '처리 중...' : '회원가입'}
             </Button>
           </div>
           
           <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">계정이 없으신가요?</p>
+            <p className="text-sm text-gray-600">이미 계정이 있으신가요?</p>
             <button 
               type="button" 
-              onClick={handleSignUp}
+              onClick={() => router.push('/login')}
               className="text-blue-600 text-sm font-medium"
             >
-              회원가입하기
+              로그인하기
             </button>
           </div>
         </form>
