@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
@@ -20,7 +20,17 @@ export default function MandalartEditorPage() {
   
   const [selectedCell, setSelectedCell] = useState<MandalartCell | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { mandalart, isLoading: loading, error, updateCell } = useMandalart(id);
+  
+  // useMandalart 훅 사용
+  const { mandalart, isLoading, error, updateCell } = useMandalart(id);
+
+  // 디버깅용 로그
+  useEffect(() => {
+    console.log('ID:', id);
+    console.log('isLoading:', isLoading);
+    console.log('error:', error);
+    console.log('mandalart:', mandalart);
+  }, [id, isLoading, error, mandalart]);
 
   // 셀 클릭 시 편집 패널 열기
   const handleCellClick = (cellId: string) => {
@@ -86,13 +96,14 @@ export default function MandalartEditorPage() {
     />
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <MobileLayout
         header={<HeaderBar title="로딩 중..." showBackButton onBackClick={handleBackClick} />}
+        className="bg-gray-50"
       >
         <div className="flex items-center justify-center h-full">
-          <p>만다라트를 불러오는 중입니다...</p>
+          <p className="text-gray-600">만다라트를 불러오는 중입니다...</p>
         </div>
       </MobileLayout>
     );
@@ -102,9 +113,10 @@ export default function MandalartEditorPage() {
     return (
       <MobileLayout
         header={<HeaderBar title="오류" showBackButton onBackClick={handleBackClick} />}
+        className="bg-gray-50"
       >
         <div className="flex flex-col items-center justify-center h-full p-4">
-          <p className="text-red-500">만다라트를 불러오는데 실패했습니다.</p>
+          <p className="text-red-500 font-medium">만다라트를 불러오는데 실패했습니다.</p>
           <p className="text-sm text-gray-500 mt-2">{error}</p>
         </div>
       </MobileLayout>
@@ -112,13 +124,18 @@ export default function MandalartEditorPage() {
   }
 
   return (
-    <MobileLayout header={header}>
-      <div className="p-2 pb-20">
-        <MandalartGrid
-          mandalart={mandalart}
-          onCellClick={handleCellClick}
-          className="w-full"
-        />
+    <MobileLayout 
+      header={header}
+      className="bg-gray-50"
+    >
+      <div className="flex flex-col items-center justify-center w-full h-full p-1 pb-16 overflow-auto">
+        <div className="w-full max-w-4xl mx-auto">
+          <MandalartGrid
+            mandalart={mandalart}
+            onCellClick={handleCellClick}
+            className="w-full aspect-square"
+          />
+        </div>
       </div>
 
       {/* 셀 편집 슬라이드업 패널 */}
