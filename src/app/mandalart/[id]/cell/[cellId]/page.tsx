@@ -205,10 +205,11 @@ export default function CellDetailPage() {
   const handleCellClick = (clickedCellId: string) => {
     if (!mandalart) return;
     
-    // 빈 셀인 경우 클릭 동작 무시
+    // 빈 셀인 경우 새 셀 생성 모드로 전환
     if (clickedCellId.startsWith('empty-')) {
-      console.log('빈 셀 클릭됨 - 편집창 열기');
-      // 여기서 새 셀 생성 모달 또는 편집창을 열 수 있음
+      console.log('빈 셀 클릭됨 - 새 셀 생성 시작');
+      const positionNumber = parseInt(clickedCellId.split('-')[1], 10);
+      handleCreateNewCell(positionNumber);
       return;
     }
     

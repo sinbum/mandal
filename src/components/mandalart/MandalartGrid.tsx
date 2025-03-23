@@ -61,9 +61,9 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     return (
       <div className="grid grid-cols-3 grid-rows-3 gap-0.5 h-full">
         {/* 상단 줄 (0, 1, 2) */}
-        {topCells.map((cell: MandalartCell) => (
+        {topCells.map((cell: MandalartCell, index: number) => (
           <MandalartCellComponent
-            key={cell.id}
+            key={`top-${block.id}-${index}-${cell.id}`}
             cell={cell}
             onClick={() => onCellClick(cell.id)}
             onEdit={() => onCellEdit && onCellEdit(cell.id)}
@@ -72,13 +72,13 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         
         {/* 중간 줄 (3, 중앙, 4) */}
         <MandalartCellComponent
-          key={middleCells[0].id}
+          key={`middle-left-${block.id}-${middleCells[0].id}`}
           cell={middleCells[0]}
           onClick={() => onCellClick(middleCells[0].id)}
           onEdit={() => onCellEdit && onCellEdit(middleCells[0].id)}
         />
         <MandalartCellComponent
-          key={middleCells[1].id}
+          key={`middle-center-${block.id}-${middleCells[1].id}`}
           cell={middleCells[1]}
           isCenter={isCenter}
           className="font-medium border-blue-300"
@@ -86,16 +86,16 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           onEdit={() => onCellEdit && onCellEdit(middleCells[1].id)}
         />
         <MandalartCellComponent
-          key={middleCells[2].id}
+          key={`middle-right-${block.id}-${middleCells[2].id}`}
           cell={middleCells[2]}
           onClick={() => onCellClick(middleCells[2].id)}
           onEdit={() => onCellEdit && onCellEdit(middleCells[2].id)}
         />
         
         {/* 하단 줄 (5, 6, 7) */}
-        {bottomCells.map((cell: MandalartCell) => (
+        {bottomCells.map((cell: MandalartCell, index: number) => (
           <MandalartCellComponent
-            key={cell.id}
+            key={`bottom-${block.id}-${index}-${cell.id}`}
             cell={cell}
             onClick={() => onCellClick(cell.id)}
             onEdit={() => onCellEdit && onCellEdit(cell.id)}
@@ -121,7 +121,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             if (index === 4) {
               return (
                 <MandalartCellComponent
-                  key={centerCellToRender.id}
+                  key={`center-${centerCellToRender.id}`}
                   cell={centerCellToRender}
                   isCenter={true}
                   className="border-blue-400"
@@ -130,11 +130,13 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               );
             }
             
-            // 나머지는 빈 셀
+            // 나머지는 빈 셀 (클릭 가능하도록 수정)
+            const emptyId = `empty-${index}`;
             return (
               <div 
-                key={`empty-${index}`} 
-                className="bg-gray-50 border border-dashed border-gray-200 rounded aspect-square flex items-center justify-center"
+                key={`empty-cell-${index}`}
+                className="bg-gray-50 border border-dashed border-gray-200 rounded aspect-square flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                onClick={() => onCellEdit && onCellEdit(emptyId)}
               >
                 <span className="text-xs text-gray-400 italic">빈 셀</span>
               </div>
@@ -153,13 +155,18 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         {positions.map((pos, index) => {
           const child = cellsToRender[index];
           if (!child || child.id.startsWith('empty-')) {
-            // 빈 셀 표시
+            // 빈 셀 표시 (클릭 가능하도록 수정)
+            const emptyId = child ? child.id : `empty-${index}`;
             return (
               <div 
-                key={`pos-${pos}`} 
-                className="bg-gray-50 border border-dashed border-gray-200 rounded aspect-square flex items-center justify-center"
+                key={`pos-empty-${pos}`}
+                className="bg-gray-50 border border-dashed border-gray-200 rounded aspect-square flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                onClick={() => onCellEdit && onCellEdit(emptyId)}
               >
-                <span className="text-xs text-gray-400 italic">빈 셀</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs text-gray-400 italic">빈 셀</span>
+                  <span className="text-[10px] text-blue-400 mt-1">클릭하여 추가</span>
+                </div>
               </div>
             );
           }
@@ -167,7 +174,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           // 실제 자식 셀 표시
           return (
             <MandalartCellComponent
-              key={child.id}
+              key={`child-${pos}-${child.id}`}
               cell={child}
               hasChildren={'children' in child && Array.isArray(child.children) && child.children.length > 0}
               onClick={() => onCellClick(child.id)}
@@ -179,7 +186,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         {/* 중앙에 현재 셀 */}
         <div className="col-start-2 col-end-3 row-start-2 row-end-3">
           <MandalartCellComponent
-            key={centerCellToRender.id}
+            key={`center-main-${centerCellToRender.id}`}
             cell={centerCellToRender}
             isCenter={true}
             className="border-blue-400"
