@@ -36,6 +36,7 @@ interface UseMandalartResult {
   toggleCellCompletion: (cellId: string) => Promise<void>;
   deleteMandalart: (id: string) => Promise<void>;
   navigationPath: MandalartCell[];
+  breadcrumbPath: MandalartCell[];
   currentCell: MandalartCell | null;
   navigateToCell: (cellId: string) => void;
   navigateToParent: () => void;
@@ -60,7 +61,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     navigateToParent,
     navigateToCell,
     setCurrentCellId,
-    setNavigationPath
+    setNavigationPath,
+    breadcrumbPath
   } = useMandalartNavigation({ data: mandalart || undefined });
 
   // 셀 찾기
@@ -583,6 +585,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     toggleCellCompletion,
     deleteMandalart,
     navigationPath,
+    breadcrumbPath,
     currentCell: getCurrentCell(),
     navigateToCell: navigateToCellById,
     navigateToParent,

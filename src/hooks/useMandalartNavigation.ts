@@ -14,6 +14,7 @@ interface UseMandalartNavigationResult {
   updateNavigationPath: (cellId: string) => void;
   navigateToParent: () => void;
   navigateToCell: (cellId: string) => void;
+  breadcrumbPath: MandalartCell[];
 }
 
 /**
@@ -98,6 +99,20 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
     updateNavigationPath(cellId);
   }, [currentCellId, updateNavigationPath, setCurrentCellId]);
 
+  // 브레드크럼 경로 계산 - "../부모 뎁스 주제/현재 뎁스 주제" 형식으로 변환
+  const breadcrumbPath = useCallback(() => {
+    // 경로가 없거나 한 개만 있으면 그대로 반환 (루트 경로)
+    if (navigationPath.length <= 1) {
+      return navigationPath;
+    }
+    
+    // 경로가 있으면 마지막 두 개 항목만 가져옴 (부모와 현재)
+    const parentCell = navigationPath[navigationPath.length - 2];
+    const currentCell = navigationPath[navigationPath.length - 1];
+    
+    return [parentCell, currentCell];
+  }, [navigationPath])();
+
   return {
     navigationPath,
     currentCellId,
@@ -105,7 +120,8 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
     setNavigationPath,
     updateNavigationPath,
     navigateToParent,
-    navigateToCell
+    navigateToCell,
+    breadcrumbPath
   };
 };
 

@@ -45,7 +45,8 @@ export default function MandalartEditorPage() {
     loadChildrenForCell,
     fetchMandalart,
     createCell,
-    toggleCellCompletion
+    toggleCellCompletion,
+    breadcrumbPath
   } = useMandalart(id);
 
   // 디버깅용 로그
@@ -299,7 +300,7 @@ export default function MandalartEditorPage() {
         {!isLegacyMode && navigationPath.length > 0 && (
           <div className="w-full mb-3">
             <MandalartNavigation 
-              path={navigationPath} 
+              path={breadcrumbPath} 
               onNavigate={handleNavigateTo} 
             />
           </div>
