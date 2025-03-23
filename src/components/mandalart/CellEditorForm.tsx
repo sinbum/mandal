@@ -43,8 +43,23 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // 디버깅 로그 추가
+    console.log('저장 시도:', {
+      cellId: cell.id,
+      originalCell: cell,
+      updatedValues: {
+        id: cell.id,
+        topic,
+        memo,
+        color,
+        imageUrl,
+        isCompleted,
+      }
+    });
+    
     onSave({
       ...cell,
+      id: cell.id,
       topic,
       memo,
       color,

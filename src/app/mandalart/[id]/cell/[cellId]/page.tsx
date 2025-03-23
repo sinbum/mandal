@@ -213,10 +213,35 @@ export default function CellDetailPage() {
   };
 
   // 셀 편집 폼 저장 처리
-  const handleSaveCell = (updatedCell: MandalartCell) => {
-    if (selectedCell && selectedCell.id) {
-      updateCell(selectedCell.id, updatedCell);
+  const handleSaveCell = async (updatedCell: Partial<MandalartCell>) => {
+    console.log('셀 상세 페이지 저장 시도:', { 
+      selectedCell, 
+      updatedCell, 
+      selectedCellId: selectedCell?.id,
+      hasId: !!selectedCell?.id
+    });
+
+    if (!selectedCell || !selectedCell.id) {
+      console.error('선택된 셀이 없거나 ID가 없어 저장 실패:', {
+        selectedCell,
+        isSelected: !!selectedCell,
+        hasId: selectedCell ? !!selectedCell.id : false
+      });
+      return;
+    }
+
+    try {
+      // 저장할 때 id 필드를 명시적으로 포함하여 업데이트
+      const cellToUpdate = {
+        ...updatedCell,
+        id: selectedCell.id
+      };
+      
+      await updateCell(selectedCell.id, cellToUpdate);
+      console.log('셀 저장 성공:', { id: selectedCell.id, updatedCell });
       setIsEditorOpen(false);
+    } catch (error) {
+      console.error('셀 저장 중 오류 발생:', error);
     }
   };
 

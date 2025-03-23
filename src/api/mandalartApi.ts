@@ -125,26 +125,43 @@ export const fetchLegacyMandalartById = async (id: string, mandalartData: any): 
 /**
  * 셀 데이터 업데이트
  */
-export const updateCellById = async (cellId: string, updatedCell: MandalartCell): Promise<void> => {
+export const updateCellById = async (cellId: string, updatedCell: Partial<MandalartCell>): Promise<void> => {
   try {
     const supabase = createClient();
     
+    if (!cellId) {
+      console.error('셀 업데이트 API 오류: cellId가 없습니다', { cellId });
+      throw new Error('셀 ID가 필요합니다');
+    }
+    
+    const updatePayload = {
+      topic: updatedCell.topic,
+      memo: updatedCell.memo,
+      color: updatedCell.color,
+      image_url: updatedCell.imageUrl,
+      is_completed: updatedCell.isCompleted,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('셀 업데이트 API 요청:', {
+      cellId,
+      updatedData: updatePayload
+    });
+    
     // Supabase API로 셀 업데이트
-    const { error } = await supabase
+    const { error, status, statusText, data } = await supabase
       .from('mandalart_cells')
-      .update({
-        topic: updatedCell.topic,
-        memo: updatedCell.memo,
-        color: updatedCell.color,
-        image_url: updatedCell.imageUrl,
-        is_completed: updatedCell.isCompleted,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', cellId);
     
+    console.log('셀 업데이트 API 응답:', { status, statusText, data, error });
+    
     if (error) {
+      console.error('셀 업데이트 API 에러:', error);
       throw new Error(error.message);
     }
+    
+    console.log('셀 업데이트 API 성공:', { cellId, status });
   } catch (err) {
     console.error('셀 업데이트 API 오류:', err);
     throw err;
@@ -425,28 +442,39 @@ export const createNewCell = async (mandalartId: string, position: number, cellD
   try {
     const supabase = createClient();
     
+    const cellPayload = {
+      mandalart_id: mandalartId,
+      position: position,
+      topic: cellData.topic || '',
+      memo: cellData.memo,
+      color: cellData.color,
+      image_url: cellData.imageUrl,
+      is_completed: cellData.isCompleted || false,
+      parent_id: cellData.parentId || null, // 부모 ID 설정
+      depth: cellData.depth || 0, // 깊이 설정
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('셀 생성 API 요청 데이터:', cellPayload);
+    
     // 셀 데이터 삽입
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('mandalart_cells')
-      .insert({
-        mandalart_id: mandalartId,
-        position: position,
-        topic: cellData.topic || '',
-        memo: cellData.memo,
-        color: cellData.color,
-        image_url: cellData.imageUrl,
-        is_completed: cellData.isCompleted || false,
-        parent_id: cellData.parentId || null, // 부모 ID 설정
-        depth: cellData.depth || 0, // 깊이 설정
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .insert(cellPayload)
       .select('id')
       .single();
+    
+    console.log('셀 생성 API 응답:', { data, error, status });
     
     if (error) {
       console.error('셀 생성 API 오류:', error);
       throw new Error(error.message);
+    }
+    
+    if (!data || !data.id) {
+      console.error('셀 생성 API 응답에 ID가 없습니다:', data);
+      throw new Error('생성된 셀 ID를 받지 못했습니다');
     }
     
     console.log('새 셀 생성됨:', data.id, '위치:', position, '부모:', cellData.parentId);
@@ -482,8 +510,10 @@ export const createNewCellAndGetEditData = async (
     // 셀 생성 API 호출
     const newCellId = await createNewCell(mandalartId, position, cellData);
     
+    console.log('새 셀 ID 생성 확인:', newCellId);
+    
     // 즉시 편집할 수 있는 셀 데이터 반환
-    return {
+    const newCellData = {
       id: newCellId,
       topic: cellData.topic || '',
       memo: '',
@@ -494,6 +524,10 @@ export const createNewCellAndGetEditData = async (
       depth: cellData.depth || 0,
       position
     };
+    
+    console.log('새 셀 데이터 생성 완료:', newCellData);
+    
+    return newCellData;
   } catch (err) {
     console.error('새 셀 생성 및 편집 데이터 준비 실패:', err);
     throw err;

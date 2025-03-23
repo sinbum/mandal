@@ -142,11 +142,23 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   }, [mandalartId, setCurrentCellId, setNavigationPath]);
 
   // 셀 업데이트
-  const updateCell = useCallback(async (cellId: string, updatedCell: MandalartCell) => {
+  const updateCell = useCallback(async (cellId: string, updatedCell: Partial<MandalartCell>) => {
     if (!mandalart) return;
+
+    // 디버깅 로그 추가
+    console.log('셀 업데이트 시도:', {
+      cellId,
+      updatedCell
+    });
+
+    if (!cellId) {
+      console.error('셀 업데이트 실패: cellId가 없습니다');
+      return;
+    }
 
     try {
       await updateCellById(cellId, updatedCell);
+      console.log('셀 업데이트 API 호출 성공:', { cellId, updatedCell });
       
       // UI 업데이트
       setMandalart(prev => {
@@ -566,6 +578,12 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     position: number, 
     parentCell?: MandalartCell | null
   ): Promise<MandalartCell> => {
+    console.log('셀 생성 및 편집 시작:', {
+      mandalartId,
+      position,
+      parentCell
+    });
+
     try {
       // 부모 셀 정보 구성
       const parentData = parentCell ? {
@@ -573,12 +591,16 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         parentDepth: parentCell.depth || 0
       } : {}; 
 
+      console.log('셀 생성 부모 데이터:', parentData);
+
       // 새 셀 생성 및 편집 데이터 받기
       const newCell = await createNewCellAndGetEditData(
         mandalartId, 
         position, 
         parentData
       );
+      
+      console.log('새 셀 생성 완료:', newCell);
       
       // 부모 셀이 있으면 자식 셀 업데이트
       if (parentCell && parentCell.id && mandalart && isHierarchicalMandalart(mandalart)) {
@@ -622,6 +644,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         });
       }
       
+      console.log('셀 생성 및 UI 업데이트 완료, 반환 데이터:', newCell);
       return newCell;
     } catch (err) {
       console.error('통합 셀 생성 및 편집 실패:', err);
