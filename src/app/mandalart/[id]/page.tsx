@@ -76,8 +76,18 @@ export default function MandalartEditorPage() {
   const handleCellClick = (cellId: string) => {
     if (!mandalart) return;
     
+    // 빈 셀인 경우 클릭 동작 무시
+    if (cellId.startsWith('empty-')) return;
+    
+    console.log(`셀 클릭: ${cellId}`);
+    
     // 하위 셀 탐색을 위한 클릭
-    loadChildrenForCell(cellId);
+    try {
+      // 자식 셀 로드 시도
+      loadChildrenForCell(cellId);
+    } catch (error) {
+      console.error('셀 클릭 처리 오류:', error);
+    }
   };
   
   // 셀 편집 버튼 클릭 처리

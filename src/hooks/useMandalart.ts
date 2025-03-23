@@ -244,9 +244,64 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         throw new Error(cellsError.message);
       }
       
-      // 데이터 구조 변환
-      const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
-      return formattedMandalart;
+      // 계층형 구조 확인 - parent_id가 있는 셀이 하나라도 있으면 계층형으로 간주
+      const isHierarchical = cellsData && cellsData.some(cell => cell.parent_id !== null);
+      
+      if (isHierarchical) {
+        // 계층형 데이터 처리
+        // 먼저 루트 셀 찾기 (parent_id가 null이고 depth가 0인 셀)
+        const rootCell = cellsData?.find(cell => cell.parent_id === null && cell.depth === 0);
+        
+        if (!rootCell) {
+          // 루트 셀이 없으면 기존 방식으로 처리
+          console.warn('루트 셀을 찾을 수 없어 레거시 모드로 전환합니다');
+          const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
+          return formattedMandalart;
+        }
+        
+        // 계층형 구조로 변환
+        const hierarchicalMandalart: Mandalart = {
+          id: mandalartData.id,
+          title: mandalartData.title,
+          createdAt: mandalartData.created_at,
+          updatedAt: mandalartData.updated_at,
+          rootCell: {
+            id: rootCell.id,
+            topic: rootCell.topic || '',
+            memo: rootCell.memo,
+            color: rootCell.color,
+            imageUrl: rootCell.image_url,
+            isCompleted: rootCell.is_completed,
+            depth: rootCell.depth || 0,
+            position: rootCell.position || 0,
+            children: []
+          }
+        };
+        
+        // 직접 자식 셀 추가 (parent_id가 루트 셀 id와 같은 셀들)
+        const directChildren = cellsData?.filter(cell => cell.parent_id === rootCell.id) || [];
+        
+        if (hierarchicalMandalart.rootCell) {
+          hierarchicalMandalart.rootCell.children = directChildren.map(child => ({
+            id: child.id,
+            topic: child.topic || '',
+            memo: child.memo,
+            color: child.color,
+            imageUrl: child.image_url,
+            isCompleted: child.is_completed,
+            parentId: child.parent_id,
+            depth: child.depth || 1,
+            position: child.position || 0,
+            children: [] // 초기에는 빈 배열로 설정
+          }));
+        }
+        
+        return hierarchicalMandalart;
+      } else {
+        // 레거시 2D 구조 처리
+        const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
+        return formattedMandalart;
+      }
     } catch (err) {
       console.error('만다라트 데이터 조회 실패:', err);
       throw err;
@@ -263,6 +318,20 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     fetchMandalart(mandalartId)
       .then((data) => {
         setMandalart(data);
+        
+        // navigationPath 초기화
+        if (data) {
+          if (data.rootCell) {
+            // 계층형 구조인 경우 루트 셀로 초기화
+            setNavigationPath([data.rootCell]);
+            setCurrentCellId(data.rootCell.id);
+          } else if (data.centerBlock) {
+            // 레거시 구조인 경우 중앙 블록의 중앙 셀로 초기화
+            setNavigationPath([data.centerBlock.centerCell]);
+            setCurrentCellId(data.centerBlock.centerCell.id);
+          }
+        }
+        
         setIsLoading(false);
       })
       .catch((err) => {
@@ -717,40 +786,107 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     try {
       setIsLoading(true);
       
-      // 이미 로드된 셀인지 확인
-      const targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+      // 현재 셀 정보 가져오기
+      let targetCell: MandalartCell | null = null;
       
-      // 이미 자식이 로드되어 있으면 그대로 사용
-      if (targetCell && 'children' in targetCell && targetCell.children && targetCell.children.length > 0) {
-        setCurrentCellId(cellId);
-        
-        // 네비게이션 경로 업데이트
-        updateNavigationPath(cellId);
-        
+      // 새 구조와 레거시 구조 모두 처리
+      if (mandalart.rootCell) {
+        // 계층형 구조에서 셀 찾기
+        targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+      } else if (mandalart.centerBlock) {
+        // 레거시 구조에서 셀 찾기
+        // 중앙 블록 중앙 셀 확인
+        if (mandalart.centerBlock.centerCell.id === cellId) {
+          targetCell = mandalart.centerBlock.centerCell;
+        } else {
+          // 중앙 블록의 주변 셀 확인
+          const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find(c => c.id === cellId);
+          if (centerSurroundingCell) {
+            targetCell = centerSurroundingCell;
+          }
+          
+          // 주변 블록 확인
+          if (!targetCell && mandalart.surroundingBlocks) {
+            for (const block of mandalart.surroundingBlocks) {
+              if (block.centerCell.id === cellId) {
+                targetCell = block.centerCell;
+                break;
+              }
+              
+              const surroundingCell = block.surroundingCells.find(c => c.id === cellId);
+              if (surroundingCell) {
+                targetCell = surroundingCell;
+                break;
+              }
+            }
+          }
+        }
+      }
+      
+      if (!targetCell) {
+        setError('선택한 셀을 찾을 수 없습니다.');
         setIsLoading(false);
         return;
       }
       
-      // 자식 셀 로드
-      const cellWithChildren = await loadHierarchicalData(mandalartId, cellId);
+      // 이미 자식이 로드되어 있는지 확인
+      if ('children' in targetCell && targetCell.children && targetCell.children.length > 0) {
+        setCurrentCellId(cellId);
+        updateNavigationPath(cellId);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Supabase에서 자식 셀 로드
+      const supabase = createClient();
+      const { data: childrenData, error: childrenError } = await supabase
+        .from('mandalart_cells')
+        .select('*')
+        .eq('mandalart_id', mandalartId)
+        .eq('parent_id', cellId)
+        .order('position', { ascending: true });
+      
+      if (childrenError) {
+        throw new Error(childrenError.message);
+      }
+      
+      console.log('로드된 자식 셀:', childrenData?.length || 0);
+      
+      // 자식 셀 데이터 변환
+      const children = childrenData?.map(child => ({
+        id: child.id,
+        topic: child.topic || '',
+        memo: child.memo,
+        color: child.color,
+        imageUrl: child.image_url,
+        isCompleted: child.is_completed,
+        parentId: child.parent_id,
+        depth: child.depth || 0,
+        position: child.position || 0,
+        children: []
+      })) || [];
       
       // 만다라트 업데이트
       setMandalart(prev => {
-        if (!prev || !prev.rootCell) return prev;
+        if (!prev) return null;
         
-        return {
-          ...prev,
-          rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, cellWithChildren.children)
-        };
+        // 계층형 구조인 경우
+        if (prev.rootCell) {
+          return {
+            ...prev,
+            rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, children)
+          };
+        }
+        
+        // 레거시 구조인 경우 (여기서는 계층 구조를 지원하지 않으므로 기존 상태 유지)
+        return prev;
       });
       
       setCurrentCellId(cellId);
-      
-      // 네비게이션 경로 업데이트
       updateNavigationPath(cellId);
     } catch (err) {
       console.error('자식 셀 로드 실패:', err);
-      setError(err instanceof Error ? err.message : '자식 셀 로드에 실패했습니다.');
+      setError('자식 셀을 로드하는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -764,7 +900,10 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       return root;
     }
     
-    for (const child of root.children) {
+    // root.children이 없으면 빈 배열로 처리
+    const children = root.children || [];
+    
+    for (const child of children) {
       if (child.id === cellId) {
         return child;
       }
@@ -790,7 +929,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     
     return {
       ...root,
-      children: root.children.map(child => {
+      children: (root.children || []).map(child => {
         if ('children' in child) {
           return updateCellChildrenInHierarchy(child as MandalartCellWithChildren, cellId, children);
         }
@@ -806,7 +945,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   
   // 네비게이션 경로 업데이트
   const updateNavigationPath = (cellId: string) => {
-    if (!mandalart || !mandalart.rootCell) return;
+    if (!mandalart) return;
     
     // 경로에 이미 있는지 확인
     const existingIndex = navigationPath.findIndex(cell => cell.id === cellId);
@@ -818,11 +957,45 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     }
     
     // 경로에 없는 경우 현재 셀 정보 가져오기
-    const targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+    let targetCell: MandalartCell | null = null;
+    
+    // 계층형 구조인 경우
+    if (mandalart.rootCell) {
+      targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+    } 
+    // 레거시 구조인 경우
+    else if (mandalart.centerBlock) {
+      // 중앙 블록 중앙 셀 확인
+      if (mandalart.centerBlock.centerCell.id === cellId) {
+        targetCell = mandalart.centerBlock.centerCell;
+      } else {
+        // 주변 셀 확인
+        const surroundingCell = mandalart.centerBlock.surroundingCells.find(c => c.id === cellId);
+        if (surroundingCell) {
+          targetCell = surroundingCell;
+        }
+        
+        // 주변 블록 확인
+        if (!targetCell && mandalart.surroundingBlocks) {
+          for (const block of mandalart.surroundingBlocks) {
+            if (block.centerCell.id === cellId) {
+              targetCell = block.centerCell;
+              break;
+            }
+            
+            const blockSurroundingCell = block.surroundingCells.find(c => c.id === cellId);
+            if (blockSurroundingCell) {
+              targetCell = blockSurroundingCell;
+              break;
+            }
+          }
+        }
+      }
+    }
     
     if (targetCell) {
       // 새 셀 추가
-      setNavigationPath(prev => [...prev, targetCell]);
+      setNavigationPath(prev => [...prev, targetCell as MandalartCell]);
     }
   };
   

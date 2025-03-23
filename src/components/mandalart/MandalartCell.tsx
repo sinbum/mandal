@@ -71,7 +71,16 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         onClick={onClick}
       >
         <span className="flex-grow flex items-center justify-center text-center">
-          {topic || '클릭하여 입력하세요'}
+          <span className="truncate max-w-[80%]">
+            {topic || '클릭하여 입력하세요'}
+          </span>
+          {hasChildren && (
+            <span className="inline-block ml-1 flex-shrink-0 text-blue-500">
+              <svg className="w-3 h-3 inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </span>
+          )}
         </span>
       </div>
       

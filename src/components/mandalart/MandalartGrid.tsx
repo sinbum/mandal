@@ -26,21 +26,22 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       
       if (!current) return [];
       
-      // 자식이 없는 경우 빈 배열 반환
-      if (!current.children) return [];
+      // 자식이 없거나 최소 1개라도 있으면 적절히 처리
+      const childCells = current.children || [];
       
       // 자식이 8개 미만이면 빈 셀로 채움
-      const children = [...current.children];
+      const children = [...childCells];
       while (children.length < 8) {
         children.push({
           id: `empty-${children.length}`,
           topic: '',
-          depth: current.depth + 1,
+          depth: (current.depth || 0) + 1,
           position: children.length,
         });
       }
       
-      return children;
+      // 표시할 때 position 기준으로 정렬
+      return children.sort((a, b) => (a.position || 0) - (b.position || 0));
     }
   }, [isLegacyStructure, currentCell, mandalart]);
 
@@ -168,7 +169,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             <MandalartCellComponent
               key={child.id}
               cell={child}
-              hasChildren={child.children && child.children.length > 0}
+              hasChildren={'children' in child && Array.isArray(child.children) && child.children.length > 0}
               onClick={() => onCellClick(child.id)}
               onEdit={() => onCellEdit && onCellEdit(child.id)}
             />
