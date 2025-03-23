@@ -32,22 +32,38 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
   // 만다라트 목록 로드
   useEffect(() => {
+    let isMounted = true;
+    
     const loadMandalarts = async () => {
+      if (!isMounted) return;
+      
       try {
+        setIsLoading(true);
         const data = await fetchMandalartList();
-        setMandalarts(data);
+        if (isMounted) {
+          setMandalarts(data);
+        }
       } catch (error) {
-        setToast({
-          message: '만다라트 목록을 불러오는데 실패했습니다.',
-          type: 'error'
-        });
+        if (isMounted) {
+          setToast({
+            message: '만다라트 목록을 불러오는데 실패했습니다.',
+            type: 'error'
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadMandalarts();
-  }, [fetchMandalartList]);
+    
+    // 클린업 함수 추가
+    return () => {
+      isMounted = false;
+    };
+  }, []); // fetchMandalartList 종속성 제거
 
   // 만다라트 카드 클릭 핸들러
   const handleCardClick = (id: string) => {

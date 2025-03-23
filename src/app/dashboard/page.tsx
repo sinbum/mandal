@@ -15,10 +15,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info' | 'warning'} | null>(null);
   
-  // 인증 상태 확인
+  // 인증 상태 확인 - 의존성 배열에 router를 제거하여 한 번만 호출되도록 수정
   useEffect(() => {
     checkSession(setLoading, setUserName);
-  }, [router]);
+  }, []);
   
 
   
