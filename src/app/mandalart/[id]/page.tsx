@@ -33,7 +33,9 @@ export default function MandalartEditorPage() {
     currentCell, 
     navigateToCell, 
     navigateToParent, 
-    loadChildrenForCell
+    loadChildrenForCell,
+    fetchMandalart,
+    createCell
   } = useMandalart(id);
 
   // 디버깅용 로그
@@ -76,17 +78,27 @@ export default function MandalartEditorPage() {
   const handleCellClick = (cellId: string) => {
     if (!mandalart) return;
     
-    // 빈 셀인 경우 클릭 동작 무시
-    if (cellId.startsWith('empty-')) return;
+    // 빈 셀인 경우 편집 기능 열기
+    if (cellId.startsWith('empty-')) {
+      const positionNumber = parseInt(cellId.split('-')[1], 10);
+      handleCellEdit(cellId); // 빈 셀도 편집 기능으로 처리
+      return;
+    }
     
     console.log(`셀 클릭: ${cellId}`);
     
-    // 하위 셀 탐색을 위한 클릭
-    try {
-      // 자식 셀 로드 시도
-      loadChildrenForCell(cellId);
-    } catch (error) {
-      console.error('셀 클릭 처리 오류:', error);
+    // 만다라트 구조 확인
+    if (mandalart.rootCell) {
+      // 계층형 구조인 경우 - 셀 상세 페이지로 이동
+      router.push(`/mandalart/${id}/cell/${cellId}`);
+    } else {
+      // 레거시 구조인 경우 - 기존 로직 사용
+      try {
+        // 자식 셀 로드 시도
+        loadChildrenForCell(cellId);
+      } catch (error) {
+        console.error('셀 클릭 처리 오류:', error);
+      }
     }
   };
   
@@ -94,7 +106,14 @@ export default function MandalartEditorPage() {
   const handleCellEdit = (cellId: string) => {
     if (!mandalart) return;
     
-    // 새 구조에서는 findCellInHierarchy 사용
+    // 빈 셀인 경우 새 셀 생성 로직 실행
+    if (cellId.startsWith('empty-')) {
+      const positionNumber = parseInt(cellId.split('-')[1], 10);
+      handleCreateNewCell(positionNumber);
+      return;
+    }
+    
+    // 새 구조에서는 findCellById 사용
     if (mandalart.rootCell) {
       const cell = findCellById(cellId);
       if (cell) {
@@ -134,6 +153,48 @@ export default function MandalartEditorPage() {
         setSelectedCell(cell);
         setIsEditorOpen(true);
       }
+    }
+  };
+  
+  // 새 셀 생성 처리
+  const handleCreateNewCell = async (position: number) => {
+    if (!mandalart) return;
+    
+    try {
+      let parentId: string | null = null;
+      let depth = 0;
+      
+      // 계층형 구조인 경우
+      if (mandalart.rootCell) {
+        // 루트 셀을 부모로 설정
+        parentId = mandalart.rootCell.id;
+        depth = 1; // 루트 셀의 자식은 깊이가 1
+      }
+      
+      // 현재 선택된 셀을 부모로 하는 새 셀 생성
+      const newCellId = await createCell(id, position, {
+        topic: '새 셀',
+        parentId: parentId,
+        depth: depth,
+        position: position
+      });
+      
+      console.log('새 셀 생성됨:', newCellId);
+      
+      // 자식 셀 다시 로드
+      if (parentId) {
+        loadChildrenForCell(parentId);
+      } else {
+        // 레거시 구조인 경우 전체 만다라트 다시 로드
+        fetchMandalart(id).then(data => {
+          if (data) {
+            // 기존 만다라트 데이터를 교체하는 대신 페이지를 새로고침
+            window.location.reload();
+          }
+        });
+      }
+    } catch (err) {
+      console.error('새 셀 생성 실패:', err);
     }
   };
   

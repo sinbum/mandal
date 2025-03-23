@@ -196,6 +196,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
           color: cellData.color,
           image_url: cellData.imageUrl,
           is_completed: cellData.isCompleted || false,
+          parent_id: cellData.parentId || null, // 부모 ID 설정
+          depth: cellData.depth || 0, // 깊이 설정
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -203,7 +205,45 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         .single();
       
       if (error) {
+        console.error('셀 생성 API 오류:', error);
         throw new Error(error.message);
+      }
+      
+      console.log('새 셀 생성됨:', data.id, '위치:', position, '부모:', cellData.parentId);
+      
+      // 생성 후 부모 셀에 자식 셀 추가 (UI 업데이트)
+      if (cellData.parentId && mandalart?.rootCell) {
+        const newCell: MandalartCell = {
+          id: data.id,
+          topic: cellData.topic || '',
+          memo: cellData.memo,
+          color: cellData.color,
+          imageUrl: cellData.imageUrl,
+          isCompleted: cellData.isCompleted || false,
+          parentId: cellData.parentId,
+          depth: cellData.depth || 0,
+          position: position,
+          children: []
+        };
+        
+        // UI 상태 업데이트
+        setMandalart(prev => {
+          if (!prev || !prev.rootCell) return prev;
+          
+          // 부모 셀 찾기
+          const parentCell = findCellInHierarchy(prev.rootCell, cellData.parentId as string);
+          if (!parentCell) return prev;
+          
+          // 부모 셀의 자식 배열에 새 셀 추가
+          return {
+            ...prev,
+            rootCell: updateCellChildrenInHierarchy(
+              prev.rootCell,
+              cellData.parentId as string,
+              [...(('children' in parentCell) ? (parentCell as MandalartCellWithChildren).children || [] : []), newCell]
+            )
+          };
+        });
       }
       
       return data.id;
@@ -211,7 +251,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.error('셀 생성 실패:', err);
       throw err;
     }
-  }, []);
+  }, [mandalart]);
 
   // 특정 만다라트 데이터 로드
   const fetchMandalart = useCallback(async (id: string): Promise<Mandalart | null> => {
@@ -785,6 +825,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     
     try {
       setIsLoading(true);
+      console.log('셀 자식 로드 시작:', cellId);
       
       // 현재 셀 정보 가져오기
       let targetCell: MandalartCell | null = null;
@@ -793,37 +834,18 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       if (mandalart.rootCell) {
         // 계층형 구조에서 셀 찾기
         targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
+        console.log('계층형 구조 - 타겟 셀 찾음:', !!targetCell, targetCell?.topic);
       } else if (mandalart.centerBlock) {
-        // 레거시 구조에서 셀 찾기
-        // 중앙 블록 중앙 셀 확인
-        if (mandalart.centerBlock.centerCell.id === cellId) {
-          targetCell = mandalart.centerBlock.centerCell;
-        } else {
-          // 중앙 블록의 주변 셀 확인
-          const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find(c => c.id === cellId);
-          if (centerSurroundingCell) {
-            targetCell = centerSurroundingCell;
-          }
-          
-          // 주변 블록 확인
-          if (!targetCell && mandalart.surroundingBlocks) {
-            for (const block of mandalart.surroundingBlocks) {
-              if (block.centerCell.id === cellId) {
-                targetCell = block.centerCell;
-                break;
-              }
-              
-              const surroundingCell = block.surroundingCells.find(c => c.id === cellId);
-              if (surroundingCell) {
-                targetCell = surroundingCell;
-                break;
-              }
-            }
-          }
-        }
+        // 레거시 구조에서는 하위 셀 로드가 지원되지 않음
+        console.log('레거시 구조에서는 하위 셀 로드가 지원되지 않음');
+        setCurrentCellId(cellId);
+        updateNavigationPath(cellId);
+        setIsLoading(false);
+        return;
       }
       
       if (!targetCell) {
+        console.error('선택한 셀을 찾을 수 없습니다:', cellId);
         setError('선택한 셀을 찾을 수 없습니다.');
         setIsLoading(false);
         return;
@@ -831,6 +853,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       
       // 이미 자식이 로드되어 있는지 확인
       if ('children' in targetCell && targetCell.children && targetCell.children.length > 0) {
+        console.log('이미 자식이 로드되어 있음:', targetCell.children.length);
         setCurrentCellId(cellId);
         updateNavigationPath(cellId);
         setIsLoading(false);
@@ -847,13 +870,37 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         .order('position', { ascending: true });
       
       if (childrenError) {
+        console.error('자식 셀 로드 API 오류:', childrenError);
         throw new Error(childrenError.message);
       }
       
-      console.log('로드된 자식 셀:', childrenData?.length || 0);
+      console.log('로드된 자식 셀 데이터:', childrenData);
+      
+      // 자식 셀이 없는 경우
+      if (!childrenData || childrenData.length === 0) {
+        console.log('자식 셀이 없습니다. 새 셀 생성이 필요합니다.');
+        
+        // 여기서는 빈 배열로 설정하여 일단 셀 이동은 가능하게 함
+        const emptyChildren: MandalartCell[] = [];
+        
+        // 만다라트 업데이트
+        setMandalart(prev => {
+          if (!prev || !prev.rootCell) return prev;
+          
+          return {
+            ...prev,
+            rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, emptyChildren)
+          };
+        });
+        
+        setCurrentCellId(cellId);
+        updateNavigationPath(cellId);
+        setIsLoading(false);
+        return;
+      }
       
       // 자식 셀 데이터 변환
-      const children = childrenData?.map(child => ({
+      const children = childrenData.map(child => ({
         id: child.id,
         topic: child.topic || '',
         memo: child.memo,
@@ -864,22 +911,26 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         depth: child.depth || 0,
         position: child.position || 0,
         children: []
-      })) || [];
+      }));
+      
+      console.log('변환된 자식 셀:', children.length);
       
       // 만다라트 업데이트
       setMandalart(prev => {
-        if (!prev) return null;
-        
-        // 계층형 구조인 경우
-        if (prev.rootCell) {
-          return {
-            ...prev,
-            rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, children)
-          };
+        if (!prev || !prev.rootCell) {
+          console.error('만다라트 또는 루트셀이 없음');
+          return prev;
         }
         
-        // 레거시 구조인 경우 (여기서는 계층 구조를 지원하지 않으므로 기존 상태 유지)
-        return prev;
+        console.log('만다라트 업데이트 - 자식 셀 추가');
+        
+        // 계층형 구조인 경우
+        const updatedMandalart = {
+          ...prev,
+          rootCell: updateCellChildrenInHierarchy(prev.rootCell, cellId, children)
+        };
+        
+        return updatedMandalart;
       });
       
       setCurrentCellId(cellId);
