@@ -9,8 +9,13 @@ import MandalartNavigation from '@/components/mandalart/MandalartNavigation';
 import CellEditorForm from '@/components/mandalart/CellEditorForm';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
 import useMandalart from '@/hooks/useMandalart';
-import { MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
+import { MandalartCell, MandalartCellWithChildren, MandalartLegacy, MandalartHierarchical } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
+
+// 타입 가드 함수 추가
+const isHierarchicalMandalart = (mandalart: any): mandalart is MandalartHierarchical => {
+  return 'rootCell' in mandalart;
+};
 
 export default function CellDetailPage() {
   const params = useParams();
@@ -134,7 +139,7 @@ export default function CellDetailPage() {
           
           // 5. 두 단계로 나누어 상태 업데이트
           // 먼저 상위 경로 업데이트 (setMandalart를 직접 호출하지 않음)
-          if (mandalart.rootCell) {
+          if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
             try {
               // 루트 셀부터 시작하여 상위 경로 따라가기
               await navigateToCell(mandalart.rootCell.id);
@@ -157,7 +162,7 @@ export default function CellDetailPage() {
           // 마지막으로 직접 현재 셀 처리 (실패해도 이 단계는 반드시 수행)
           try {
             // 이미 로드된 자식 데이터로 UI 업데이트
-            if (mandalart.rootCell) {
+            if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
               // 현재 셀의 자식 셀 정보를 직접 업데이트 (만다라트 hook 외부에서)
               // 1. 셀 페이지에서 사용할 현재 셀 데이터 구성
               const currentCellWithChildren = {
@@ -194,7 +199,8 @@ export default function CellDetailPage() {
     
     if (currentCell) {
       console.log('현재 셀:', currentCell.topic || '(제목 없음)');
-      console.log('자식 셀 수:', currentCell.children?.length || 0);
+      const currentCellWithChildren = currentCell as MandalartCellWithChildren;
+      console.log('자식 셀 수:', currentCellWithChildren.children?.length || 0);
     }
     
     console.log('네비게이션 경로:', navigationPath.map(cell => cell.topic || '무제'));
@@ -267,8 +273,9 @@ export default function CellDetailPage() {
     if (cellInPath) return cellInPath;
     
     // 현재 셀 자식에서 찾기
-    if (currentCell && currentCell.children) {
-      const childCell = currentCell.children.find(cell => cell.id === searchCellId);
+    const currentCellWithChildren = currentCell as MandalartCellWithChildren;
+    if (currentCellWithChildren?.children) {
+      const childCell = currentCellWithChildren.children.find((cell: MandalartCell) => cell.id === searchCellId);
       if (childCell) return childCell;
     }
     
@@ -293,7 +300,7 @@ export default function CellDetailPage() {
     if (navigationPath.length > 1) {
       // 부모 셀로 이동
       const parentCell = navigationPath[navigationPath.length - 2];
-      if (parentCell.id === mandalart?.rootCell?.id) {
+      if (isHierarchicalMandalart(mandalart) && mandalart.rootCell && parentCell.id === mandalart.rootCell.id) {
         // 루트 셀이면 만다라트 메인 페이지로
         router.push(`/mandalart/${id}`);
       } else {
@@ -308,7 +315,7 @@ export default function CellDetailPage() {
   
   // 특정 셀로 이동 처리
   const handleNavigateTo = (navCellId: string) => {
-    if (navCellId === mandalart?.rootCell?.id) {
+    if (isHierarchicalMandalart(mandalart) && mandalart.rootCell && navCellId === mandalart.rootCell.id) {
       // 루트 셀이면 만다라트 메인 페이지로
       router.push(`/mandalart/${id}`);
     } else {

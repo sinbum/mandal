@@ -12,7 +12,16 @@ import MobileLayout from '@/components/layout/MobileLayout';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
 
 import useMandalart from '@/hooks/useMandalart';
-import { MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
+import { MandalartCell, MandalartCellWithChildren, MandalartLegacy, MandalartHierarchical } from '@/types/mandalart';
+
+// 타입 가드 함수 추가
+const isLegacyMandalart = (mandalart: any): mandalart is MandalartLegacy => {
+  return 'centerBlock' in mandalart && 'surroundingBlocks' in mandalart;
+};
+
+const isHierarchicalMandalart = (mandalart: any): mandalart is MandalartHierarchical => {
+  return 'rootCell' in mandalart;
+};
 
 export default function MandalartEditorPage() {
   const params = useParams();
@@ -48,19 +57,22 @@ export default function MandalartEditorPage() {
     if (mandalart) {
       console.log('만다라트 구조:');
       console.log('- 제목:', mandalart.title);
-      console.log('- rootCell 존재 여부:', !!mandalart.rootCell);
-      console.log('- centerBlock 존재 여부:', !!mandalart.centerBlock);
-      console.log('- surroundingBlocks 존재 여부:', !!mandalart.surroundingBlocks);
       
-      // 자세한 구조 확인
-      if (mandalart.rootCell) {
-        console.log('rootCell 주제:', mandalart.rootCell.topic || '없음');
-        console.log('rootCell 자식 수:', mandalart.rootCell.children?.length || 0);
+      if (isHierarchicalMandalart(mandalart)) {
+        console.log('- rootCell 존재 여부:', !!mandalart.rootCell);
+        if (mandalart.rootCell) {
+          console.log('rootCell 주제:', mandalart.rootCell.topic || '없음');
+          console.log('rootCell 자식 수:', mandalart.rootCell.children?.length || 0);
+        }
       }
       
-      if (mandalart.centerBlock) {
-        console.log('centerBlock 중앙 주제:', mandalart.centerBlock.centerCell.topic || '없음');
-        console.log('centerBlock 주변 셀 수:', mandalart.centerBlock.surroundingCells.length);
+      if (isLegacyMandalart(mandalart)) {
+        console.log('- centerBlock 존재 여부:', !!mandalart.centerBlock);
+        console.log('- surroundingBlocks 존재 여부:', !!mandalart.surroundingBlocks);
+        if (mandalart.centerBlock) {
+          console.log('centerBlock 중앙 주제:', mandalart.centerBlock.centerCell.topic || '없음');
+          console.log('centerBlock 주변 셀 수:', mandalart.centerBlock.surroundingCells.length);
+        }
       }
     }
     
@@ -81,20 +93,16 @@ export default function MandalartEditorPage() {
     // 빈 셀인 경우 편집 기능 열기
     if (cellId.startsWith('empty-')) {
       const positionNumber = parseInt(cellId.split('-')[1], 10);
-      handleCellEdit(cellId); // 빈 셀도 편집 기능으로 처리
+      handleCellEdit(cellId);
       return;
     }
     
     console.log(`셀 클릭: ${cellId}`);
     
-    // 만다라트 구조 확인
-    if (mandalart.rootCell) {
-      // 계층형 구조인 경우 - 셀 상세 페이지로 이동
+    if (isHierarchicalMandalart(mandalart)) {
       router.push(`/mandalart/${id}/cell/${cellId}`);
     } else {
-      // 레거시 구조인 경우 - 기존 로직 사용
       try {
-        // 자식 셀 로드 시도
         loadChildrenForCell(cellId);
       } catch (error) {
         console.error('셀 클릭 처리 오류:', error);
@@ -106,41 +114,35 @@ export default function MandalartEditorPage() {
   const handleCellEdit = (cellId: string) => {
     if (!mandalart) return;
     
-    // 빈 셀인 경우 새 셀 생성 로직 실행
     if (cellId.startsWith('empty-')) {
       const positionNumber = parseInt(cellId.split('-')[1], 10);
       handleCreateNewCell(positionNumber);
       return;
     }
     
-    // 새 구조에서는 findCellById 사용
-    if (mandalart.rootCell) {
+    if (isHierarchicalMandalart(mandalart)) {
       const cell = findCellById(cellId);
       if (cell) {
         setSelectedCell(cell);
         setIsEditorOpen(true);
       }
-    } else {
-      // 레거시 구조 지원 (이전 코드)
+    } else if (isLegacyMandalart(mandalart)) {
       let cell: MandalartCell | undefined;
       
-      // 중앙 블록 확인
       if (mandalart.centerBlock && cellId === mandalart.centerBlock.centerCell.id) {
         cell = mandalart.centerBlock.centerCell;
       } else if (mandalart.centerBlock) {
-        // 중앙 블록의 주변 셀 확인
-        const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find(c => c.id === cellId);
+        const centerSurroundingCell = mandalart.centerBlock.surroundingCells.find((c: MandalartCell) => c.id === cellId);
         if (centerSurroundingCell) {
           cell = centerSurroundingCell;
         } else if (mandalart.surroundingBlocks) {
-          // 주변 블록 확인
           for (const block of mandalart.surroundingBlocks) {
             if (cellId === block.centerCell.id) {
               cell = block.centerCell;
               break;
             }
             
-            const surroundingCell = block.surroundingCells.find(c => c.id === cellId);
+            const surroundingCell = block.surroundingCells.find((c: MandalartCell) => c.id === cellId);
             if (surroundingCell) {
               cell = surroundingCell;
               break;
@@ -161,34 +163,28 @@ export default function MandalartEditorPage() {
     if (!mandalart) return;
     
     try {
-      let parentId: string | null = null;
+      let parentId: string | undefined = undefined;
       let depth = 0;
       
-      // 계층형 구조인 경우
-      if (mandalart.rootCell) {
-        // 루트 셀을 부모로 설정
+      if (isHierarchicalMandalart(mandalart)) {
         parentId = mandalart.rootCell.id;
-        depth = 1; // 루트 셀의 자식은 깊이가 1
+        depth = 1;
       }
       
-      // 현재 선택된 셀을 부모로 하는 새 셀 생성
       const newCellId = await createCell(id, position, {
         topic: '새 셀',
-        parentId: parentId,
-        depth: depth,
-        position: position
+        parentId,
+        depth,
+        position
       });
       
       console.log('새 셀 생성됨:', newCellId);
       
-      // 자식 셀 다시 로드
       if (parentId) {
         loadChildrenForCell(parentId);
       } else {
-        // 레거시 구조인 경우 전체 만다라트 다시 로드
         fetchMandalart(id).then(data => {
           if (data) {
-            // 기존 만다라트 데이터를 교체하는 대신 페이지를 새로고침
             window.location.reload();
           }
         });
@@ -205,8 +201,9 @@ export default function MandalartEditorPage() {
     if (cellInPath) return cellInPath;
     
     // 현재 셀 자식에서 찾기
-    if (currentCell && currentCell.children) {
-      const childCell = currentCell.children.find(cell => cell.id === cellId);
+    const currentCellWithChildren = currentCell as MandalartCellWithChildren;
+    if (currentCellWithChildren?.children) {
+      const childCell = currentCellWithChildren.children.find((cell: MandalartCell) => cell.id === cellId);
       if (childCell) return childCell;
     }
     
@@ -276,8 +273,8 @@ export default function MandalartEditorPage() {
     );
   }
 
-  // 레거시 모드인지 확인 (이전 코드와의 호환성)
-  const isLegacyMode = !mandalart.rootCell && mandalart.centerBlock;
+  // 레거시 모드인지 확인
+  const isLegacyMode = isLegacyMandalart(mandalart);
 
   return (
     <MobileLayout 

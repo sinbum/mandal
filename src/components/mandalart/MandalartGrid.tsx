@@ -1,6 +1,15 @@
 import React from 'react';
-import { MandalartGridProps, MandalartCell, MandalartBlock } from '@/types/mandalart';
+import { MandalartGridProps, MandalartCell, MandalartBlock, MandalartLegacy, MandalartHierarchical } from '@/types/mandalart';
 import MandalartCellComponent from './MandalartCell';
+
+// 타입 가드 함수 추가
+const isLegacyMandalart = (mandalart: any): mandalart is MandalartLegacy => {
+  return 'centerBlock' in mandalart && 'surroundingBlocks' in mandalart;
+};
+
+const isHierarchicalMandalart = (mandalart: any): mandalart is MandalartHierarchical => {
+  return 'rootCell' in mandalart;
+};
 
 const MandalartGrid: React.FC<MandalartGridProps> = ({
   mandalart,
@@ -13,7 +22,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   depth = 0,
 }) => {
   // 레거시 구조 지원 (이전 코드와의 호환성)
-  const isLegacyStructure = !mandalart.rootCell && mandalart.centerBlock;
+  const isLegacyStructure = isLegacyMandalart(mandalart);
 
   // 현재 표시할 셀 및 그 자식들 결정
   const cellsToRender = React.useMemo(() => {
@@ -22,7 +31,8 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       return null;
     } else {
       // 새 구조에서는 currentCell이 없으면 rootCell 사용
-      const current = currentCell || mandalart.rootCell;
+      const hierarchicalMandalart = mandalart as MandalartHierarchical;
+      const current = currentCell || hierarchicalMandalart.rootCell;
       
       if (!current) return [];
       
@@ -199,7 +209,8 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
 
   // 레거시 렌더링
   if (isLegacyStructure) {
-    const { centerBlock, surroundingBlocks } = mandalart;
+    const legacyMandalart = mandalart as MandalartLegacy;
+    const { centerBlock, surroundingBlocks } = legacyMandalart;
     
     // 확장 모드가 아닐 때는 중앙 블록만 렌더링
     if (!isExpanded) {
@@ -219,7 +230,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       <div className={`w-full overflow-auto ${className}`}>
         <div className="grid grid-cols-3 grid-rows-3 gap-2 p-2">
           {/* 첫 번째 줄: 블록 0, 1, 2 */}
-          {surroundingBlocks?.slice(0, 3).map((block) => (
+          {surroundingBlocks?.slice(0, 3).map((block: MandalartBlock) => (
             <div key={block.id} className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
               {renderLegacyBlock(block)}
             </div>
@@ -237,7 +248,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           </div>
           
           {/* 세 번째 줄: 블록 5, 6, 7 */}
-          {surroundingBlocks?.slice(5, 8).map((block) => (
+          {surroundingBlocks?.slice(5, 8).map((block: MandalartBlock) => (
             <div key={block.id} className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
               {renderLegacyBlock(block)}
             </div>

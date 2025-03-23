@@ -5,10 +5,9 @@ export interface MandalartCell {
   color?: string;
   imageUrl?: string;
   isCompleted?: boolean;
-  parentId?: string | null;
   depth: number;
   position: number;
-  children?: MandalartCell[];
+  parentId?: string;
 }
 
 export interface MandalartCellWithChildren extends MandalartCell {
@@ -21,15 +20,24 @@ export interface MandalartBlock {
   surroundingCells: MandalartCell[];
 }
 
-export interface Mandalart {
+export interface MandalartLegacy {
   id: string;
   title: string;
   createdAt: string;
   updatedAt: string;
-  rootCell?: MandalartCellWithChildren;
-  centerBlock?: MandalartBlock;
-  surroundingBlocks?: MandalartBlock[];
+  centerBlock: MandalartBlock;
+  surroundingBlocks: MandalartBlock[];
 }
+
+export interface MandalartHierarchical {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  rootCell: MandalartCellWithChildren;
+}
+
+export type Mandalart = MandalartLegacy | MandalartHierarchical;
 
 export interface MandalartCellProps {
   cell: MandalartCell;
