@@ -24,7 +24,85 @@ export const fetchMandalartById = async (id: string): Promise<Mandalart | null> 
       return null;
     }
     
-    // 만다라트 셀 데이터 가져오기
+    // 최적화: 루트 셀만 로드 (계층형 구조의 경우)
+    const { data: rootCellData, error: rootCellError } = await supabase
+      .from('mandalart_cells')
+      .select('*')
+      .eq('mandalart_id', id)
+      .is('parent_id', null)
+      .eq('depth', 0)
+      .limit(1)
+      .single();
+    
+    if (rootCellError && rootCellError.code !== 'PGRST116') { // 결과 없음 오류는 무시
+      console.log('루트 셀 로드 실패, 레거시 모드로 전환:', rootCellError);
+      // 레거시 구조로 처리
+      return await fetchLegacyMandalartById(id, mandalartData);
+    }
+    
+    if (rootCellData) {
+      // 계층형 구조로 처리
+      // 루트 셀의 직접 자식만 추가로 로드 (첫 단계 최적화)
+      const { data: directChildrenData, error: directChildrenError } = await supabase
+        .from('mandalart_cells')
+        .select('*')
+        .eq('mandalart_id', id)
+        .eq('parent_id', rootCellData.id)
+        .order('position', { ascending: true });
+      
+      if (directChildrenError) {
+        console.warn('자식 셀 로드 실패, 빈 자식으로 처리:', directChildrenError);
+      }
+      
+      // 계층형 구조로 변환
+      const hierarchicalMandalart: Mandalart = {
+        id: mandalartData.id,
+        title: mandalartData.title,
+        createdAt: mandalartData.created_at,
+        updatedAt: mandalartData.updated_at,
+        rootCell: {
+          id: rootCellData.id,
+          topic: rootCellData.topic || '',
+          memo: rootCellData.memo,
+          color: rootCellData.color,
+          imageUrl: rootCellData.image_url,
+          isCompleted: rootCellData.is_completed,
+          depth: rootCellData.depth || 0,
+          position: rootCellData.position || 0,
+          children: (directChildrenData || []).map(child => ({
+            id: child.id,
+            topic: child.topic || '',
+            memo: child.memo,
+            color: child.color,
+            imageUrl: child.image_url,
+            isCompleted: child.is_completed,
+            parentId: child.parent_id,
+            depth: child.depth || 1,
+            position: child.position || 0,
+            children: [] // 초기에는 빈 배열로 설정 (필요 시 추가 로드)
+          }))
+        }
+      };
+      
+      return hierarchicalMandalart;
+    } else {
+      // 레거시 구조로 처리
+      return await fetchLegacyMandalartById(id, mandalartData);
+    }
+  } catch (err) {
+    console.error('만다라트 데이터 조회 실패:', err);
+    throw err;
+  }
+};
+
+/**
+ * 레거시 구조의 만다라트 로드 (별도 함수로 분리)
+ */
+export const fetchLegacyMandalartById = async (id: string, mandalartData: any): Promise<Mandalart | null> => {
+  try {
+    const supabase = createClient();
+    
+    // 레거시 구조의 모든 셀 로드
     const { data: cellsData, error: cellsError } = await supabase
       .from('mandalart_cells')
       .select('*')
@@ -35,66 +113,11 @@ export const fetchMandalartById = async (id: string): Promise<Mandalart | null> 
       throw new Error(cellsError.message);
     }
     
-    // 계층형 구조 확인 - parent_id가 있는 셀이 하나라도 있으면 계층형으로 간주
-    const isHierarchical = cellsData && cellsData.some(cell => cell.parent_id !== null);
-    
-    if (isHierarchical) {
-      // 계층형 데이터 처리
-      // 먼저 루트 셀 찾기 (parent_id가 null이고 depth가 0인 셀)
-      const rootCell = cellsData?.find(cell => cell.parent_id === null && cell.depth === 0);
-      
-      if (!rootCell) {
-        // 루트 셀이 없으면 기존 방식으로 처리
-        console.warn('루트 셀을 찾을 수 없어 레거시 모드로 전환합니다');
-        const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
-        return formattedMandalart;
-      }
-      
-      // 계층형 구조로 변환
-      const hierarchicalMandalart: Mandalart = {
-        id: mandalartData.id,
-        title: mandalartData.title,
-        createdAt: mandalartData.created_at,
-        updatedAt: mandalartData.updated_at,
-        rootCell: {
-          id: rootCell.id,
-          topic: rootCell.topic || '',
-          memo: rootCell.memo,
-          color: rootCell.color,
-          imageUrl: rootCell.image_url,
-          isCompleted: rootCell.is_completed,
-          depth: rootCell.depth || 0,
-          position: rootCell.position || 0,
-          children: []
-        }
-      };
-      
-      // 직접 자식 셀 추가 (parent_id가 루트 셀 id와 같은 셀들)
-      const directChildren = cellsData?.filter(cell => cell.parent_id === rootCell.id) || [];
-      
-      if (hierarchicalMandalart.rootCell) {
-        hierarchicalMandalart.rootCell.children = directChildren.map(child => ({
-          id: child.id,
-          topic: child.topic || '',
-          memo: child.memo,
-          color: child.color,
-          imageUrl: child.image_url,
-          isCompleted: child.is_completed,
-          parentId: child.parent_id,
-          depth: child.depth || 1,
-          position: child.position || 0,
-          children: [] // 초기에는 빈 배열로 설정
-        }));
-      }
-      
-      return hierarchicalMandalart;
-    } else {
-      // 레거시 2D 구조 처리
-      const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
-      return formattedMandalart;
-    }
+    // 레거시 2D 구조 처리
+    const formattedMandalart = convertDbCellsToMandalart(mandalartData, cellsData || []);
+    return formattedMandalart;
   } catch (err) {
-    console.error('만다라트 데이터 조회 실패:', err);
+    console.error('레거시 만다라트 데이터 조회 실패:', err);
     throw err;
   }
 };
@@ -314,29 +337,84 @@ export const deleteMandalartById = async (id: string): Promise<void> => {
 };
 
 /**
- * 특정 셀의 자식 셀 로드
+ * 특정 셀의 자식 셀 로드 - 개선된 버전 (페이징 지원)
  */
-export const loadChildrenForCellById = async (mandalartId: string, cellId: string): Promise<{ children: MandalartCell[] }> => {
+export const loadChildrenForCellById = async (
+  mandalartId: string, 
+  cellId: string, 
+  options: { limit?: number; offset?: number } = {}
+): Promise<{ children: MandalartCell[]; total: number }> => {
   try {
-    // Supabase에서 자식 셀 로드
+    // 메모리 캐시 키 생성
+    const cacheKey = `children_${mandalartId}_${cellId}_${options.limit || 9}_${options.offset || 0}`;
+    
+    // 브라우저 환경에서만 sessionStorage 사용
+    if (typeof window !== 'undefined') {
+      // 캐시된 데이터가 있는지 확인
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const now = new Date().getTime();
+        
+        // 캐시 유효 시간 (30초)
+        const CACHE_VALIDITY = 30 * 1000;
+        
+        // 캐시가 유효한 경우 캐시된 데이터 반환
+        if (now - timestamp < CACHE_VALIDITY) {
+          console.log('캐시된 자식 셀 데이터 사용:', cellId);
+          return data;
+        }
+      }
+    }
+    
+    // 기본값 설정
+    const limit = options.limit || 9; // 기본적으로 9개 (만다라트 그리드 크기)
+    const offset = options.offset || 0;
+    
+    // Supabase에서 자식 셀 로드 (페이징 적용)
     const supabase = createClient();
+    
+    // 전체 개수 조회 (카운트 쿼리)
+    const { count, error: countError } = await supabase
+      .from('mandalart_cells')
+      .select('*', { count: 'exact', head: true })
+      .eq('mandalart_id', mandalartId)
+      .eq('parent_id', cellId);
+    
+    if (countError) {
+      console.error('자식 셀 개수 조회 실패:', countError);
+      throw new Error(countError.message);
+    }
+    
+    // 실제 데이터 조회 (페이징 적용)
     const { data: childrenData, error: childrenError } = await supabase
       .from('mandalart_cells')
       .select('*')
       .eq('mandalart_id', mandalartId)
       .eq('parent_id', cellId)
-      .order('position', { ascending: true });
+      .order('position', { ascending: true })
+      .range(offset, offset + limit - 1);
     
     if (childrenError) {
       console.error('자식 셀 로드 API 오류:', childrenError);
       throw new Error(childrenError.message);
     }
     
-    console.log('로드된 자식 셀 데이터:', childrenData);
+    console.log(`로드된 자식 셀 데이터 (${offset}~${offset + limit - 1}):`, childrenData?.length);
     
     // 자식 셀이 없는 경우
     if (!childrenData || childrenData.length === 0) {
-      return { children: [] };
+      const result = { children: [], total: count || 0 };
+      
+      // 결과 캐싱
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          data: result,
+          timestamp: new Date().getTime()
+        }));
+      }
+      
+      return result;
     }
     
     // 자식 셀 데이터 변환
@@ -353,9 +431,17 @@ export const loadChildrenForCellById = async (mandalartId: string, cellId: strin
       children: []
     }));
     
-    console.log('변환된 자식 셀:', children.length);
+    const result = { children, total: count || 0 };
     
-    return { children };
+    // 결과 캐싱
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        data: result,
+        timestamp: new Date().getTime()
+      }));
+    }
+    
+    return result;
   } catch (err) {
     console.error('자식 셀 로드 API 오류:', err);
     throw err;
@@ -363,105 +449,94 @@ export const loadChildrenForCellById = async (mandalartId: string, cellId: strin
 };
 
 /**
- * 계층 구조 데이터 로드 헬퍼 함수
+ * 특정 셀 경로 구성하기 (셀 ID에서 루트까지의 경로)
  */
-export const loadHierarchicalData = async (mandalartId: string, parentId: string | null = null, depth: number = 0): Promise<MandalartCellWithChildren> => {
-  const supabase = createClient();
-  
-  // 해당 부모의 직접 자식 셀 로드
-  const query = supabase
-    .from('mandalart_cells')
-    .select('*')
-    .eq('mandalart_id', mandalartId);
+export const buildCellPathById = async (mandalartId: string, cellId: string): Promise<MandalartCell[]> => {
+  try {
+    const supabase = createClient();
     
-  if (parentId === null) {
-    // 루트 셀 로드 (parent_id가 null)
-    query.is('parent_id', null);
-  } else {
-    // 특정 셀의 자식 로드
-    query.eq('parent_id', parentId);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    throw new Error(error.message);
-  }
-  
-  // 부모 셀을 찾거나 루트 셀 생성
-  let parentCell: MandalartCellWithChildren;
-  
-  if (parentId === null) {
-    // 루트 셀
-    if (data && data.length > 0) {
-      const rootData = data[0];
-      parentCell = {
-        id: rootData.id,
-        topic: rootData.topic || '',
-        memo: rootData.memo,
-        color: rootData.color,
-        imageUrl: rootData.image_url,
-        isCompleted: rootData.is_completed,
-        parentId: undefined,
-        depth: 0,
-        position: 0,
-        children: []
-      };
-    } else {
-      throw new Error('루트 셀을 찾을 수 없습니다');
+    // 캐싱을 위한 로컬 스토리지 키
+    const cacheKey = `cell_path_${mandalartId}_${cellId}`;
+    
+    // 브라우저 환경에서만 localStorage 사용
+    if (typeof window !== 'undefined') {
+      // 캐시된 데이터가 있는지 확인
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const now = new Date().getTime();
+        
+        // 캐시 유효 시간 (5분)
+        const CACHE_VALIDITY = 5 * 60 * 1000;
+        
+        // 캐시가 유효한 경우 캐시된 데이터 반환
+        if (now - timestamp < CACHE_VALIDITY) {
+          console.log('캐시된 셀 경로 사용');
+          return data;
+        }
+      }
     }
-  } else {
-    // 부모 셀 로드
-    const { data: parentData, error: parentError } = await supabase
+    
+    // 현재 셀 정보 가져오기
+    const { data: cellData, error: cellError } = await supabase
       .from('mandalart_cells')
       .select('*')
-      .eq('id', parentId)
+      .eq('id', cellId)
+      .eq('mandalart_id', mandalartId)
       .single();
     
-    if (parentError) {
-      throw new Error(parentError.message);
+    if (cellError) {
+      throw new Error(`셀 데이터 로드 실패: ${cellError.message}`);
     }
     
-    parentCell = {
-      id: parentData.id,
-      topic: parentData.topic || '',
-      memo: parentData.memo,
-      color: parentData.color,
-      imageUrl: parentData.image_url,
-      isCompleted: parentData.is_completed,
-      parentId: parentData.parent_id,
-      depth: parentData.depth || depth,
-      position: parentData.position || 0,
-      children: []
-    };
-  }
-  
-  // 자식 셀 로드 (첫 번째 부모의 직접 자식이 아닌 경우)
-  if (parentId !== null) {
-    const { data: childrenData, error: childrenError } = await supabase
-      .from('mandalart_cells')
-      .select('*')
-      .eq('parent_id', parentId);
+    // 경로 구성 (현재 셀에서 루트 셀까지)
+    const cellPath: MandalartCell[] = [];
+    let currentCell = cellData;
     
-    if (childrenError) {
-      throw new Error(childrenError.message);
+    while (currentCell) {
+      // 프론트엔드 모델로 변환하여 경로에 추가
+      cellPath.unshift({
+        id: currentCell.id,
+        topic: currentCell.topic || '',
+        memo: currentCell.memo,
+        color: currentCell.color,
+        imageUrl: currentCell.image_url,
+        isCompleted: currentCell.is_completed,
+        parentId: currentCell.parent_id,
+        depth: currentCell.depth || 0,
+        position: currentCell.position || 0
+      });
+      
+      // 부모가 없으면 루트에 도달한 것
+      if (!currentCell.parent_id) break;
+      
+      // 부모 셀 정보 가져오기
+      const { data: parentData, error: parentError } = await supabase
+        .from('mandalart_cells')
+        .select('*')
+        .eq('id', currentCell.parent_id)
+        .single();
+      
+      if (parentError) {
+        console.error('부모 셀 로드 실패:', parentError);
+        break;
+      }
+      
+      currentCell = parentData;
     }
     
-    // 자식 셀 처리
-    const children = childrenData || [];
-    parentCell.children = children.map(child => ({
-      id: child.id,
-      topic: child.topic || '',
-      memo: child.memo,
-      color: child.color,
-      imageUrl: child.image_url,
-      isCompleted: child.is_completed,
-      parentId: child.parent_id,
-      depth: child.depth || (parentCell.depth + 1),
-      position: child.position || 0,
-      children: [] // 기본적으로 빈 배열로 설정
-    }));
+    // 캐싱
+    if (typeof window !== 'undefined') {
+      const cacheData = {
+        data: cellPath,
+        timestamp: new Date().getTime()
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    }
+    
+    return cellPath;
+  } catch (err) {
+    console.error('셀 경로 구성 실패:', err);
+    throw err;
   }
-  
-  return parentCell;
 }; 

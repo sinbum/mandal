@@ -39,10 +39,12 @@ export default function CellDetailPage() {
     navigateToParent, 
     loadChildrenForCell,
     createCell,
-    toggleCellCompletion
+    toggleCellCompletion,
+    setNavigationPath,
+    setCurrentCellId
   } = useMandalart(id);
 
-  // cellId 로 자식 데이터 로드
+  // 셀 ID 로 자식 데이터 로드
   useEffect(() => {
     if (mandalart && cellId && !isLoading) {
       console.log('셀 상세 페이지 로드 - cellId:', cellId);
@@ -57,148 +59,68 @@ export default function CellDetailPage() {
         return;
       }
       
-      // 1. 특정 셀에 대한 경로 구성
-      const buildCellPath = async () => {
+      // 최적화된 셀 로드 및 경로 구성
+      const loadCellData = async () => {
         try {
-          // Supabase 클라이언트 생성
-          const supabase = createClient();
+          console.log('셀 데이터 최적화 로드 시작:', cellId);
           
-          // 현재 셀 정보 가져오기
-          const { data: cellData, error: cellError } = await supabase
-            .from('mandalart_cells')
-            .select('*')
-            .eq('id', cellId)
-            .eq('mandalart_id', id)
-            .single();
+          // 1. 해당 셀의 경로 구성 (API 함수 활용)
+          const { buildCellPathById, loadChildrenForCellById } = await import('@/api/mandalartApi');
           
-          if (cellError) {
-            console.error('셀 데이터 로드 실패:', cellError);
-            setLocalError('셀 데이터를 가져오는데 실패했습니다.');
-            return;
-          }
+          // 2. 셀 경로 조회 (최적화된 함수 사용)
+          const cellPath = await buildCellPathById(id, cellId);
+          console.log('셀 경로 구성됨:', cellPath.map(c => c.topic));
           
-          if (!cellData) {
-            console.error('셀을 찾을 수 없습니다:', cellId);
-            setLocalError('요청한 셀을 찾을 수 없습니다.');
-            return;
-          }
+          // 3. 현재 셀의 자식 셀 로드 (페이징 적용)
+          const { children: childrenData, total } = await loadChildrenForCellById(id, cellId, { limit: 9 });
+          console.log(`자식 셀 로드됨: ${childrenData.length}/${total}`);
           
-          console.log('셀 데이터 로드 성공:', cellData);
-          
-          // 2. 셀 경로 구성하기 (상위 셀 체인 찾기)
-          const cellChain: any[] = [cellData];
-          let currentParentId = cellData.parent_id;
-          
-          // 루트 셀까지 거슬러 올라가며 경로 구성
-          while (currentParentId) {
-            const { data: parentData, error: parentError } = await supabase
-              .from('mandalart_cells')
-              .select('*')
-              .eq('id', currentParentId)
-              .single();
-            
-            if (parentError || !parentData) {
-              console.error('부모 셀 로드 실패:', parentError);
-              break;
-            }
-            
-            cellChain.unshift(parentData); // 경로 앞에 부모 셀 추가
-            currentParentId = parentData.parent_id;
-          }
-          
-          console.log('셀 경로 구성됨:', cellChain.map(c => c.topic));
-          
-          // 3. 경로 셀들을 MandalartCell 형식으로 변환하여 네비게이션 경로 설정
-          const convertedPath = cellChain.map(cell => ({
-            id: cell.id,
-            topic: cell.topic || '',
-            memo: cell.memo,
-            color: cell.color,
-            imageUrl: cell.image_url,
-            isCompleted: cell.is_completed,
-            parentId: cell.parent_id,
-            depth: cell.depth || 0,
-            position: cell.position || 0
-          }));
-          
-          // 4. 현재 셀의 자식 셀도 함께 로드
-          const { data: childrenData, error: childrenError } = await supabase
-            .from('mandalart_cells')
-            .select('*')
-            .eq('mandalart_id', id)
-            .eq('parent_id', cellId);
-          
-          if (childrenError) {
-            console.error('자식 셀 로드 실패:', childrenError);
-            // 자식이 없어도 계속 진행
-          }
-          
-          // 자식 셀 데이터 변환
-          const convertedChildren = (childrenData || []).map(child => ({
-            id: child.id,
-            topic: child.topic || '',
-            memo: child.memo,
-            color: child.color,
-            imageUrl: child.image_url,
-            isCompleted: child.is_completed,
-            parentId: child.parent_id,
-            depth: child.depth || 0,
-            position: child.position || 0
-          }));
-          
-          console.log('로드된 자식 셀:', convertedChildren.length);
-          
-          // 5. 두 단계로 나누어 상태 업데이트
-          // 먼저 상위 경로 업데이트 (setMandalart를 직접 호출하지 않음)
+          // 4. UI 상태 업데이트 - 전체 경로를 한 번에 설정
           if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
             try {
-              // 루트 셀부터 시작하여 상위 경로 따라가기
-              navigateToCell(mandalart.rootCell.id);
+              // 네비게이션 경로 직접 설정 (API 호출 없이)
+              setNavigationPath(cellPath);
+              setCurrentCellId(cellId);
               
-              // 중간 경로 셀들을 통과 (한번에 처리)
-              for (let i = 1; i < convertedPath.length; i++) {
-                try {
-                  loadChildrenForCell(convertedPath[i-1].id);
-                  navigateToCell(convertedPath[i].id);
-                } catch (e) {
-                  console.warn(`경로 구성 중 ${i}번째 셀 처리 실패:`, e);
-                  // 계속 진행
-                }
-              }
-            } catch (e) {
-              console.warn('경로 구성 중 오류 발생, 직접 현재 셀 로드 시도:', e);
-            }
-          }
-          
-          // 마지막으로 직접 현재 셀 처리 (실패해도 이 단계는 반드시 수행)
-          try {
-            // 이미 로드된 자식 데이터로 UI 업데이트
-            if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
-              // 현재 셀의 자식 셀 정보를 직접 업데이트 (만다라트 hook 외부에서)
-              // 1. 셀 페이지에서 사용할 현재 셀 데이터 구성
+              // 커스텀 상태로 현재 셀과 자식 관리
               const currentCellWithChildren = {
-                ...convertedPath[convertedPath.length - 1],
-                children: convertedChildren
+                ...cellPath[cellPath.length - 1],
+                children: childrenData
               };
               
-              console.log('현재 셀 데이터 설정 완료:', currentCellWithChildren.topic);
-              
-              // 2. 커스텀 상태로 현재 셀과 자식 관리 (useMandalart가 실패하는 경우 대비)
               setSelectedCell(currentCellWithChildren as MandalartCell);
+              
+              // 부모 셀들의 자식 셀 정보를 메모리에 업데이트
+              // (이 데이터가 현재 경로 이동 시 필요할 때를 위해)
+              if (cellPath.length > 1) {
+                const asyncUpdateCells = async () => {
+                  try {
+                    // 현재 셀의 부모 셀에 자식 정보만 업데이트 (1회만)
+                    const parentCell = cellPath[cellPath.length - 2];
+                    if (parentCell && parentCell.id) {
+                      await loadChildrenForCell(parentCell.id);
+                    }
+                  } catch (e) {
+                    console.warn('부모 셀 자식 정보 업데이트 중 오류:', e);
+                  }
+                };
+                
+                // 백그라운드로 실행 (UI 블로킹 방지)
+                asyncUpdateCells();
+              }
+            } catch (e) {
+              console.error('셀 경로 설정 실패:', e);
             }
-          } catch (e) {
-            console.error('최종 셀 데이터 설정 실패:', e);
           }
-          
         } catch (err) {
-          console.error('셀 경로 구성 실패:', err);
+          console.error('셀 데이터 로드 실패:', err);
           setLocalError('셀 데이터를 처리하는데 실패했습니다.');
         }
       };
       
-      buildCellPath();
+      loadCellData();
     }
-  }, [mandalart, cellId, id, currentCell, selectedCell, isLoading]);
+  }, [mandalart, cellId, id, currentCell, selectedCell, isLoading, navigateToCell, loadChildrenForCell, setNavigationPath, setCurrentCellId]);
 
   // 디버깅용 로그
   useEffect(() => {
