@@ -46,7 +46,8 @@ export default function MandalartEditorPage() {
     fetchMandalart,
     createCell,
     toggleCellCompletion,
-    breadcrumbPath
+    breadcrumbPath,
+    setMandalart
   } = useMandalart(id);
 
   // 디버깅용 로그
@@ -182,15 +183,39 @@ export default function MandalartEditorPage() {
       
       console.log('새 셀 생성됨:', newCellId);
       
+      // 새로 생성된 셀 데이터 가져오기
+      const fetchNewCell = async () => {
+        // 새 셀 데이터를 가져오는 로직
+        const newCell: MandalartCell = {
+          id: newCellId,
+          topic: '새 셀',
+          memo: '',
+          color: '',
+          imageUrl: '',
+          isCompleted: false,
+          parentId,
+          depth,
+          position
+        };
+        
+        // 편집기 열기
+        setSelectedCell(newCell);
+        setIsEditorOpen(true);
+      };
+      
       if (parentId) {
         loadChildrenForCell(parentId);
       } else {
         fetchMandalart(id).then(data => {
           if (data) {
-            window.location.reload();
+            // 페이지 새로고침 대신 데이터만 업데이트
+            setMandalart(data);
           }
         });
       }
+      
+      // 새 셀 데이터 가져오기 실행
+      fetchNewCell();
     } catch (err) {
       console.error('새 셀 생성 실패:', err);
     }
@@ -292,48 +317,54 @@ export default function MandalartEditorPage() {
   const isLegacyMode = isLegacyMandalart(mandalart);
 
   return (
-    <MobileLayout 
-      header={header}
-      className="bg-gray-50"
-    >
-      <div className="flex flex-col items-center justify-center w-full h-full p-1 pb-16 overflow-auto">
-        {!isLegacyMode && navigationPath.length > 0 && (
-          <div className="w-full mb-3">
-            <MandalartNavigation 
-              path={breadcrumbPath} 
-              onNavigate={handleNavigateTo} 
+    <>
+      <MobileLayout 
+        header={header}
+        className="bg-gray-50"
+      >
+        <div className="flex flex-col items-center justify-center w-full h-full p-1 pb-16 overflow-auto">
+          {!isLegacyMode && navigationPath.length > 0 && (
+            <div className="w-full mb-3">
+              <MandalartNavigation 
+                path={breadcrumbPath} 
+                onNavigate={handleNavigateTo} 
+              />
+            </div>
+          )}
+          
+          {isLegacyMode && (
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={toggleExpand}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                {isExpanded ? '접기' : '펼쳐보기'}
+              </button>
+            </div>
+          )}
+
+          <div className="w-full max-w-4xl mx-auto">
+            <MandalartGrid
+              mandalart={mandalart}
+              currentCell={currentCell as MandalartCellWithChildren}
+              onCellClick={handleCellClick}
+              onCellEdit={handleCellEdit}
+              onCellToggleComplete={handleCellToggleComplete}
+              onNavigateBack={navigationPath.length > 1 ? handleNavigateBack : undefined}
+              isExpanded={isExpanded}
+              className="w-full aspect-square"
+              depth={navigationPath.length - 1}
             />
           </div>
-        )}
-        
-        {isLegacyMode && (
-          <div className="flex justify-center mb-4">
-            <button
-              onClick={toggleExpand}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              {isExpanded ? '접기' : '펼쳐보기'}
-            </button>
-          </div>
-        )}
-
-        <div className="w-full max-w-4xl mx-auto">
-          <MandalartGrid
-            mandalart={mandalart}
-            currentCell={currentCell as MandalartCellWithChildren}
-            onCellClick={handleCellClick}
-            onCellEdit={handleCellEdit}
-            onCellToggleComplete={handleCellToggleComplete}
-            onNavigateBack={navigationPath.length > 1 ? handleNavigateBack : undefined}
-            isExpanded={isExpanded}
-            className="w-full aspect-square"
-            depth={navigationPath.length - 1}
-          />
         </div>
-      </div>
+      </MobileLayout>
 
-      {/* 셀 편집 슬라이드업 패널 */}
-      <SlideUpPanel isOpen={isEditorOpen} onClose={handleClosePanel}>
+      {/* 셀 편집 슬라이드업 패널 - MobileLayout 밖으로 이동 */}
+      <SlideUpPanel 
+        isOpen={isEditorOpen} 
+        onClose={handleClosePanel}
+        height="auto"
+      >
         {selectedCell && (
           <CellEditorForm
             cell={selectedCell}
@@ -342,6 +373,6 @@ export default function MandalartEditorPage() {
           />
         )}
       </SlideUpPanel>
-    </MobileLayout>
+    </>
   );
 } 

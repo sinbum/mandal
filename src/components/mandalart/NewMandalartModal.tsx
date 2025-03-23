@@ -57,6 +57,7 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <InputField
+            id="title"
             label="제목"
             value={title}
             onChange={handleTitleChange}

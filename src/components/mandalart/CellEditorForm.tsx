@@ -57,6 +57,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* 주제 입력 */}
       <InputField
+        id="topic"
         label="주제"
         value={topic}
         onChange={setTopic}

@@ -37,21 +37,34 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
   if (!isOpen) return null;
 
+  // 유리 효과(glass effect)용 스타일
+  const glassStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)', // Safari 지원
+  };
+
+  const overlayStyle = {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backdropFilter: 'blur(2px)',
+    WebkitBackdropFilter: 'blur(2px)', // Safari 지원
+  };
+
   const slideUpStyles = {
     panel: `
-      fixed bottom-0 left-0 right-0 z-50
-      bg-white rounded-t-2xl shadow-lg
-      transform transition-transform duration-${ANIMATION.SLIDEUP_DURATION}
+      fixed bottom-0 left-0 right-0 z-[9999]
+      rounded-t-2xl shadow-xl
+      transform transition-all duration-300 ease-in-out
       ${isOpen ? 'translate-y-0' : 'translate-y-full'}
+      border-t border-l border-r border-gray-200
       ${className}
     `,
     overlay: `
-      fixed inset-0 z-40 bg-black bg-opacity-40
-      transition-opacity duration-${ANIMATION.SLIDEUP_DURATION}
-      ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+      fixed inset-0 z-[9998]
+      transition-opacity duration-300
     `,
     dragHandle: `
-      w-10 h-1 mx-auto my-3 rounded-full bg-gray-300
+      w-12 h-1.5 mx-auto my-3 rounded-full bg-gray-300
     `,
     header: `
       px-4 py-3 border-b border-gray-200 flex justify-between items-center
@@ -63,7 +76,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       text-gray-500 hover:text-gray-700 focus:outline-none
     `,
     content: `
-      p-4 overflow-y-auto
+      p-4 overflow-y-auto max-h-[70vh]
     `
   };
 
@@ -72,13 +85,18 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       <div 
         ref={overlayRef}
         className={slideUpStyles.overlay}
+        style={overlayStyle}
         onClick={onClose}
         aria-hidden="true"
       />
       <div
         ref={panelRef}
         className={slideUpStyles.panel}
-        style={{ height: typeof height === 'number' ? `${height}px` : height }}
+        style={{ 
+          ...glassStyle,
+          height: height === 'auto' ? 'auto' : (typeof height === 'number' ? `${height}px` : height),
+          maxHeight: '80vh'
+        }}
         role="dialog"
         aria-modal="true"
       >

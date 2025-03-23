@@ -43,6 +43,7 @@ interface UseMandalartResult {
   loadChildrenForCell: (cellId: string) => Promise<void>;
   setNavigationPath: (path: MandalartCell[]) => void;
   setCurrentCellId: (id: string | null) => void;
+  setMandalart: (data: Mandalart | null) => void;
 }
 
 /**
@@ -591,7 +592,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     navigateToParent,
     loadChildrenForCell,
     setNavigationPath,
-    setCurrentCellId
+    setCurrentCellId,
+    setMandalart
   };
 };
 
