@@ -166,30 +166,219 @@ export const createNewMandalart = async (title: string, templateId?: string): Pr
     }
     
     if (templateId) {
-      // 템플릿 기반 복제 (RPC 호출)
-      const { data, error } = await supabase
-        .rpc('duplicate_mandalart_from_template', {
-          _template_id: templateId,
-          _user_id: user.id // 실제 인증된 사용자 ID 사용
-        });
-      
-      if (error) throw new Error(error.message);
-      return data as string;
+      try {
+        // 템플릿 기반 복제 (RPC 호출)
+        const { data, error } = await supabase
+          .rpc('duplicate_mandalart_from_template', {
+            _template_id: templateId,
+            _user_id: user.id // 실제 인증된 사용자 ID 사용
+          });
+        
+        if (error) throw error;
+        return data as string;
+      } catch (rpcError) {
+        console.error('RPC 호출 실패, 직접 데이터 삽입으로 전환:', rpcError);
+        
+        // 백업: RPC 호출 실패 시 직접 템플릿 데이터 삽입
+        return await createMandalartFromTemplateDirectly(supabase, title, templateId, user.id);
+      }
     } else {
       // 새 만다라트 생성 (RPC 호출)
-      const { data, error } = await supabase
-        .rpc('create_mandalart_with_cells', {
-          _title: title,
-          _user_id: user.id // 실제 인증된 사용자 ID 사용
-        });
-      
-      if (error) throw new Error(error.message);
-      return data as string;
+      try {
+        const { data, error } = await supabase
+          .rpc('create_mandalart_with_cells', {
+            _title: title,
+            _user_id: user.id
+          });
+        
+        if (error) throw error;
+        return data as string;
+      } catch (rpcError) {
+        console.error('RPC 호출 실패, 직접 데이터 삽입으로 전환:', rpcError);
+        
+        // 백업: RPC 호출 실패 시 직접 빈 만다라트 데이터 삽입
+        return await createEmptyMandalartDirectly(supabase, title, user.id);
+      }
     }
   } catch (err) {
     console.error('만다라트 생성 API 오류:', err);
     throw err;
   }
+};
+
+/**
+ * 템플릿 기반 만다라트 직접 생성 (RPC 호출 실패 시 백업 함수)
+ */
+const createMandalartFromTemplateDirectly = async (
+  supabase: any,
+  title: string,
+  templateId: string,
+  userId: string
+): Promise<string> => {
+  // 1. 새 만다라트 레코드 생성
+  const { data: mandalartData, error: mandalartError } = await supabase
+    .from('mandalarts')
+    .insert({
+      title: title,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .select('id')
+    .single();
+
+  if (mandalartError) throw mandalartError;
+  const newMandalartId = mandalartData.id;
+
+  // 2. 템플릿 ID에 따라 처리
+  if (templateId === 'goal' || templateId === 'skill') {
+    // 루트 셀 먼저 생성
+    const rootCellTopic = templateId === 'goal' ? '1년 목표' : '기술 습득';
+    const rootCellMemo = templateId === 'goal' 
+      ? '1년 동안 이루고 싶은 목표를 설정하세요' 
+      : '배우고 싶은 기술들을 관리하세요';
+    
+    const { data: rootCell, error: rootCellError } = await supabase
+      .from('mandalart_cells')
+      .insert({
+        mandalart_id: newMandalartId,
+        topic: rootCellTopic,
+        memo: rootCellMemo,
+        position: 0,
+        depth: 0,
+        parent_id: null,
+        is_completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+
+    if (rootCellError) throw rootCellError;
+
+    // 8개의 주요 영역 생성
+    const childTopics = templateId === 'goal' 
+      ? [
+          { topic: '건강', position: 1 },
+          { topic: '재정', position: 2 },
+          { topic: '경력', position: 3 },
+          { topic: '관계', position: 4 },
+          { topic: '자기계발', position: 5 },
+          { topic: '취미', position: 6 },
+          { topic: '여행', position: 7 },
+          { topic: '생활환경', position: 8 }
+        ]
+      : [
+          { topic: '프로그래밍', position: 1 },
+          { topic: '언어', position: 2 },
+          { topic: '디자인', position: 3 },
+          { topic: '비즈니스', position: 4 },
+          { topic: '소통', position: 5 },
+          { topic: '마케팅', position: 6 },
+          { topic: '분석', position: 7 },
+          { topic: '리더십', position: 8 }
+        ];
+
+    // 자식 셀 생성
+    const childCells = childTopics.map(item => ({
+      mandalart_id: newMandalartId,
+      topic: item.topic,
+      memo: templateId === 'goal' 
+        ? `${item.topic}과 관련된 목표를 설정하세요` 
+        : `${item.topic} 관련 기술을 구체화하세요`,
+      position: item.position,
+      depth: 1,
+      parent_id: rootCell.id,
+      is_completed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+    const { error: childrenError } = await supabase
+      .from('mandalart_cells')
+      .insert(childCells);
+
+    if (childrenError) {
+      console.error('템플릿 자식 셀 삽입 오류:', childrenError);
+      throw childrenError;
+    }
+  } else {
+    // 알 수 없는 템플릿은 빈 템플릿으로 처리
+    return await createEmptyMandalartDirectly(supabase, title, userId, newMandalartId);
+  }
+
+  return newMandalartId;
+};
+
+/**
+ * 빈 만다라트 직접 생성 (RPC 호출 실패 시 백업 함수)
+ */
+const createEmptyMandalartDirectly = async (
+  supabase: any,
+  title: string,
+  userId: string,
+  existingMandalartId?: string
+): Promise<string> => {
+  let mandalartId: string;
+  
+  // 만다라트 ID가 없으면 새로 생성
+  if (!existingMandalartId) {
+    const { data: mandalartData, error: mandalartError } = await supabase
+      .from('mandalarts')
+      .insert({
+        title: title,
+        user_id: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+
+    if (mandalartError) throw mandalartError;
+    mandalartId = mandalartData.id;
+  } else {
+    mandalartId = existingMandalartId;
+  }
+
+  // 루트 셀 생성
+  const { data: rootCellData, error: rootCellError } = await supabase
+    .from('mandalart_cells')
+    .insert({
+      mandalart_id: mandalartId,
+      topic: title,
+      memo: '',
+      position: 0,
+      depth: 0,
+      parent_id: null,
+      is_completed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .select('id')
+    .single();
+
+  if (rootCellError) throw rootCellError;
+  
+  // 8개의 빈 하위 셀 생성
+  const childCells = Array(8).fill(null).map((_, index) => ({
+    mandalart_id: mandalartId,
+    topic: '',
+    memo: '',
+    position: index + 1, // 1부터 8까지
+    depth: 1,
+    parent_id: rootCellData.id,
+    is_completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }));
+
+  const { error: childCellsError } = await supabase
+    .from('mandalart_cells')
+    .insert(childCells);
+
+  if (childCellsError) throw childCellsError;
+
+  return mandalartId;
 };
 
 /**
@@ -265,6 +454,48 @@ export const createNewCell = async (mandalartId: string, position: number, cellD
     return data.id;
   } catch (err) {
     console.error('셀 생성 API 오류:', err);
+    throw err;
+  }
+};
+
+/**
+ * 새 셀 생성 후 편집을 위한 셀 객체 생성 
+ * (UI에서 재사용 가능한 통합 함수)
+ */
+export const createNewCellAndGetEditData = async (
+  mandalartId: string, 
+  position: number, 
+  parentData: {
+    parentId?: string;
+    parentDepth?: number;
+  } = {}
+): Promise<MandalartCell> => {
+  // 기본 셀 데이터 구성
+  const cellData: Partial<MandalartCell> = {
+    topic: '새 셀',
+    parentId: parentData.parentId,
+    depth: parentData.parentId ? (parentData.parentDepth !== undefined ? parentData.parentDepth + 1 : 1) : 0,
+    position
+  };
+
+  try {
+    // 셀 생성 API 호출
+    const newCellId = await createNewCell(mandalartId, position, cellData);
+    
+    // 즉시 편집할 수 있는 셀 데이터 반환
+    return {
+      id: newCellId,
+      topic: cellData.topic || '',
+      memo: '',
+      color: '',
+      imageUrl: '',
+      isCompleted: false,
+      parentId: cellData.parentId,
+      depth: cellData.depth || 0,
+      position
+    };
+  } catch (err) {
+    console.error('새 셀 생성 및 편집 데이터 준비 실패:', err);
     throw err;
   }
 };

@@ -47,7 +47,8 @@ export default function MandalartEditorPage() {
     createCell,
     toggleCellCompletion,
     breadcrumbPath,
-    setMandalart
+    setMandalart,
+    createCellAndEdit
   } = useMandalart(id);
 
   // 디버깅용 로그
@@ -166,56 +167,20 @@ export default function MandalartEditorPage() {
     if (!mandalart) return;
     
     try {
-      let parentId: string | undefined = undefined;
-      let depth = 0;
+      let parentCell = null;
       
       if (isHierarchicalMandalart(mandalart)) {
-        parentId = mandalart.rootCell.id;
-        depth = 1;
+        parentCell = mandalart.rootCell;
       }
       
-      const newCellId = await createCell(id, position, {
-        topic: '새 셀',
-        parentId,
-        depth,
-        position
-      });
+      // 통합 셀 생성 함수 사용
+      const newCell = await createCellAndEdit(id, position, parentCell);
       
-      console.log('새 셀 생성됨:', newCellId);
+      console.log('새 셀 생성됨:', newCell.id);
       
-      // 새로 생성된 셀 데이터 가져오기
-      const fetchNewCell = async () => {
-        // 새 셀 데이터를 가져오는 로직
-        const newCell: MandalartCell = {
-          id: newCellId,
-          topic: '새 셀',
-          memo: '',
-          color: '',
-          imageUrl: '',
-          isCompleted: false,
-          parentId,
-          depth,
-          position
-        };
-        
-        // 편집기 열기
-        setSelectedCell(newCell);
-        setIsEditorOpen(true);
-      };
-      
-      if (parentId) {
-        loadChildrenForCell(parentId);
-      } else {
-        fetchMandalart(id).then(data => {
-          if (data) {
-            // 페이지 새로고침 대신 데이터만 업데이트
-            setMandalart(data);
-          }
-        });
-      }
-      
-      // 새 셀 데이터 가져오기 실행
-      fetchNewCell();
+      // 편집기 열기
+      setSelectedCell(newCell);
+      setIsEditorOpen(true);
     } catch (err) {
       console.error('새 셀 생성 실패:', err);
     }

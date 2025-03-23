@@ -6,7 +6,7 @@ import InputField from '@/components/ui/InputField';
 interface NewMandalartModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateMandalart: (title: string, templateId?: string) => void;
+  onCreateMandalart: (title: string, templateId?: string) => Promise<boolean | void>;
 }
 
 const templates = [
@@ -23,8 +23,9 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
   const [title, setTitle] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('blank');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
@@ -32,11 +33,21 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
       return;
     }
     
-    onCreateMandalart(title, selectedTemplate !== 'blank' ? selectedTemplate : undefined);
-    handleClose();
+    try {
+      setIsLoading(true);
+      await onCreateMandalart(title, selectedTemplate !== 'blank' ? selectedTemplate : undefined);
+      
+      handleClose();
+    } catch (err) {
+      console.error('만다라트 생성 오류:', err);
+      setError('만다라트 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
+    if (isLoading) return;
+    
     setTitle('');
     setSelectedTemplate('blank');
     setError('');
@@ -65,6 +76,7 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
             required
             maxLength={50}
             error={error}
+            disabled={isLoading}
           />
           
           <div className="text-xs text-gray-500 mt-1">
@@ -83,19 +95,21 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
                 key={template.id}
                 className={`
                   border rounded-lg p-3 cursor-pointer
+                  ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}
                   ${selectedTemplate === template.id 
                     ? 'border-blue-500 bg-blue-50' 
                     : 'border-gray-200 hover:border-gray-300'
                   }
                 `}
-                onClick={() => setSelectedTemplate(template.id)}
+                onClick={() => !isLoading && setSelectedTemplate(template.id)}
               >
                 <div className="flex items-center">
                   <input
                     type="radio"
                     checked={selectedTemplate === template.id}
-                    onChange={() => setSelectedTemplate(template.id)}
+                    onChange={() => !isLoading && setSelectedTemplate(template.id)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    disabled={isLoading}
                   />
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-gray-800">
@@ -116,14 +130,16 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
             type="button"
             variant="secondary"
             onClick={handleClose}
+            disabled={isLoading}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="primary"
+            disabled={isLoading}
           >
-            만들기
+            {isLoading ? '생성 중...' : '만들기'}
           </Button>
         </div>
       </form>

@@ -75,13 +75,17 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
   };
 
   // 새 만다라트 생성 핸들러
-  const handleCreateMandalart = async (title: string, templateId?: string) => {
+  const handleCreateMandalart = async (title: string, templateId?: string): Promise<boolean> => {
     try {
       const newId = await createMandalart(title, templateId);
+      
+      // 토스트 메시지 설정
       setToast({
         message: '만다라트가 생성되었습니다.',
         type: 'success'
       });
+      
+      // 모달 닫기는 이제 NewMandalartModal에서 처리
       
       // 바로 편집 페이지로 이동
       if (onNavigate) {
@@ -89,11 +93,18 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       } else {
         router.push(`/mandalart/${newId}`);
       }
-    } catch (error) {
+      
+      return true;
+    } catch (error: any) {
+      console.error('만다라트 생성 실패:', error);
+      
+      // 에러 메시지 설정
       setToast({
-        message: '만다라트 생성에 실패했습니다.',
+        message: error?.message || '만다라트 생성에 실패했습니다.',
         type: 'error'
       });
+      
+      return false;
     }
   };
 

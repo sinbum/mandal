@@ -16,6 +16,7 @@ import {
   createNewMandalart,
   fetchMandalartListForUser,
   createNewCell,
+  createNewCellAndGetEditData,
   toggleCellCompletionById,
   deleteMandalartById,
   loadChildrenForCellById
@@ -33,6 +34,7 @@ interface UseMandalartResult {
   fetchMandalartList: () => Promise<Array<{id: string, title: string, createdAt: string, updatedAt: string}>>;
   fetchMandalart: (id: string) => Promise<Mandalart | null>;
   createCell: (mandalartId: string, position: number, cellData: Partial<MandalartCell>) => Promise<string>;
+  createCellAndEdit: (mandalartId: string, position: number, parentCell?: MandalartCell | null) => Promise<MandalartCell>;
   toggleCellCompletion: (cellId: string) => Promise<void>;
   deleteMandalart: (id: string) => Promise<void>;
   navigationPath: MandalartCell[];
@@ -557,7 +559,76 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       setIsLoading(false);
     }
   }, [mandalart, mandalartId, isLoading, setCurrentCellId, updateNavigationPath, findCell]);
-  
+
+  // 통합된 셀 생성 및 편집 함수 (UI 효율성 개선)
+  const createCellAndEdit = useCallback(async (
+    mandalartId: string, 
+    position: number, 
+    parentCell?: MandalartCell | null
+  ): Promise<MandalartCell> => {
+    try {
+      // 부모 셀 정보 구성
+      const parentData = parentCell ? {
+        parentId: parentCell.id,
+        parentDepth: parentCell.depth || 0
+      } : {}; 
+
+      // 새 셀 생성 및 편집 데이터 받기
+      const newCell = await createNewCellAndGetEditData(
+        mandalartId, 
+        position, 
+        parentData
+      );
+      
+      // 부모 셀이 있으면 자식 셀 업데이트
+      if (parentCell && parentCell.id && mandalart && isHierarchicalMandalart(mandalart)) {
+        // UI 상태 업데이트
+        setMandalart(prev => {
+          if (!prev || !isHierarchicalMandalart(prev)) return prev;
+          
+          // 부모 셀 찾기
+          const foundParentCell = findCellInHierarchy(prev.rootCell, parentCell.id);
+          if (!foundParentCell) return prev;
+          
+          // 부모 셀의 자식 배열에 새 셀 추가
+          const updatedRootCell = updateCellChildrenInHierarchy(
+            prev.rootCell,
+            parentCell.id,
+            { 
+              children: Array.isArray((foundParentCell as any).children) 
+                ? [...(foundParentCell as any).children, newCell]
+                : [newCell]
+            } as any
+          );
+          
+          if (updatedRootCell) {
+            return {
+              ...prev,
+              rootCell: updatedRootCell
+            };
+          }
+          
+          return prev;
+        });
+        
+        // 부모 셀의 자식 목록 다시 로드 (백엔드 동기화)
+        loadChildrenForCell(parentCell.id);
+      } else if (!parentCell && mandalart) {
+        // 루트 레벨 셀인 경우 만다라트 전체 다시 로드
+        fetchMandalart(mandalartId).then(data => {
+          if (data) {
+            setMandalart(data);
+          }
+        });
+      }
+      
+      return newCell;
+    } catch (err) {
+      console.error('통합 셀 생성 및 편집 실패:', err);
+      throw err;
+    }
+  }, [mandalart, fetchMandalart, loadChildrenForCell]);
+
   // 현재 활성화된 셀 가져오기
   const getCurrentCell = useCallback(() => {
     if (!mandalart || !currentCellId) return null;
@@ -583,6 +654,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     fetchMandalartList,
     fetchMandalart,
     createCell,
+    createCellAndEdit,
     toggleCellCompletion,
     deleteMandalart,
     navigationPath,

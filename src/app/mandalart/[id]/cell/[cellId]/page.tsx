@@ -39,6 +39,7 @@ export default function CellDetailPage() {
     navigateToParent, 
     loadChildrenForCell,
     createCell,
+    createCellAndEdit,
     toggleCellCompletion,
     setNavigationPath,
     setCurrentCellId
@@ -182,18 +183,14 @@ export default function CellDetailPage() {
     if (!mandalart || !currentCell) return;
     
     try {
-      // 현재 선택된 셀을 부모로 하는 새 셀 생성
-      const newCellId = await createCell(id, position, {
-        topic: '새 셀',
-        parentId: currentCell.id,
-        depth: (currentCell.depth || 0) + 1,
-        position: position
-      });
+      // 통합 함수 사용: 현재 셀을 부모로 하는 새 셀 생성
+      const newCell = await createCellAndEdit(id, position, currentCell);
       
-      console.log('새 셀 생성됨:', newCellId);
+      console.log('새 셀 생성됨:', newCell.id);
       
-      // 자식 셀 다시 로드
-      loadChildrenForCell(currentCell.id);
+      // 편집기 열기
+      setSelectedCell(newCell);
+      setIsEditorOpen(true);
     } catch (err) {
       console.error('새 셀 생성 실패:', err);
     }
@@ -337,7 +334,7 @@ export default function CellDetailPage() {
       </div>
 
       {/* 셀 편집 슬라이드업 패널 */}
-      <SlideUpPanel isOpen={isEditorOpen} onClose={handleClosePanel}>
+      <SlideUpPanel isOpen={isEditorOpen} onClose={handleClosePanel} height="auto">
         {selectedCell && (
           <CellEditorForm
             cell={selectedCell}
