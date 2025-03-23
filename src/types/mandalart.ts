@@ -44,8 +44,10 @@ export interface MandalartCellProps {
   isCenter?: boolean;
   onClick?: () => void;
   onEdit?: () => void;
+  onToggleComplete?: () => void;
   className?: string;
   hasChildren?: boolean;
+  isEmpty?: boolean;
 }
 
 export interface MandalartGridProps {
@@ -53,6 +55,7 @@ export interface MandalartGridProps {
   currentCell?: MandalartCellWithChildren;
   onCellClick: (cellId: string) => void;
   onCellEdit?: (cellId: string) => void;
+  onCellToggleComplete?: (cellId: string) => void;
   onNavigateBack?: () => void;
   className?: string;
   isExpanded?: boolean;

@@ -7,10 +7,30 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   isCenter = false,
   onClick,
   onEdit,
+  onToggleComplete,
   hasChildren = false,
   className = '',
+  isEmpty = false,
 }) => {
-  const { topic, color, imageUrl, isCompleted } = cell;
+  const { topic, color, imageUrl, isCompleted } = cell || {};
+  
+  // 빈 셀인 경우 기본 스타일로 표시
+  if (isEmpty) {
+    return (
+      <div
+        className={`
+          aspect-square border border-dashed border-gray-300 rounded p-1
+          bg-gray-50 hover:bg-gray-100 cursor-pointer
+          ${className}
+        `}
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-center h-full">
+          <span className="text-gray-400 text-[10px]">클릭하여 추가</span>
+        </div>
+      </div>
+    );
+  }
   
   // 이미지가 있는 경우 배경으로 설정
   const backgroundStyle = imageUrl ? {
@@ -84,7 +104,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         </span>
       </div>
       
-      {/* 편집 버튼 - 별도로 메모와 속성 편집 */}
+      {/* 편집 버튼 */}
       {onEdit && (
         <button
           className="absolute top-0.5 left-0.5 w-5 h-5 bg-white bg-opacity-70 rounded-full shadow-sm opacity-60 hover:opacity-100 flex items-center justify-center"
@@ -95,6 +115,32 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         >
           <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
+      )}
+      
+      {/* 완료 상태 토글 버튼 */}
+      {onToggleComplete && (
+        <button
+          className={`
+            absolute bottom-0.5 left-0.5 w-5 h-5 
+            ${isCompleted ? 'bg-green-500' : 'bg-white'}
+            bg-opacity-70 rounded-full shadow-sm opacity-60 hover:opacity-100 
+            flex items-center justify-center
+          `}
+          onClick={(e) => {
+            e.stopPropagation(); // 클릭 이벤트 전파 방지
+            onToggleComplete();
+          }}
+        >
+          <svg 
+            className={`w-3 h-3 ${isCompleted ? 'text-white' : 'text-gray-600'}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </button>
       )}

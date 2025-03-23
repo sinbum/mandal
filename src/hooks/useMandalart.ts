@@ -432,6 +432,12 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     if (!mandalart || !mandalartId) return;
     
     try {
+      // 이미 로딩 중이면 중복 요청 방지
+      if (isLoading) {
+        console.log('이미 다른 데이터 로딩 중 - 요청 무시:', cellId);
+        return;
+      }
+      
       setIsLoading(true);
       console.log('셀 자식 로드 시작:', cellId);
       
@@ -459,20 +465,45 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         return;
       }
       
-      // 이미 자식이 로드되어 있는지 확인
-      if ('children' in targetCell && Array.isArray((targetCell as any).children) && (targetCell as any).children.length > 0) {
-        console.log('이미 자식이 로드되어 있음:', (targetCell as any).children.length);
+      // 이미 자식이 로드되어 있는지 확인 (더 명확한 체크)
+      const targetCellWithChildren = targetCell as any;
+      if (targetCellWithChildren.children && 
+          Array.isArray(targetCellWithChildren.children) && 
+          targetCellWithChildren.children.length > 0) {
+        console.log('이미 자식이 로드되어 있음:', targetCellWithChildren.children.length);
+        // 네비게이션 업데이트만 하고 API 요청은 하지 않음
         setCurrentCellId(cellId);
         updateNavigationPath(cellId);
         setIsLoading(false);
         return;
       }
       
+      // 자식 셀 데이터 로드
       const childrenResults = await loadChildrenForCellById(mandalartId, cellId);
       
       // 자식 셀이 없는 경우
       if (!childrenResults.children || childrenResults.children.length === 0) {
         console.log('자식 셀이 없습니다. 새 셀 생성이 필요합니다.');
+        
+        // 빈 배열로 children 설정하여 다시 로드되지 않도록 함
+        setMandalart(prev => {
+          if (!prev || !isHierarchicalMandalart(prev)) {
+            return prev;
+          }
+          
+          const updatedRootCell = updateCellChildrenInHierarchy(
+            prev.rootCell,
+            cellId,
+            { children: [] } as any
+          );
+          
+          if (!updatedRootCell) return prev;
+          
+          return {
+            ...prev,
+            rootCell: updatedRootCell
+          };
+        });
         
         setCurrentCellId(cellId);
         updateNavigationPath(cellId);
@@ -512,7 +543,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [mandalart, mandalartId, setCurrentCellId, updateNavigationPath, findCell]);
+  }, [mandalart, mandalartId, isLoading, setCurrentCellId, updateNavigationPath, findCell]);
   
   // 현재 활성화된 셀 가져오기
   const getCurrentCell = useCallback(() => {

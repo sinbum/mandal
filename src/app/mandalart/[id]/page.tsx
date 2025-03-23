@@ -44,7 +44,8 @@ export default function MandalartEditorPage() {
     navigateToParent, 
     loadChildrenForCell,
     fetchMandalart,
-    createCell
+    createCell,
+    toggleCellCompletion
   } = useMandalart(id);
 
   // 디버깅용 로그
@@ -238,6 +239,19 @@ export default function MandalartEditorPage() {
     navigateToCell(cellId);
   };
 
+  // 셀 완료 상태 토글 처리
+  const handleCellToggleComplete = (cellId: string) => {
+    if (!mandalart) return;
+    
+    // 빈 셀인 경우 무시
+    if (cellId.startsWith('empty-')) {
+      return;
+    }
+    
+    console.log(`셀 완료 상태 토글: ${cellId}`);
+    toggleCellCompletion(cellId);
+  };
+
   const header = (
     <HeaderBar 
       title={mandalart?.title || '만다라트'} 
@@ -308,6 +322,7 @@ export default function MandalartEditorPage() {
             currentCell={currentCell as MandalartCellWithChildren}
             onCellClick={handleCellClick}
             onCellEdit={handleCellEdit}
+            onCellToggleComplete={handleCellToggleComplete}
             onNavigateBack={navigationPath.length > 1 ? handleNavigateBack : undefined}
             isExpanded={isExpanded}
             className="w-full aspect-square"

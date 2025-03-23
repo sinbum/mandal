@@ -38,13 +38,24 @@ export default function CellDetailPage() {
     navigateToCell, 
     navigateToParent, 
     loadChildrenForCell,
-    createCell
+    createCell,
+    toggleCellCompletion
   } = useMandalart(id);
 
   // cellId 로 자식 데이터 로드
   useEffect(() => {
-    if (mandalart && cellId) {
+    if (mandalart && cellId && !isLoading) {
       console.log('셀 상세 페이지 로드 - cellId:', cellId);
+      
+      // 이미 현재 cellId에 해당하는 셀이 로드되어 있는지 확인
+      const isCellAlreadyLoaded = (selectedCell && selectedCell.id === cellId) || 
+                                 (currentCell && currentCell.id === cellId);
+      
+      // 이미 로드되었으면 다시 요청하지 않음
+      if (isCellAlreadyLoaded) {
+        console.log('이미 셀 데이터가 로드되어 있습니다:', cellId);
+        return;
+      }
       
       // 1. 특정 셀에 대한 경로 구성
       const buildCellPath = async () => {
@@ -142,13 +153,13 @@ export default function CellDetailPage() {
           if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
             try {
               // 루트 셀부터 시작하여 상위 경로 따라가기
-              await navigateToCell(mandalart.rootCell.id);
+              navigateToCell(mandalart.rootCell.id);
               
-              // 중간 경로 셀들을 통과
+              // 중간 경로 셀들을 통과 (한번에 처리)
               for (let i = 1; i < convertedPath.length; i++) {
                 try {
-                  await loadChildrenForCell(convertedPath[i-1].id);
-                  await navigateToCell(convertedPath[i].id);
+                  loadChildrenForCell(convertedPath[i-1].id);
+                  navigateToCell(convertedPath[i].id);
                 } catch (e) {
                   console.warn(`경로 구성 중 ${i}번째 셀 처리 실패:`, e);
                   // 계속 진행
@@ -187,7 +198,7 @@ export default function CellDetailPage() {
       
       buildCellPath();
     }
-  }, [mandalart, cellId, id, loadChildrenForCell, navigateToCell]);
+  }, [mandalart, cellId, id, currentCell, selectedCell, isLoading]);
 
   // 디버깅용 로그
   useEffect(() => {
@@ -324,6 +335,19 @@ export default function CellDetailPage() {
     }
   };
 
+  // 셀 완료 상태 토글 처리
+  const handleCellToggleComplete = (cellId: string) => {
+    if (!mandalart) return;
+    
+    // 빈 셀인 경우 무시
+    if (cellId.startsWith('empty-')) {
+      return;
+    }
+    
+    console.log(`셀 완료 상태 토글: ${cellId}`);
+    toggleCellCompletion(cellId);
+  };
+
   const title = selectedCell ? (selectedCell.topic || '셀 상세') : currentCell ? (currentCell.topic || '셀 상세') : '셀 상세';
   
   const header = (
@@ -382,6 +406,7 @@ export default function CellDetailPage() {
             currentCell={selectedCell as MandalartCellWithChildren || currentCell as MandalartCellWithChildren}
             onCellClick={handleCellClick}
             onCellEdit={handleCellEdit}
+            onCellToggleComplete={handleCellToggleComplete}
             onNavigateBack={undefined} // 네비게이션 컴포넌트로 대체
             className="w-full aspect-square"
             depth={navigationPath.length - 1}

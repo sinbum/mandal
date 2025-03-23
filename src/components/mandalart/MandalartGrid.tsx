@@ -16,6 +16,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   currentCell,
   onCellClick,
   onCellEdit,
+  onCellToggleComplete,
   onNavigateBack,
   isExpanded = false,
   className = '',
@@ -77,6 +78,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             cell={cell}
             onClick={() => onCellClick(cell.id)}
             onEdit={() => onCellEdit && onCellEdit(cell.id)}
+            onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(cell.id)}
           />
         ))}
         
@@ -86,6 +88,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           cell={middleCells[0]}
           onClick={() => onCellClick(middleCells[0].id)}
           onEdit={() => onCellEdit && onCellEdit(middleCells[0].id)}
+          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[0].id)}
         />
         <MandalartCellComponent
           key={`middle-center-${block.id}-${middleCells[1].id}`}
@@ -94,12 +97,14 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           className="font-medium border-blue-300"
           onClick={() => onCellClick(middleCells[1].id)}
           onEdit={() => onCellEdit && onCellEdit(middleCells[1].id)}
+          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[1].id)}
         />
         <MandalartCellComponent
           key={`middle-right-${block.id}-${middleCells[2].id}`}
           cell={middleCells[2]}
           onClick={() => onCellClick(middleCells[2].id)}
           onEdit={() => onCellEdit && onCellEdit(middleCells[2].id)}
+          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[2].id)}
         />
         
         {/* 하단 줄 (5, 6, 7) */}
@@ -109,6 +114,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             cell={cell}
             onClick={() => onCellClick(cell.id)}
             onEdit={() => onCellEdit && onCellEdit(cell.id)}
+            onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(cell.id)}
           />
         ))}
       </div>
@@ -130,13 +136,15 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             // 중앙은 현재 셀
             if (index === 4) {
               return (
-                <MandalartCellComponent
-                  key={`center-${centerCellToRender.id}`}
-                  cell={centerCellToRender}
-                  isCenter={true}
-                  className="border-blue-400"
-                  onEdit={() => onCellEdit && onCellEdit(centerCellToRender.id)}
-                />
+                <div key={`center-${centerCellToRender.id}`} className="relative">
+                  <MandalartCellComponent
+                    cell={centerCellToRender}
+                    isCenter={true}
+                    className="border-blue-400"
+                    onEdit={() => onCellEdit && onCellEdit(centerCellToRender.id)}
+                    onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(centerCellToRender.id)}
+                  />
+                </div>
               );
             }
             
@@ -183,25 +191,29 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           
           // 실제 자식 셀 표시
           return (
-            <MandalartCellComponent
-              key={`child-${pos}-${child.id}`}
-              cell={child}
-              hasChildren={'children' in child && Array.isArray(child.children) && child.children.length > 0}
-              onClick={() => onCellClick(child.id)}
-              onEdit={() => onCellEdit && onCellEdit(child.id)}
-            />
+            <div key={`child-${pos}-${child.id}`} className="relative">
+              <MandalartCellComponent
+                cell={child}
+                hasChildren={'children' in child && Array.isArray(child.children) && child.children.length > 0}
+                onClick={() => onCellClick(child.id)}
+                onEdit={() => onCellEdit && onCellEdit(child.id)}
+                onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(child.id)}
+              />
+            </div>
           );
         })}
         
         {/* 중앙에 현재 셀 */}
         <div className="col-start-2 col-end-3 row-start-2 row-end-3">
-          <MandalartCellComponent
-            key={`center-main-${centerCellToRender.id}`}
-            cell={centerCellToRender}
-            isCenter={true}
-            className="border-blue-400"
-            onEdit={() => onCellEdit && onCellEdit(centerCellToRender.id)}
-          />
+          <div className="relative">
+            <MandalartCellComponent
+              cell={centerCellToRender}
+              isCenter={true}
+              className="border-blue-400"
+              onEdit={() => onCellEdit && onCellEdit(centerCellToRender.id)}
+              onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(centerCellToRender.id)}
+            />
+          </div>
         </div>
       </div>
     );

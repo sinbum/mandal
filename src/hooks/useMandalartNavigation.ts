@@ -41,32 +41,62 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
 
   // 네비게이션 경로 업데이트
   const updateNavigationPath = useCallback((cellId: string) => {
+    // 현재 경로의 맨 마지막 셀 ID 확인
+    const currentLastCellId = navigationPath.length > 0 ? 
+      navigationPath[navigationPath.length - 1].id : null;
+    
+    // 이미 현재 셀이 경로의 마지막이면 업데이트 불필요
+    if (currentLastCellId === cellId) {
+      console.log('이미 현재 셀이 네비게이션 경로의 마지막입니다:', cellId);
+      return;
+    }
+    
     // 경로에 이미 있는지 확인
     const existingIndex = navigationPath.findIndex(cell => cell.id === cellId);
     
     if (existingIndex >= 0) {
       // 이미 경로에 있는 경우 그 위치까지 잘라냄
+      console.log(`셀 ${cellId}은(는) 이미 경로에 있습니다. 인덱스: ${existingIndex}`);
       setNavigationPath(prev => prev.slice(0, existingIndex + 1));
       return;
     }
     
+    // 셀 데이터 검증
+    if (!cellId) {
+      console.warn('유효하지 않은 셀 ID로 네비게이션 경로 업데이트 시도:', cellId);
+      return;
+    }
+    
     // 경로에 셀 추가
+    console.log(`네비게이션 경로에 셀 추가: ${cellId}`);
     setNavigationPath(prev => [...prev, { id: cellId } as MandalartCell]);
   }, [navigationPath]);
 
   // 상위 셀로 이동
   const navigateToParent = useCallback(() => {
-    if (navigationPath.length <= 1) return;
+    if (navigationPath.length <= 1) {
+      console.log('이미 최상위 셀입니다.');
+      return;
+    }
     
     const parentCell = navigationPath[navigationPath.length - 2];
+    console.log(`상위 셀로 이동: ${parentCell.id}`);
     setCurrentCellId(parentCell.id);
     setNavigationPath(prev => prev.slice(0, prev.length - 1));
-  }, [navigationPath]);
+  }, [navigationPath, setCurrentCellId]);
 
-  // 특정 셀로 이동 (이 함수는 사용되지 않지만 인터페이스를 맞추기 위해 유지)
-  const navigateToCell = useCallback((_cellId: string) => {
-    // 실제 구현은 사용하지 않으므로 비어 있음
-  }, []);
+  // 특정 셀로 이동
+  const navigateToCell = useCallback((cellId: string) => {
+    // 현재 셀과 동일하면 불필요한 상태 업데이트 방지
+    if (currentCellId === cellId) {
+      console.log('이미 선택된 셀입니다:', cellId);
+      return;
+    }
+    
+    console.log(`특정 셀로 이동: ${cellId}`);
+    setCurrentCellId(cellId);
+    updateNavigationPath(cellId);
+  }, [currentCellId, updateNavigationPath, setCurrentCellId]);
 
   return {
     navigationPath,
