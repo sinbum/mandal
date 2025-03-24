@@ -405,7 +405,6 @@ export const fetchMandalartListForUser = async (): Promise<Array<{id: string, ti
   try {
     const supabase = createClient();
     
-    // 현재 로그인한 사용자 정보 가져오기
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -415,14 +414,13 @@ export const fetchMandalartListForUser = async (): Promise<Array<{id: string, ti
     const { data, error } = await supabase
       .from('mandalarts')
       .select('id, title, created_at, updated_at')
-      .eq('user_id', user.id) // 현재 사용자의 만다라트만 가져오기
+      .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
 
     if (error) {
       throw new Error(error.message);
     }
     
-    // Supabase에서 반환된 데이터 형식을 조정
     return data.map(item => ({
       id: item.id,
       title: item.title,
@@ -610,36 +608,11 @@ export const loadChildrenForCellById = async (
   options: { limit?: number; offset?: number } = {}
 ): Promise<{ children: MandalartCell[]; total: number }> => {
   try {
-    // 메모리 캐시 키 생성
-    const cacheKey = `children_${mandalartId}_${cellId}_${options.limit || 9}_${options.offset || 0}`;
-    
-    // 브라우저 환경에서만 sessionStorage 사용
-    if (typeof window !== 'undefined') {
-      // 캐시된 데이터가 있는지 확인
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
-        const now = new Date().getTime();
-        
-        // 캐시 유효 시간 (30초)
-        const CACHE_VALIDITY = 30 * 1000;
-        
-        // 캐시가 유효한 경우 캐시된 데이터 반환
-        if (now - timestamp < CACHE_VALIDITY) {
-          console.log('캐시된 자식 셀 데이터 사용:', cellId);
-          return data;
-        }
-      }
-    }
-    
-    // 기본값 설정
-    const limit = options.limit || 9; // 기본적으로 9개 (만다라트 그리드 크기)
+    const limit = options.limit || 9;
     const offset = options.offset || 0;
     
-    // Supabase에서 자식 셀 로드 (페이징 적용)
     const supabase = createClient();
     
-    // 전체 개수 조회 (카운트 쿼리)
     const { count, error: countError } = await supabase
       .from('mandalart_cells')
       .select('*', { count: 'exact', head: true })
@@ -651,7 +624,6 @@ export const loadChildrenForCellById = async (
       throw new Error(countError.message);
     }
     
-    // 실제 데이터 조회 (페이징 적용)
     const { data: childrenData, error: childrenError } = await supabase
       .from('mandalart_cells')
       .select('*')
@@ -665,24 +637,10 @@ export const loadChildrenForCellById = async (
       throw new Error(childrenError.message);
     }
     
-    console.log(`로드된 자식 셀 데이터 (${offset}~${offset + limit - 1}):`, childrenData?.length);
-    
-    // 자식 셀이 없는 경우
     if (!childrenData || childrenData.length === 0) {
-      const result = { children: [], total: count || 0 };
-      
-      // 결과 캐싱
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          data: result,
-          timestamp: new Date().getTime()
-        }));
-      }
-      
-      return result;
+      return { children: [], total: count || 0 };
     }
     
-    // 자식 셀 데이터 변환
     const children = childrenData.map(child => ({
       id: child.id,
       topic: child.topic || '',
@@ -696,17 +654,7 @@ export const loadChildrenForCellById = async (
       children: []
     }));
     
-    const result = { children, total: count || 0 };
-    
-    // 결과 캐싱
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(cacheKey, JSON.stringify({
-        data: result,
-        timestamp: new Date().getTime()
-      }));
-    }
-    
-    return result;
+    return { children, total: count || 0 };
   } catch (err) {
     console.error('자식 셀 로드 API 오류:', err);
     throw err;
@@ -720,29 +668,6 @@ export const buildCellPathById = async (mandalartId: string, cellId: string): Pr
   try {
     const supabase = createClient();
     
-    // 캐싱을 위한 로컬 스토리지 키
-    const cacheKey = `cell_path_${mandalartId}_${cellId}`;
-    
-    // 브라우저 환경에서만 localStorage 사용
-    if (typeof window !== 'undefined') {
-      // 캐시된 데이터가 있는지 확인
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
-        const now = new Date().getTime();
-        
-        // 캐시 유효 시간 (5분)
-        const CACHE_VALIDITY = 5 * 60 * 1000;
-        
-        // 캐시가 유효한 경우 캐시된 데이터 반환
-        if (now - timestamp < CACHE_VALIDITY) {
-          console.log('캐시된 셀 경로 사용');
-          return data;
-        }
-      }
-    }
-    
-    // 현재 셀 정보 가져오기
     const { data: cellData, error: cellError } = await supabase
       .from('mandalart_cells')
       .select('*')
@@ -754,12 +679,10 @@ export const buildCellPathById = async (mandalartId: string, cellId: string): Pr
       throw new Error(`셀 데이터 로드 실패: ${cellError.message}`);
     }
     
-    // 경로 구성 (현재 셀에서 루트 셀까지)
     const cellPath: MandalartCell[] = [];
     let currentCell = cellData;
     
     while (currentCell) {
-      // 프론트엔드 모델로 변환하여 경로에 추가
       cellPath.unshift({
         id: currentCell.id,
         topic: currentCell.topic || '',
@@ -772,10 +695,8 @@ export const buildCellPathById = async (mandalartId: string, cellId: string): Pr
         position: currentCell.position || 0
       });
       
-      // 부모가 없으면 루트에 도달한 것
       if (!currentCell.parent_id) break;
       
-      // 부모 셀 정보 가져오기
       const { data: parentData, error: parentError } = await supabase
         .from('mandalart_cells')
         .select('*')
@@ -788,15 +709,6 @@ export const buildCellPathById = async (mandalartId: string, cellId: string): Pr
       }
       
       currentCell = parentData;
-    }
-    
-    // 캐싱
-    if (typeof window !== 'undefined') {
-      const cacheData = {
-        data: cellPath,
-        timestamp: new Date().getTime()
-      };
-      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
     }
     
     return cellPath;

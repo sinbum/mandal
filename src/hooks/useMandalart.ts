@@ -29,7 +29,17 @@ interface UseMandalartResult {
   mandalart: Mandalart | null;
   isLoading: boolean;
   error: string | null;
-  updateCell: (cellId: string, updatedCell: MandalartCell) => void;
+  updateCell: (cellId: string, updatedCell: {
+    id: string;
+    topic?: string;
+    memo?: string;
+    color?: string;
+    imageUrl?: string;
+    isCompleted?: boolean;
+    depth?: number;
+    position?: number;
+    parentId?: string
+  }) => void;
   createMandalart: (title: string, templateId?: string) => Promise<string>;
   fetchMandalartList: () => Promise<Array<{id: string, title: string, createdAt: string, updatedAt: string}>>;
   fetchMandalart: (id: string) => Promise<Mandalart | null>;
@@ -172,7 +182,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
             newMandalart.centerBlock = {
               ...newMandalart.centerBlock,
               centerCell: {
-                ...updatedCell
+                ...newMandalart.centerBlock.centerCell,
+                ...updatedCell,
+                id: cellId
               }
             };
             return newMandalart;
@@ -182,7 +194,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
           const centerSurroundingIndex = newMandalart.centerBlock.surroundingCells.findIndex(cell => cell.id === cellId);
           if (centerSurroundingIndex !== -1) {
             newMandalart.centerBlock.surroundingCells[centerSurroundingIndex] = {
-              ...updatedCell
+              ...newMandalart.centerBlock.surroundingCells[centerSurroundingIndex],
+              ...updatedCell,
+              id: cellId
             };
             return newMandalart;
           }
@@ -196,7 +210,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
               newMandalart.surroundingBlocks[i] = {
                 ...block,
                 centerCell: {
-                  ...updatedCell
+                  ...block.centerCell,
+                  ...updatedCell,
+                  id: cellId
                 }
               };
               return newMandalart;
@@ -206,7 +222,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
             const surroundingIndex = block.surroundingCells.findIndex(cell => cell.id === cellId);
             if (surroundingIndex !== -1) {
               newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex] = {
-                ...updatedCell
+                ...newMandalart.surroundingBlocks[i].surroundingCells[surroundingIndex],
+                ...updatedCell,
+                id: cellId
               };
               return newMandalart;
             }
