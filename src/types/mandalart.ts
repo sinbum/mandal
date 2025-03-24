@@ -20,6 +20,7 @@ export interface MandalartHierarchical {
   createdAt: string;
   updatedAt: string;
   rootCell: MandalartCellWithChildren;
+  cells?: MandalartCell[];
 }
 
 export type Mandalart = MandalartHierarchical;

@@ -4,7 +4,8 @@ import { Mandalart, MandalartCell, MandalartCellWithChildren, MandalartHierarchi
 // 분리된 유틸 함수들 임포트
 import { 
   findCellInHierarchy, 
-  updateCellChildrenInHierarchy
+  updateCellChildrenInHierarchy,
+  isHierarchicalMandalart
 } from '@/utils/mandalartUtils';
 
 // 분리된 API 함수들 임포트
@@ -13,11 +14,12 @@ import {
   updateCellById,
   createNewMandalart,
   fetchMandalartListForUser,
-  createNewCell,
+  createNewCell as apiCreateNewCell,
   createNewCellAndGetEditData,
   toggleCellCompletionById,
   deleteMandalartById,
-  loadChildrenForCellById
+  loadChildrenForCellById,
+  loadChildCellsForParent
 } from '@/api/mandalartApi';
 
 // 분리된 네비게이션 관련 함수 임포트
@@ -54,6 +56,10 @@ interface UseMandalartResult {
   setNavigationPath: (path: MandalartCell[]) => void;
   setCurrentCellId: (id: string | null) => void;
   setMandalart: (data: MandalartHierarchical | null) => void;
+  getRootCellTitle: () => string;
+  getEmptyCellsWithVirtualIds: (cellsArray: MandalartCell[]) => MandalartCell[];
+  loadChildrenForCellById: (cellId: string) => Promise<MandalartCell[]>;
+  createNewCell: (mandalartId: string, position: number, cellData: Partial<MandalartCell>) => Promise<string>;
 }
 
 /**
@@ -73,7 +79,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     navigateToCell,
     setCurrentCellId,
     setNavigationPath,
-    breadcrumbPath
+    breadcrumbPath,
+    getRootCellTitle,
+    getEmptyCellsWithVirtualIds
   } = useMandalartNavigation({ data: mandalart || undefined });
 
   // 셀 찾기
@@ -93,6 +101,12 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       .then((data) => {
         // 오직 계층형 만다라트만 처리
         const hierarchicalData = data as MandalartHierarchical;
+        
+        // 루트 셀의 depth를 강제로 0으로 설정
+        if (hierarchicalData && hierarchicalData.rootCell) {
+          hierarchicalData.rootCell.depth = 0;
+        }
+        
         setMandalart(hierarchicalData);
         
         // navigationPath 초기화
@@ -206,7 +220,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   // 개별 셀 생성
   const createCell = useCallback(async (mandalartId: string, position: number, cellData: Partial<MandalartCell>): Promise<string> => {
     try {
-      const cellId = await createNewCell(mandalartId, position, cellData);
+      const cellId = await apiCreateNewCell(mandalartId, position, cellData);
       
       // 생성 후 부모 셀에 자식 셀 추가 (UI 업데이트)
       if (cellData.parentId && mandalart) {
@@ -320,31 +334,19 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
 
   // 특정 셀의 자식 셀 로드
   const loadChildrenForCell = useCallback(async (cellId: string) => {
-    if (!mandalart || !mandalartId) return;
+    if (!mandalart || !mandalartId || isLoading) {
+      return;
+    }
     
     try {
-      // 이미 로딩 중이면 중복 요청 방지
-      if (isLoading) {
-        console.log('이미 다른 데이터 로딩 중 - 요청 무시:', cellId);
-        return;
-      }
+      console.log('자식 셀 로드 요청:', cellId);
       
       // 현재 셀 정보 가져오기
       const targetCell = findCellInHierarchy(mandalart.rootCell, cellId);
-      console.log('계층형 구조 - 타겟 셀 찾음:', !!targetCell, targetCell?.topic);
+      console.log('타겟 셀 찾음:', !!targetCell, targetCell?.topic);
       
-      // 이미 자식 데이터가 있는지 확인
-      const targetCellWithChildren = targetCell as MandalartCellWithChildren;
-      if (targetCellWithChildren && 
-          targetCellWithChildren.children && 
-          targetCellWithChildren.children.length > 0) {
-        console.log('이미 자식 데이터가 로드되어 있음:', targetCellWithChildren.children.length);
-        
-        // 이미 데이터가 있으면 네비게이션만 업데이트하고 API 요청은 하지 않음
-        setCurrentCellId(cellId);
-        updateNavigationPath(cellId);
-        return;
-      }
+      // 2023.10.20 수정: 자식 데이터 여부와 상관없이 항상 API 요청 수행
+      // 이전에는 이미 자식 데이터가 있으면 API 요청을 하지 않았음
       
       if (!targetCell) {
         console.error('선택한 셀을 찾을 수 없습니다:', cellId);
@@ -357,8 +359,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       
       // API 직접 호출
       try {
-        const childrenResults = await loadChildrenForCellById(mandalartId, cellId, { limit: 25 });
-        console.log('자식 셀 로드 완료:', childrenResults.children.length);
+        const childrenResults = await loadChildCellsForParent(cellId);
+        console.log('자식 셀 로드 완료:', childrenResults.length);
         
         // 만다라트 업데이트
         setMandalart(prev => {
@@ -373,7 +375,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
           const updatedRootCell = updateCellChildrenInHierarchy(
             prev.rootCell,
             cellId,
-            { children: childrenResults.children } as Partial<MandalartCellWithChildren>
+            { children: childrenResults } as Partial<MandalartCellWithChildren>
           );
           
           if (!updatedRootCell) return prev;
@@ -494,6 +496,106 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     }
   }, [findCell, setCurrentCellId, updateNavigationPath]);
 
+  // 특정 셀의 자식 셀 로드
+  const loadChildrenForCellById = useCallback(async (cellId: string) => {
+    console.log('자식 셀 로드 요청:', cellId);
+    
+    try {
+      // 'virtual-root-xxx' 형식의 가상 ID 확인
+      if (cellId.startsWith('virtual-root-')) {
+        console.log('가상 루트 셀 ID 감지됨, 실제 루트 셀 찾기');
+        // 가상 루트 ID인 경우 실제 루트 셀 찾기
+        if (mandalart?.rootCell) {
+          cellId = mandalart.rootCell.id;
+          console.log('실제 루트 셀 ID로 변환:', cellId);
+        } else {
+          throw new Error('루트 셀을 찾을 수 없습니다.');
+        }
+      }
+      
+      // API 호출로 자식 셀 데이터 가져오기
+      const childCells = await loadChildCellsForParent(cellId);
+      console.log('자식 셀 로드 완료:', {
+        parentId: cellId,
+        childCount: childCells.length,
+        children: childCells.map((c: MandalartCell) => ({id: c.id, topic: c.topic || '(제목 없음)'}))
+      });
+    
+      // 현재 셀을 찾아서 자식 셀 업데이트
+      setMandalart(prev => {
+        if (!prev || !prev.rootCell) return prev;
+        
+        // 선택된 셀 찾기 (rootCell에서 찾기)
+        const selectedCell = findCellInHierarchy(prev.rootCell, cellId);
+        
+        if (!selectedCell) {
+          console.warn('자식 셀을 연결할 대상 셀을 찾지 못함:', cellId);
+          return prev;
+        }
+        
+        // 이미 빈 셀이 포함된 경우 필터링 (empty- 또는 temp-new- 제외)
+        const realCells = childCells.filter((cell: MandalartCell) => 
+          !cell.id.startsWith('empty-') && !cell.id.startsWith('temp-new-')
+        );
+        
+        console.log('실제 셀 추출됨:', realCells.length);
+        
+        // Depth 레벨에 따른 빈 셀 추가
+        let processedChildren = [...realCells];
+        
+        // 빈 셀이 없는 경우 8개의 빈 셀 추가
+        if (processedChildren.length < 8) {
+          for (let i = processedChildren.length; i < 8; i++) {
+            processedChildren.push({
+              id: `empty-${i+1}`,
+              topic: '',
+              memo: '클릭하여 새 셀을 추가하세요',
+              isCompleted: false,
+              parentId: cellId,
+              depth: (selectedCell.depth || 0) + 1,
+              position: i+1,
+              color: '',
+              imageUrl: ''
+            });
+          }
+        }
+        
+        // 업데이트된 루트 셀 생성 (불변성 유지)
+        const updatedRootCell = updateCellChildrenInHierarchy(
+          prev.rootCell,
+          cellId,
+          { children: processedChildren } as Partial<MandalartCellWithChildren>
+        );
+        
+        if (!updatedRootCell) return prev;
+        
+        // 새 만다라트 상태 반환
+        return { ...prev, rootCell: updatedRootCell };
+      });
+      
+      return childCells;
+    } catch (err) {
+      console.error('자식 셀 로드 오류:', err);
+      throw err;
+    }
+  }, [mandalart, findCellInHierarchy]);
+
+  /**
+   * 새 셀 생성 함수를 훅에서 제공
+   */
+  const createNewCell = useCallback(async (
+    mandalartId: string, 
+    position: number, 
+    cellData: Partial<MandalartCell>
+  ) => {
+    try {
+      return await apiCreateNewCell(mandalartId, position, cellData);
+    } catch (err) {
+      console.error('새 셀 생성 실패:', err);
+      throw err;
+    }
+  }, []);
+
   return {
     mandalart,
     isLoading,
@@ -514,7 +616,11 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     loadChildrenForCell,
     setNavigationPath,
     setCurrentCellId,
-    setMandalart
+    setMandalart,
+    getRootCellTitle,
+    getEmptyCellsWithVirtualIds,
+    loadChildrenForCellById,
+    createNewCell
   };
 };
 

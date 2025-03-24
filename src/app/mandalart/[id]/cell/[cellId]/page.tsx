@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
@@ -42,7 +42,10 @@ export default function CellDetailPage() {
     createCellAndEdit,
     toggleCellCompletion,
     setNavigationPath,
-    setCurrentCellId
+    setCurrentCellId,
+    getEmptyCellsWithVirtualIds,
+    loadChildrenForCellById,
+    createNewCell
   } = useMandalart(id);
 
   // 셀 ID 로 자식 데이터 로드
@@ -60,6 +63,9 @@ export default function CellDetailPage() {
         return;
       }
       
+      // 새 셀로 이동할 때는 항상 기존 상태를 초기화
+      setSelectedCell(null);
+      
       // 최적화된 셀 로드 및 경로 구성
       const loadCellData = async () => {
         try {
@@ -76,6 +82,15 @@ export default function CellDetailPage() {
           const { children: childrenData, total } = await loadChildrenForCellById(id, cellId, { limit: 9 });
           console.log(`자식 셀 로드됨: ${childrenData.length}/${total}`);
           
+          // 자식 셀의 depth를 올바르게 설정 - 현재 셀의 depth + 1로 강제 설정
+          const currentCellDepth = cellPath[cellPath.length - 1].depth || 0;
+          const processedChildrenData = childrenData.map(child => ({
+            ...child,
+            depth: currentCellDepth + 1 // 부모 셀 depth + 1로 명시적 설정
+          }));
+          
+          console.log('처리된 자식 셀 depth:', processedChildrenData.map(c => ({ id: c.id, topic: c.topic, depth: c.depth })));
+          
           // 4. UI 상태 업데이트 - 전체 경로를 한 번에 설정
           if (isHierarchicalMandalart(mandalart) && mandalart.rootCell) {
             try {
@@ -86,10 +101,29 @@ export default function CellDetailPage() {
               // 커스텀 상태로 현재 셀과 자식 관리
               const currentCellWithChildren = {
                 ...cellPath[cellPath.length - 1],
-                children: childrenData
+                children: processedChildrenData // depth가 조정된 자식 셀 사용
               };
               
-              setSelectedCell(currentCellWithChildren as MandalartCell);
+              console.log('현재 셀 설정:', {
+                id: currentCellWithChildren.id,
+                topic: currentCellWithChildren.topic,
+                depth: currentCellWithChildren.depth,
+                childrenCount: processedChildrenData.length,
+                childrenDepths: processedChildrenData.map(c => c.depth)
+              });
+              
+              // MandalartCell로 캐스팅하여 확실히 타입 설정
+              setSelectedCell({
+                id: currentCellWithChildren.id,
+                topic: currentCellWithChildren.topic || '',
+                memo: currentCellWithChildren.memo,
+                color: currentCellWithChildren.color,
+                imageUrl: currentCellWithChildren.imageUrl,
+                isCompleted: currentCellWithChildren.isCompleted || false,
+                depth: currentCellWithChildren.depth !== undefined ? currentCellWithChildren.depth : 0,
+                position: currentCellWithChildren.position || 0,
+                parentId: currentCellWithChildren.parentId
+              });
               
               // 부모 셀들의 자식 셀 정보를 메모리에 업데이트
               // (이 데이터가 현재 경로 이동 시 필요할 때를 위해)
@@ -182,18 +216,22 @@ export default function CellDetailPage() {
   const handleCreateNewCell = async (position: number) => {
     if (!mandalart || !currentCell) return;
     
-    try {
-      // 통합 함수 사용: 현재 셀을 부모로 하는 새 셀 생성
-      const newCell = await createCellAndEdit(id, position, currentCell);
-      
-      console.log('새 셀 생성됨:', newCell.id);
-      
-      // 편집기 열기
-      setSelectedCell(newCell);
-      setIsEditorOpen(true);
-    } catch (err) {
-      console.error('새 셀 생성 실패:', err);
-    }
+    // 임시 빈 셀 데이터 생성 (아직 저장하지 않음)
+    const tempNewCell: MandalartCell = {
+      id: `temp-new-${position}`, // 임시 ID
+      topic: '새 셀',
+      memo: '',
+      color: '',
+      imageUrl: '',
+      isCompleted: false,
+      parentId: currentCell.id,
+      depth: (currentCell.depth || 0) + 1,
+      position: position
+    };
+    
+    // 편집기 열기
+    setSelectedCell(tempNewCell);
+    setIsEditorOpen(true);
   };
   
   // 네비게이션 경로에서 ID로 셀 찾기
@@ -212,38 +250,85 @@ export default function CellDetailPage() {
     return null;
   };
 
-  // 셀 편집 폼 저장 처리
-  const handleSaveCell = async (updatedCell: Partial<MandalartCell>) => {
-    console.log('셀 상세 페이지 저장 시도:', { 
-      selectedCell, 
-      updatedCell, 
-      selectedCellId: selectedCell?.id,
-      hasId: !!selectedCell?.id
-    });
-
-    if (!selectedCell || !selectedCell.id) {
-      console.error('선택된 셀이 없거나 ID가 없어 저장 실패:', {
-        selectedCell,
-        isSelected: !!selectedCell,
-        hasId: selectedCell ? !!selectedCell.id : false
-      });
-      return;
-    }
-
+  // 셀 저장 처리
+  const handleSaveCell = useCallback(async (editedCell: MandalartCell) => {
     try {
-      // 저장할 때 id 필드를 명시적으로 포함하여 업데이트
-      const cellToUpdate = {
-        ...updatedCell,
-        id: selectedCell.id
-      };
+      console.log('셀 저장 요청:', editedCell);
       
-      await updateCell(selectedCell.id, cellToUpdate);
-      console.log('셀 저장 성공:', { id: selectedCell.id, updatedCell });
+      // 임시 ID를 가진 새 셀 처리 (empty-x 또는 temp-new-x)
+      if (editedCell.id.startsWith('empty-') || editedCell.id.startsWith('temp-new-')) {
+        console.log('새 셀 생성 처리 시작:', {
+          id: editedCell.id,
+          parentId: editedCell.parentId,
+          mandalartId: params.id
+        });
+        
+        // 부모 ID 확인 (가상 루트 ID 처리 포함)
+        let parentId = editedCell.parentId;
+        if (parentId && (parentId.startsWith('virtual-root-') || parentId === 'root')) {
+          // 가상 루트 ID는 null로 설정 (실제 DB에서는 최상위 셀에 부모가 없음)
+          console.log('가상 루트 ID 감지, 부모 ID를 null로 설정:', parentId);
+          parentId = undefined;  // string | undefined 타입에 맞게 수정
+        }
+        
+        // 새 셀 생성 요청
+        const position = parseInt(editedCell.id.split('-').pop() || '0', 10);
+        
+        const cellData: Partial<MandalartCell> = {
+          topic: editedCell.topic,
+          memo: editedCell.memo,
+          color: editedCell.color,
+          imageUrl: editedCell.imageUrl,
+          isCompleted: editedCell.isCompleted,
+          parentId: parentId,
+          position: position
+        };
+        
+        console.log('새 셀 생성 데이터:', cellData);
+        
+        // 새 셀 생성 API 호출 (params.id가 배열일 경우 첫 번째 요소 사용, undefined인 경우 기본값 제공)
+        const mandalartId = typeof params?.id === 'string' 
+          ? params.id 
+          : Array.isArray(params?.id) 
+            ? params.id[0] 
+            : id; // 현재 컴포넌트에서 접근 가능한 id 사용
+        
+        await createNewCell(mandalartId, position, cellData);
+        
+        console.log('새 셀 생성 완료');
+        
+        // 셀 선택 상태 및 패널 초기화
+        setSelectedCell(null);
+        setIsEditorOpen(false);
+        
+        // 현재 셀의 자식 셀 다시 로드 (현재 셀이 있는 경우에만)
+        if (currentCell) {
+          await loadChildrenForCellById(currentCell.id);
+        }
+        
+        return;
+      }
+      
+      // 기존 셀 업데이트
+      await updateCell(editedCell.id, editedCell);
+      
+      // 셀 선택 상태 및 패널 초기화
+      setSelectedCell(null);
       setIsEditorOpen(false);
+      
+      // 현재 셀의 자식 셀 다시 로드 (현재 셀이 있는 경우에만)
+      if (currentCell) {
+        // 현재 셀이 수정된 경우 현재 셀 ID 다시 설정 (새로고침 효과)
+        if (editedCell.id === currentCell.id) {
+          setCurrentCellId(editedCell.id);
+        }
+        // 자식 셀 목록 갱신
+        await loadChildrenForCellById(currentCell.id);
+      }
     } catch (error) {
       console.error('셀 저장 중 오류 발생:', error);
     }
-  };
+  }, [currentCell, params, id, loadChildrenForCellById, createNewCell, updateCell, setCurrentCellId]);
 
   // 패널 닫기
   const handleClosePanel = () => {
@@ -290,6 +375,76 @@ export default function CellDetailPage() {
     
     console.log(`셀 완료 상태 토글: ${cellId}`);
     toggleCellCompletion(cellId);
+  };
+
+  // 현재 셀의 자식 셀 배열 (빈 셀 포함)
+  const getDisplayChildren = () => {
+    if (!currentCell) return [];
+    
+    // 현재 셀의 자식 셀만 사용
+    const currentCellWithChildren = currentCell as MandalartCellWithChildren;
+    const children = currentCellWithChildren.children || [];
+    
+    // 자식 셀의 depth가 올바른지 확인 (현재 셀의 depth + 1)
+    const currentDepth = currentCell.depth !== undefined ? currentCell.depth : 0;
+    
+    console.log('자식 셀 처리 시작:', {
+      currentCellId: currentCell.id,
+      currentCellTopic: currentCell.topic,
+      currentCellDepth: currentDepth,
+      childrenCount: children.length,
+    });
+    
+    // 빈 배열인 경우 8개의 빈 셀 생성
+    if (!children || children.length === 0) {
+      console.log('자식 셀이 없음 - 빈 셀 8개 생성');
+      const emptyChildren = Array(8).fill(null).map((_, index) => ({
+        id: `empty-${index+1}`,
+        topic: '',
+        memo: '클릭하여 새 셀을 추가하세요',
+        isCompleted: false,
+        parentId: currentCell.id,
+        depth: currentDepth + 1, // 부모 셀 depth + 1
+        position: index+1,
+        color: '',
+        imageUrl: ''
+      }));
+      
+      console.log('빈 셀 생성 완료:', emptyChildren.length);
+      return emptyChildren;
+    }
+    
+    // depth 값이 일치하지 않는 자식 셀들의 depth 값을 수정
+    const processedChildren = children.map(child => ({
+      ...child,
+      depth: currentDepth + 1 // 부모 셀 depth + 1로 강제 설정
+    }));
+    
+    console.log('자식 셀 처리 완료:', {
+      childrenCount: processedChildren.length,
+      processedChildren: processedChildren.slice(0, 3).map(c => ({ id: c.id, topic: c.topic, depth: c.depth }))
+    });
+    
+    // 빈 셀이 없는 경우 8개의 빈 셀 추가
+    if (processedChildren.length < 8) {
+      console.log(`${8 - processedChildren.length}개의 빈 셀 추가`);
+      
+      for (let i = processedChildren.length; i < 8; i++) {
+        processedChildren.push({
+          id: `empty-${i+1}`,
+          topic: '',
+          memo: '클릭하여 새 셀을 추가하세요', 
+          isCompleted: false,
+          parentId: currentCell.id,
+          depth: currentDepth + 1,
+          position: i+1,
+          color: '',
+          imageUrl: ''
+        });
+      }
+    }
+    
+    return processedChildren;
   };
 
   const title = selectedCell ? (selectedCell.topic || '셀 상세') : currentCell ? (currentCell.topic || '셀 상세') : '셀 상세';
@@ -347,13 +502,29 @@ export default function CellDetailPage() {
         <div className="w-full max-w-4xl mx-auto">
           <MandalartGrid
             mandalart={mandalart}
-            currentCell={selectedCell as MandalartCellWithChildren || currentCell as MandalartCellWithChildren}
+            currentCell={
+              (selectedCell || currentCell) 
+                ? {
+                    ...(selectedCell || currentCell),
+                    children: getDisplayChildren()
+                  } as MandalartCellWithChildren
+                : {
+                    id: 'root',
+                    topic: '셀 상세',
+                    memo: '',
+                    isCompleted: false,
+                    depth: 0,
+                    position: 0,
+                    children: []
+                  } as MandalartCellWithChildren
+            }
             onCellClick={handleCellClick}
             onCellEdit={handleCellEdit}
             onCellToggleComplete={handleCellToggleComplete}
-            onNavigateBack={undefined} // 네비게이션 컴포넌트로 대체
+            onNavigateBack={navigationPath.length > 1 ? handleBackClick : undefined}
             className="w-full aspect-square"
-            depth={navigationPath.length - 1}
+            // 명시적으로 현재 셀의 실제 depth 값 설정
+            depth={currentCell && currentCell.depth !== undefined ? currentCell.depth : 0}
           />
         </div>
       </div>

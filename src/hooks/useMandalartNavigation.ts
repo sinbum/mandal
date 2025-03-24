@@ -9,6 +9,8 @@ interface UseMandalartNavigationResult {
   navigationPath: MandalartCell[];
   currentCellId: string | null;
   setCurrentCellId: (id: string | null) => void;
+  getRootCellTitle: () => string;
+  getEmptyCellsWithVirtualIds: (cellsArray: MandalartCell[]) => MandalartCell[];
   setNavigationPath: (path: MandalartCell[]) => void;
   updateNavigationPath: (cellId: string) => void;
   navigateToParent: () => void;
@@ -26,7 +28,7 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
 
   // 초기화 - data 변경시 네비게이션 경로 초기화
   useEffect(() => {
-    if (data) {
+    if (data && data.rootCell) {
       // 계층형 구조인 경우 루트 셀로 초기화
       setNavigationPath([data.rootCell]);
       setCurrentCellId(data.rootCell.id);
@@ -106,10 +108,43 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
     return [parentCell, currentCell];
   }, [navigationPath])();
 
+  // 루트 셀 제목 가져오기 (중앙 셀에 표시하기 위함)
+  const getRootCellTitle = useCallback(() => {
+    if (!data || !data.rootCell) return '새 만다라트';
+    return data.rootCell.topic || data.title || '새 만다라트';
+  }, [data]);
+
+  // 빈 셀에 가상 ID 부여하기
+  const getEmptyCellsWithVirtualIds = useCallback((cellsArray: MandalartCell[]) => {
+    if (!cellsArray || !Array.isArray(cellsArray)) return [];
+
+    // 배열 내 실제 셀 수
+    const existingCellsCount = cellsArray.filter(cell => cell && cell.id).length;
+    
+    // 결과 배열 구성
+    const resultCells = [...cellsArray];
+    
+    // 8개가 될 때까지 빈 셀 추가
+    for (let i = existingCellsCount; i < 8; i++) {
+      resultCells.push({
+        id: `empty-${i+1}`, // 가상 ID 부여
+        topic: '',
+        memo: '클릭하여 새 셀을 추가하세요',
+        isCompleted: false,
+        depth: 1,
+        position: i+1
+      } as MandalartCell);
+    }
+    
+    return resultCells;
+  }, []);
+
   return {
     navigationPath,
     currentCellId,
     setCurrentCellId,
+    getRootCellTitle,
+    getEmptyCellsWithVirtualIds,
     setNavigationPath,
     updateNavigationPath,
     navigateToParent,
