@@ -85,7 +85,7 @@ export default function HomePage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {rootCells.map(cell => (
             <Link 
               key={cell.id}
@@ -93,7 +93,7 @@ export default function HomePage() {
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col"
             >
               <div 
-                className="h-40 mb-2 rounded"
+                className="h-48 mb-2 rounded" 
                 style={{
                   backgroundColor: cell.color || '#f0f4f8',
                   backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,
@@ -103,13 +103,13 @@ export default function HomePage() {
               >
                 {/* 배경 오버레이 */}
                 <div className="h-full w-full bg-black bg-opacity-10 flex items-center justify-center">
-                  <h2 className="text-xl font-bold text-center text-white drop-shadow-md px-2">
+                  <h2 className="text-2xl font-bold text-center text-white drop-shadow-md px-2">
                     {cell.topic || '무제'}
                   </h2>
                 </div>
               </div>
               <div className="mt-auto">
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-gray-500">
                   {cell.isCompleted ? '완료됨' : '진행 중'}
                 </span>
               </div>
