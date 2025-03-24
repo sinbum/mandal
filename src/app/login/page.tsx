@@ -25,7 +25,7 @@ export default function AuthPage() {
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
-          router.push('/dashboard');
+          router.push('/');
         }
       } catch (error) {
         console.error('세션 확인 오류:', error);
@@ -68,7 +68,7 @@ export default function AuthPage() {
       });
       
       // 즉시 대시보드로 이동
-      router.push('/dashboard');
+      router.push('/');
     } catch (err: any) {
       console.error('로그인 오류:', err);
       setError(err.message || '로그인 중 오류가 발생했습니다.');

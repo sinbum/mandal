@@ -9,18 +9,7 @@ import {
 } from '@/utils/mandalartUtils';
 
 // 분리된 API 함수들 임포트
-import {
-  fetchMandalartById,
-  updateCellById,
-  createNewMandalart,
-  fetchMandalartListForUser,
-  createNewCell as apiCreateNewCell,
-  createNewCellAndGetEditData,
-  toggleCellCompletionById,
-  deleteMandalartById,
-  loadChildrenForCellById,
-  loadChildCellsForParent
-} from '@/api/mandalartApi';
+import { mandalartAPI } from '@/services/mandalartService';
 
 // 분리된 네비게이션 관련 함수 임포트
 import useMandalartNavigation from '@/hooks/useMandalartNavigation';
@@ -74,15 +63,15 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   const {
     navigationPath,
     currentCellId,
-    updateNavigationPath,
+    buildPathForCell,
     navigateToParent,
     navigateToCell,
     setCurrentCellId,
     setNavigationPath,
     breadcrumbPath,
-    getRootCellTitle,
-    getEmptyCellsWithVirtualIds
-  } = useMandalartNavigation({ data: mandalart || undefined });
+    fillEmptyCells,
+    createEmptyCell
+  } = useMandalartNavigation({ initialCell: mandalart?.rootCell });
 
   // 셀 찾기
   const findCell = useCallback((cellId: string): MandalartCell | null => {
@@ -97,7 +86,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     setIsLoading(true);
     setError(null);
 
-    fetchMandalartById(mandalartId)
+    mandalartAPI.getMandalart(mandalartId)
       .then((data) => {
         // 오직 계층형 만다라트만 처리
         const hierarchicalData = data as MandalartHierarchical;
@@ -141,7 +130,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     }
 
     try {
-      await updateCellById(cellId, updatedCell);
+      await mandalartAPI.updateCell(cellId, updatedCell);
       console.log('셀 업데이트 API 호출 성공:', { cellId, updatedCell });
       
       // UI 업데이트
@@ -183,9 +172,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   }, [mandalart]);
 
   // 새 만다라트 생성
-  const createMandalart = useCallback(async (title: string, templateId?: string): Promise<string> => {
+  const createMandalart = useCallback(async (title: string): Promise<string> => {
     try {
-      const mandalartId = await createNewMandalart(title, templateId);
+      const mandalartId = await mandalartAPI.createMandalart(title);
       return mandalartId;
     } catch (err) {
       console.error('만다라트 생성 실패:', err);
@@ -197,7 +186,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   const fetchMandalartList = useCallback(async () => {
     try {
       // API 직접 호출
-      const data = await fetchMandalartListForUser();
+      const data = await mandalartAPI.getUserMandalarts();
       return data;
     } catch (err) {
       console.error('만다라트 목록 조회 실패:', err);
@@ -209,7 +198,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   // 특정 만다라트 데이터 로드
   const fetchMandalart = useCallback(async (id: string): Promise<MandalartHierarchical | null> => {
     try {
-      const data = await fetchMandalartById(id);
+      const data = await mandalartAPI.getMandalart(id);
       return data as MandalartHierarchical;
     } catch (err) {
       console.error('만다라트 데이터 조회 실패:', err);
@@ -220,7 +209,12 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   // 개별 셀 생성
   const createCell = useCallback(async (mandalartId: string, position: number, cellData: Partial<MandalartCell>): Promise<string> => {
     try {
-      const cellId = await apiCreateNewCell(mandalartId, position, cellData);
+      // mandalartId를 cellData에 포함시켜 전달
+      const cellWithMandalartId = {
+        ...cellData,
+        mandalartId
+      };
+      const cellId = await mandalartAPI.createCell(cellData.parentId || '', cellWithMandalartId);
       
       // 생성 후 부모 셀에 자식 셀 추가 (UI 업데이트)
       if (cellData.parentId && mandalart) {
@@ -250,7 +244,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
             cellData.parentId as string,
             { 
               children: Array.isArray((parentCell as MandalartCellWithChildren).children) 
-                ? [...(parentCell as MandalartCellWithChildren).children, newCell]
+                ? [...((parentCell as MandalartCellWithChildren).children ?? []), newCell]
                 : [newCell]
             } as Partial<MandalartCellWithChildren>
           );
@@ -288,7 +282,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       // 완료 상태 반전
       const newCompletionStatus = !currentCell.isCompleted;
       
-      await toggleCellCompletionById(cellId, newCompletionStatus);
+      await mandalartAPI.toggleCellCompletion(cellId, newCompletionStatus);
       
       // UI 업데이트
       setMandalart(prev => {
@@ -319,7 +313,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   // 만다라트 삭제
   const deleteMandalart = useCallback(async (id: string) => {
     try {
-      await deleteMandalartById(id);
+      await mandalartAPI.deleteMandalart(id);
       
       // 현재 보고 있는 만다라트가 삭제된 경우 상태 초기화
       if (mandalartId === id) {
@@ -359,7 +353,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       
       // API 직접 호출
       try {
-        const childrenResults = await loadChildCellsForParent(cellId);
+        const childrenResults = await mandalartAPI.getChildCells(cellId);
         console.log('자식 셀 로드 완료:', childrenResults.length);
         
         // 만다라트 업데이트
@@ -387,7 +381,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         });
         
         setCurrentCellId(cellId);
-        updateNavigationPath(cellId);
+        buildPathForCell(cellId);
       } catch (apiError) {
         console.error('API 호출 실패:', apiError);
         setError('자식 셀을 로드하는데 실패했습니다.');
@@ -398,7 +392,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [mandalart, mandalartId, isLoading, setCurrentCellId, updateNavigationPath, findCell]);
+  }, [mandalart, mandalartId, isLoading, setCurrentCellId, buildPathForCell, findCell]);
 
   // 통합된 셀 생성 및 편집 함수 (UI 효율성 개선)
   const createCellAndEdit = useCallback(async (
@@ -422,7 +416,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.log('셀 생성 부모 데이터:', parentData);
 
       // 새 셀 생성 및 편집 데이터 받기
-      const newCell = await createNewCellAndGetEditData(
+      const newCell = await mandalartAPI.createCellWithData(
         mandalartId, 
         position, 
         parentData
@@ -446,7 +440,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
             parentCell.id,
             { 
               children: Array.isArray((foundParentCell as MandalartCellWithChildren).children) 
-                ? [...(foundParentCell as MandalartCellWithChildren).children, newCell]
+                ? [...((foundParentCell as MandalartCellWithChildren).children ?? []), newCell]
                 : [newCell]
             } as Partial<MandalartCellWithChildren>
           );
@@ -492,9 +486,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     const cell = findCell(cellId);
     if (cell) {
       setCurrentCellId(cell.id);
-      updateNavigationPath(cell.id);
+      buildPathForCell(cell.id);
     }
-  }, [findCell, setCurrentCellId, updateNavigationPath]);
+  }, [findCell, setCurrentCellId, buildPathForCell]);
 
   // 특정 셀의 자식 셀 로드
   const loadChildrenForCellById = useCallback(async (cellId: string) => {
@@ -514,7 +508,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       }
       
       // API 호출로 자식 셀 데이터 가져오기
-      const childCells = await loadChildCellsForParent(cellId);
+      const childCells = await mandalartAPI.getChildCells(cellId);
       console.log('자식 셀 로드 완료:', {
         parentId: cellId,
         childCount: childCells.length,
@@ -589,12 +583,20 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     cellData: Partial<MandalartCell>
   ) => {
     try {
-      return await apiCreateNewCell(mandalartId, position, cellData);
+      // mandalartId를 cellData에 포함시켜 전달
+      const cellWithMandalartId = {
+        ...cellData,
+        mandalartId
+      };
+      return await mandalartAPI.createCell(cellData.parentId || '', cellWithMandalartId);
     } catch (err) {
       console.error('새 셀 생성 실패:', err);
       throw err;
     }
   }, []);
+
+  // getRootCellTitle 직접 구현
+  const getRootCellTitle = () => mandalart?.rootCell?.topic || '새 만다라트';
 
   return {
     mandalart,
@@ -618,7 +620,10 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     setCurrentCellId,
     setMandalart,
     getRootCellTitle,
-    getEmptyCellsWithVirtualIds,
+    getEmptyCellsWithVirtualIds: (cellsArray: MandalartCell[]) => {
+      // parentId와 parentDepth 기본값 제공
+      return fillEmptyCells(cellsArray, null, 0);
+    },
     loadChildrenForCellById,
     createNewCell
   };

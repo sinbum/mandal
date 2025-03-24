@@ -5,13 +5,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { Mandalart, MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
 import { updateCellChildrenInHierarchy, isHierarchicalMandalart, findCellInHierarchy } from '@/utils/mandalartUtils';
-import { 
-  updateCellById, 
-  createNewCell, 
-  toggleCellCompletionById, 
-  loadChildrenForCellById,
-  createNewCellAndGetEditData
-} from '@/api/mandalartApi';
+import { mandalartAPI } from '@/services/mandalartService';
 
 interface UseMandalartCellOperationsProps {
   mandalart: Mandalart | null;
@@ -123,7 +117,7 @@ const useMandalartCellOperations = ({
     if (!mandalart || !cellId) return;
 
     try {
-      await updateCellById(cellId, updatedCell);
+      await mandalartAPI.updateCell(cellId, updatedCell);
       updateMandalartState(cellId, updatedCell);
     } catch (err) {
       handleApiError(err, '셀 업데이트에 실패했습니다.');
@@ -142,7 +136,12 @@ const useMandalartCellOperations = ({
     cellData: Partial<MandalartCell>
   ): Promise<string> => {
     try {
-      const cellId = await createNewCell(mandalartId, position, cellData);
+      const parentId = cellData.parentId || '';
+      const cellId = await mandalartAPI.createCell(parentId, {
+        ...cellData,
+        position,
+        mandalartId
+      });
 
       // 생성 후 부모 셀에 자식 셀 추가 (UI 업데이트)
       if (cellData.parentId && mandalart && isHierarchicalMandalart(mandalart)) {
@@ -196,7 +195,7 @@ const useMandalartCellOperations = ({
 
       // 완료 상태 반전
       const newCompletionStatus = !currentCell.isCompleted;
-      await toggleCellCompletionById(cellId, newCompletionStatus);
+      await mandalartAPI.toggleCellCompletion(cellId, newCompletionStatus);
       
       // UI 업데이트
       updateMandalartState(cellId, { isCompleted: newCompletionStatus });
@@ -266,20 +265,20 @@ const useMandalartCellOperations = ({
       }
 
       // 자식 셀이 이미 로드되어 있고 내용이 있는 경우
-      if (targetCell.children?.length > 0) {
+      if ((targetCell.children ?? []).length > 0) {
         const parentDepth = forcedDepth !== undefined ? forcedDepth : 
           targetCell.depth !== undefined ? targetCell.depth : 0;
         
         // 강제 깊이가 있거나 depth/parentId 불일치가 있는 경우에만 업데이트
         const needsUpdate = forcedDepth !== undefined || 
-          targetCell.children.some(child => 
+          (targetCell.children ?? []).some(child => 
             child.depth === undefined || 
             child.parentId === undefined || 
             child.depth !== parentDepth + 1);
         
         if (needsUpdate) {
           // 자식 셀에 depth와 parentId 적용
-          const updatedChildren = targetCell.children.map(child => ({
+          const updatedChildren = (targetCell.children ?? []).map(child => ({
             ...child,
             depth: parentDepth + 1,
             parentId: cellId
@@ -302,10 +301,10 @@ const useMandalartCellOperations = ({
         targetCell.depth !== undefined ? targetCell.depth : 0;
 
       // API 호출
-      const childrenResults = await loadChildrenForCellById(mandalartId, cellId, { limit: 25 });
+      const childrenResults = await mandalartAPI.getChildCells(cellId);
       
       // 자식 셀에 메타데이터 추가
-      const enrichedChildren = childrenResults.children.map(child => ({
+      const enrichedChildren = childrenResults.map(child => ({
         ...child,
         depth: parentDepth + 1,
         parentId: cellId
@@ -378,7 +377,7 @@ const useMandalartCellOperations = ({
       } : {};
 
       // 새 셀 생성 및 편집 데이터 받기
-      const newCell = await createNewCellAndGetEditData(
+      const newCell = await mandalartAPI.createCellWithData(
         mandalartId,
         position,
         parentData

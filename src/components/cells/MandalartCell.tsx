@@ -1,18 +1,32 @@
 import React from 'react';
-import { MandalartCellProps } from '@/types/mandalart';
+import { MandalartCell as MandalartCellType } from '@/types/mandalart';
 import { CELL_COLORS } from '@/lib/colors';
+
+interface MandalartCellProps {
+  cell: MandalartCellType;
+  isCenterCell?: boolean;
+  onClick?: () => void;
+  onUpdate?: (updates: Partial<MandalartCellType>) => void;
+  onToggleComplete?: () => void;
+  hasChildren?: boolean;
+  className?: string;
+  onEdit?: (cell: MandalartCellType) => void;
+}
 
 const MandalartCell: React.FC<MandalartCellProps> = ({
   cell,
-  isCenter = false,
+  isCenterCell = false,
   onClick,
-  onEdit,
+  onUpdate,
   onToggleComplete,
   hasChildren = false,
   className = '',
-  isEmpty = false,
+  onEdit,
 }) => {
   const { topic, color, imageUrl, isCompleted } = cell || {};
+  
+  // 빈 셀인 경우 (id가 empty- 로 시작)
+  const isEmpty = cell?.id?.startsWith('empty-');
   
   // 빈 셀인 경우 기본 스타일로 표시
   if (isEmpty) {
@@ -48,7 +62,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
     <div
       className={`
         aspect-square border border-gray-200 rounded p-1 relative
-        ${isCenter ? 'font-semibold bg-blue-50' : ''}
+        ${isCenterCell ? 'font-semibold bg-blue-50' : ''}
         ${isCompleted ? 'border-green-500' : ''}
         ${onClick ? 'cursor-pointer hover:shadow-md hover:brightness-95 transition-all' : ''}
         ${className}
@@ -56,6 +70,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
       style={{...colorStyle, ...backgroundStyle}}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
     >
       {/* 이미지가 있는 경우 반투명 오버레이 추가 */}
       {imageUrl && (
@@ -88,7 +103,6 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           ${!topic ? 'text-gray-400 text-[10px] italic' : ''}
           flex flex-col h-full
         `}
-        onClick={onClick}
       >
         <span className="flex-grow flex items-center justify-center text-center">
           <span className="truncate max-w-[80%]">
@@ -110,7 +124,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           className="absolute top-0.5 left-0.5 w-5 h-5 bg-white bg-opacity-70 rounded-full shadow-sm opacity-60 hover:opacity-100 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation(); // 클릭 이벤트 전파 방지
-            onEdit();
+            onEdit(cell);
           }}
         >
           <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

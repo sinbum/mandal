@@ -1,29 +1,34 @@
+/**
+ * 만다라트 셀 정의
+ */
 export interface MandalartCell {
   id: string;
   topic: string;
   memo?: string;
   color?: string;
   imageUrl?: string;
-  isCompleted?: boolean;
+  isCompleted: boolean;
+  parentId?: string | null;
   depth: number;
   position: number;
-  parentId?: string;
+  mandalartId?: string; // 셀이 속한 만다라트 ID
+  children?: MandalartCell[]; // 자식 셀 목록 (UI를 위해 확장)
 }
 
-export interface MandalartCellWithChildren extends MandalartCell {
-  children: MandalartCell[];
-}
-
-export interface MandalartHierarchical {
+/**
+ * 만다라트 정의
+ */
+export interface Mandalart {
   id: string;
   title: string;
   createdAt: string;
   updatedAt: string;
-  rootCell: MandalartCellWithChildren;
-  cells?: MandalartCell[];
+  rootCell: MandalartCell;
 }
 
-export type Mandalart = MandalartHierarchical;
+// 기존 타입과의 호환성을 위한 별칭
+export type MandalartCellWithChildren = MandalartCell;
+export type MandalartHierarchical = Mandalart;
 
 export interface MandalartCellProps {
   cell: MandalartCell;

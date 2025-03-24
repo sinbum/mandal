@@ -1,155 +1,152 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Mandalart, MandalartCell } from '@/types/mandalart';
+import { mandalartAPI } from '@/services/mandalartService';
 
 interface UseMandalartNavigationProps {
-  data?: Mandalart;
-}
-
-interface UseMandalartNavigationResult {
-  navigationPath: MandalartCell[];
-  currentCellId: string | null;
-  setCurrentCellId: (id: string | null) => void;
-  getRootCellTitle: () => string;
-  getEmptyCellsWithVirtualIds: (cellsArray: MandalartCell[]) => MandalartCell[];
-  setNavigationPath: (path: MandalartCell[]) => void;
-  updateNavigationPath: (cellId: string) => void;
-  navigateToParent: () => void;
-  navigateToCell: (cellId: string) => void;
-  breadcrumbPath: MandalartCell[];
+  initialCell?: MandalartCell | null;
 }
 
 /**
- * 만다라트 네비게이션 관련 훅
- * 현재 활성화된 셀과 네비게이션 경로 관리
+ * 만다라트 내비게이션 관련 로직을 담당하는 훅
  */
-const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
-  const [navigationPath, setNavigationPath] = useState<MandalartCell[]>([]);
-  const [currentCellId, setCurrentCellId] = useState<string | null>(null);
-
-  // 초기화 - data 변경시 네비게이션 경로 초기화
-  useEffect(() => {
-    if (data && data.rootCell) {
-      // 계층형 구조인 경우 루트 셀로 초기화
-      setNavigationPath([data.rootCell]);
-      setCurrentCellId(data.rootCell.id);
-    }
-  }, [data]);
-
-  // 네비게이션 경로 업데이트
-  const updateNavigationPath = useCallback((cellId: string) => {
-    // 현재 경로의 맨 마지막 셀 ID 확인
-    const currentLastCellId = navigationPath.length > 0 ? 
-      navigationPath[navigationPath.length - 1].id : null;
-    
-    // 이미 현재 셀이 경로의 마지막이면 업데이트 불필요
-    if (currentLastCellId === cellId) {
-      console.log('이미 현재 셀이 네비게이션 경로의 마지막입니다:', cellId);
-      return;
-    }
-    
-    // 경로에 이미 있는지 확인
-    const existingIndex = navigationPath.findIndex(cell => cell.id === cellId);
-    
-    if (existingIndex >= 0) {
-      // 이미 경로에 있는 경우 그 위치까지 잘라냄
-      console.log(`셀 ${cellId}은(는) 이미 경로에 있습니다. 인덱스: ${existingIndex}`);
-      setNavigationPath(prev => prev.slice(0, existingIndex + 1));
-      return;
-    }
-    
-    // 셀 데이터 검증
-    if (!cellId) {
-      console.warn('유효하지 않은 셀 ID로 네비게이션 경로 업데이트 시도:', cellId);
-      return;
-    }
-    
-    // 경로에 셀 추가
-    console.log(`네비게이션 경로에 셀 추가: ${cellId}`);
-    setNavigationPath(prev => [...prev, { id: cellId } as MandalartCell]);
+const useMandalartNavigation = ({ initialCell }: UseMandalartNavigationProps = {}) => {
+  const [navigationPath, setNavigationPath] = useState<MandalartCell[]>(
+    initialCell ? [initialCell] : []
+  );
+  const [currentCellId, setCurrentCellId] = useState<string | null>(
+    initialCell ? initialCell.id : null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // 현재 셀 정보
+  const currentCell = useMemo(() => {
+    if (!currentCellId) return null;
+    return navigationPath.find(cell => cell.id === currentCellId) || null;
+  }, [navigationPath, currentCellId]);
+  
+  // 빵 부스러기 경로 - 네비게이션 경로에서 제목만 가져온 간소화 버전
+  const breadcrumbPath = useMemo(() => {
+    return navigationPath.map(cell => ({
+      id: cell.id,
+      topic: cell.topic || '무제',
+      depth: cell.depth,
+      position: cell.position,
+    } as MandalartCell));
   }, [navigationPath]);
-
-  // 상위 셀로 이동
+  
+  // 셀 ID로 경로 구성
+  const buildPathForCell = useCallback(async (cellId: string) => {
+    if (!cellId) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // API를 통해 셀 경로 가져오기
+      const path = await mandalartAPI.buildCellPath(cellId);
+      
+      if (path.length > 0) {
+        setNavigationPath(path);
+        setCurrentCellId(cellId);
+      } else {
+        // 단일 셀 정보 가져오기
+        const cell = await mandalartAPI.fetchCellById(cellId);
+        if (cell) {
+          setNavigationPath([cell]);
+          setCurrentCellId(cell.id);
+        } else {
+          setError('셀 정보를 찾을 수 없습니다');
+        }
+      }
+    } catch (err) {
+      console.error('셀 경로 구성 오류:', err);
+      setError('셀 경로를 구성하는데 실패했습니다');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  // 부모 셀로 네비게이션
   const navigateToParent = useCallback(() => {
     if (navigationPath.length <= 1) {
-      console.log('이미 최상위 셀입니다.');
-      return;
+      return; // 이미 최상위 셀
     }
     
-    const parentCell = navigationPath[navigationPath.length - 2];
-    console.log(`상위 셀로 이동: ${parentCell.id}`);
-    setCurrentCellId(parentCell.id);
-    setNavigationPath(prev => prev.slice(0, prev.length - 1));
-  }, [navigationPath, setCurrentCellId]);
-
-  // 특정 셀로 이동
+    // 마지막에서 두 번째 셀로 이동 (현재 셀의 부모)
+    const parentIndex = navigationPath.length - 2;
+    if (parentIndex >= 0) {
+      const parentCell = navigationPath[parentIndex];
+      setCurrentCellId(parentCell.id);
+      setNavigationPath(prevPath => prevPath.slice(0, parentIndex + 1));
+    }
+  }, [navigationPath]);
+  
+  // 특정 셀로 네비게이션
   const navigateToCell = useCallback((cellId: string) => {
-    // 현재 셀과 동일하면 불필요한 상태 업데이트 방지
-    if (currentCellId === cellId) {
-      console.log('이미 선택된 셀입니다:', cellId);
-      return;
+    if (!cellId) return;
+    
+    // 이미 현재 셀이면 무시
+    if (currentCellId === cellId) return;
+    
+    // 현재 경로에서 셀 찾기
+    const cellIndex = navigationPath.findIndex(cell => cell.id === cellId);
+    
+    if (cellIndex >= 0) {
+      // 이미 경로에 있는 셀이면 해당 위치까지 경로 잘라내기
+      setCurrentCellId(cellId);
+      setNavigationPath(prevPath => prevPath.slice(0, cellIndex + 1));
+    } else {
+      // 경로에 없는 셀이면 새 경로 구성
+      buildPathForCell(cellId);
     }
-    
-    console.log(`특정 셀로 이동: ${cellId}`);
-    setCurrentCellId(cellId);
-    updateNavigationPath(cellId);
-  }, [currentCellId, updateNavigationPath, setCurrentCellId]);
-
-  // 브레드크럼 경로 계산 - "../부모 뎁스 주제/현재 뎁스 주제" 형식으로 변환
-  const breadcrumbPath = useCallback(() => {
-    // 경로가 없거나 한 개만 있으면 그대로 반환 (루트 경로)
-    if (navigationPath.length <= 1) {
-      return navigationPath;
-    }
-    
-    // 경로가 있으면 마지막 두 개 항목만 가져옴 (부모와 현재)
-    const parentCell = navigationPath[navigationPath.length - 2];
-    const currentCell = navigationPath[navigationPath.length - 1];
-    
-    return [parentCell, currentCell];
-  }, [navigationPath])();
-
-  // 루트 셀 제목 가져오기 (중앙 셀에 표시하기 위함)
-  const getRootCellTitle = useCallback(() => {
-    if (!data || !data.rootCell) return '새 만다라트';
-    return data.rootCell.topic || data.title || '새 만다라트';
-  }, [data]);
-
-  // 빈 셀에 가상 ID 부여하기
-  const getEmptyCellsWithVirtualIds = useCallback((cellsArray: MandalartCell[]) => {
-    if (!cellsArray || !Array.isArray(cellsArray)) return [];
-
-    // 배열 내 실제 셀 수
-    const existingCellsCount = cellsArray.filter(cell => cell && cell.id).length;
-    
-    // 결과 배열 구성
-    const resultCells = [...cellsArray];
+  }, [currentCellId, navigationPath, buildPathForCell]);
+  
+  // 빈 셀 생성 헬퍼 함수
+  const createEmptyCell = useCallback((
+    parentId: string | null,
+    position: number,
+    depth: number
+  ): MandalartCell => ({
+    id: `empty-${position}`,
+    topic: '',
+    memo: '클릭하여 새 셀을 추가하세요',
+    isCompleted: false,
+    parentId,
+    depth,
+    position
+  }), []);
+  
+  // 빈 셀 자동 채우기
+  const fillEmptyCells = useCallback((
+    cells: MandalartCell[],
+    parentId: string | null,
+    parentDepth: number
+  ): MandalartCell[] => {
+    const resultCells = [...cells];
     
     // 8개가 될 때까지 빈 셀 추가
-    for (let i = existingCellsCount; i < 8; i++) {
-      resultCells.push({
-        id: `empty-${i+1}`, // 가상 ID 부여
-        topic: '',
-        memo: '클릭하여 새 셀을 추가하세요',
-        isCompleted: false,
-        depth: 1,
-        position: i+1
-      } as MandalartCell);
+    for (let i = resultCells.length; i < 8; i++) {
+      resultCells.push(createEmptyCell(parentId, i + 1, parentDepth + 1));
     }
     
     return resultCells;
-  }, []);
+  }, [createEmptyCell]);
 
   return {
     navigationPath,
     currentCellId,
-    setCurrentCellId,
-    getRootCellTitle,
-    getEmptyCellsWithVirtualIds,
+    currentCell,
+    breadcrumbPath,
+    isLoading,
+    error,
     setNavigationPath,
-    updateNavigationPath,
+    setCurrentCellId,
+    buildPathForCell,
     navigateToParent,
     navigateToCell,
-    breadcrumbPath
+    fillEmptyCells,
+    createEmptyCell
   };
 };
 
