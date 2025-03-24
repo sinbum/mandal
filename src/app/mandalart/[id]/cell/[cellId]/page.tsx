@@ -9,7 +9,7 @@ import MandalartNavigation from '@/components/mandalart/MandalartNavigation';
 import CellEditorForm from '@/components/mandalart/CellEditorForm';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
 import useMandalart from '@/hooks/useMandalart';
-import { MandalartCell, MandalartCellWithChildren, MandalartLegacy, MandalartHierarchical } from '@/types/mandalart';
+import { MandalartCell, MandalartCellWithChildren, MandalartHierarchical } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
 
 // 타입 가드 함수 추가

@@ -14,21 +14,6 @@ export interface MandalartCellWithChildren extends MandalartCell {
   children: MandalartCell[];
 }
 
-export interface MandalartBlock {
-  id: string;
-  centerCell: MandalartCell;
-  surroundingCells: MandalartCell[];
-}
-
-export interface MandalartLegacy {
-  id: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  centerBlock: MandalartBlock;
-  surroundingBlocks: MandalartBlock[];
-}
-
 export interface MandalartHierarchical {
   id: string;
   title: string;
@@ -37,7 +22,7 @@ export interface MandalartHierarchical {
   rootCell: MandalartCellWithChildren;
 }
 
-export type Mandalart = MandalartLegacy | MandalartHierarchical;
+export type Mandalart = MandalartHierarchical;
 
 export interface MandalartCellProps {
   cell: MandalartCell;
@@ -58,7 +43,6 @@ export interface MandalartGridProps {
   onCellToggleComplete?: (cellId: string) => void;
   onNavigateBack?: () => void;
   className?: string;
-  isExpanded?: boolean;
   depth?: number;
 }
 

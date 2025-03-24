@@ -1,6 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Mandalart, MandalartCell } from '@/types/mandalart';
-import { isHierarchicalMandalart, isLegacyMandalart } from '@/utils/mandalartUtils';
 
 interface UseMandalartNavigationProps {
   data?: Mandalart;
@@ -28,15 +27,9 @@ const useMandalartNavigation = ({ data }: UseMandalartNavigationProps = {}) => {
   // 초기화 - data 변경시 네비게이션 경로 초기화
   useEffect(() => {
     if (data) {
-      if (isHierarchicalMandalart(data)) {
-        // 계층형 구조인 경우 루트 셀로 초기화
-        setNavigationPath([data.rootCell]);
-        setCurrentCellId(data.rootCell.id);
-      } else if (isLegacyMandalart(data)) {
-        // 레거시 구조인 경우 중앙 블록의 중앙 셀로 초기화
-        setNavigationPath([data.centerBlock.centerCell]);
-        setCurrentCellId(data.centerBlock.centerCell.id);
-      }
+      // 계층형 구조인 경우 루트 셀로 초기화
+      setNavigationPath([data.rootCell]);
+      setCurrentCellId(data.rootCell.id);
     }
   }, [data]);
 

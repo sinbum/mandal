@@ -1,15 +1,6 @@
 import React from 'react';
-import { MandalartGridProps, MandalartCell, MandalartBlock, MandalartLegacy, MandalartHierarchical } from '@/types/mandalart';
+import { MandalartGridProps, MandalartCell, MandalartHierarchical } from '@/types/mandalart';
 import MandalartCellComponent from './MandalartCell';
-
-// 타입 가드 함수 추가
-const isLegacyMandalart = (mandalart: any): mandalart is MandalartLegacy => {
-  return 'centerBlock' in mandalart && 'surroundingBlocks' in mandalart;
-};
-
-const isHierarchicalMandalart = (mandalart: any): mandalart is MandalartHierarchical => {
-  return 'rootCell' in mandalart;
-};
 
 const MandalartGrid: React.FC<MandalartGridProps> = ({
   mandalart,
@@ -18,108 +9,33 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   onCellEdit,
   onCellToggleComplete,
   onNavigateBack,
-  isExpanded = false,
   className = '',
   depth = 0,
 }) => {
-  // 레거시 구조 지원 (이전 코드와의 호환성)
-  const isLegacyStructure = isLegacyMandalart(mandalart);
-
   // 현재 표시할 셀 및 그 자식들 결정
   const cellsToRender = React.useMemo(() => {
-    if (isLegacyStructure) {
-      // 이전 구조는 기존 로직대로 처리
-      return null;
-    } else {
-      // 새 구조에서는 currentCell이 없으면 rootCell 사용
-      const hierarchicalMandalart = mandalart as MandalartHierarchical;
-      const current = currentCell || hierarchicalMandalart.rootCell;
-      
-      if (!current) return [];
-      
-      // 자식이 없거나 최소 1개라도 있으면 적절히 처리
-      const childCells = current.children || [];
-      
-      // 자식이 8개 미만이면 빈 셀로 채움
-      const children = [...childCells];
-      while (children.length < 8) {
-        children.push({
-          id: `empty-${children.length}`,
-          topic: '',
-          depth: (current.depth || 0) + 1,
-          position: children.length,
-        });
-      }
-      
-      // 표시할 때 position 기준으로 정렬
-      return children.sort((a, b) => (a.position || 0) - (b.position || 0));
+    const hierarchicalMandalart = mandalart as MandalartHierarchical;
+    const current = currentCell || hierarchicalMandalart.rootCell;
+    
+    if (!current) return [];
+    
+    // 자식이 없거나 최소 1개라도 있으면 적절히 처리
+    const childCells = current.children || [];
+    
+    // 자식이 8개 미만이면 빈 셀로 채움
+    const children = [...childCells];
+    while (children.length < 8) {
+      children.push({
+        id: `empty-${children.length}`,
+        topic: '',
+        depth: (current.depth || 0) + 1,
+        position: children.length,
+      });
     }
-  }, [isLegacyStructure, currentCell, mandalart]);
-
-  // 레거시 3x3 블록 렌더링 코드
-  const renderLegacyBlock = (block: MandalartBlock, isCenter = false) => {
-    const { centerCell, surroundingCells } = block;
     
-    // 주변 셀 위치별 렌더링 (9개 셀이 3x3 그리드에 정확하게 배치되도록)
-    const topCells = surroundingCells.slice(0, 3);
-    const middleCells = [
-      surroundingCells[3],
-      centerCell,
-      surroundingCells[4]
-    ];
-    const bottomCells = surroundingCells.slice(5, 8);
-    
-    return (
-      <div className="grid grid-cols-3 grid-rows-3 gap-0.5 h-full">
-        {/* 상단 줄 (0, 1, 2) */}
-        {topCells.map((cell: MandalartCell, index: number) => (
-          <MandalartCellComponent
-            key={`top-${block.id}-${index}-${cell.id}`}
-            cell={cell}
-            onClick={() => onCellClick(cell.id)}
-            onEdit={() => onCellEdit && onCellEdit(cell.id)}
-            onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(cell.id)}
-          />
-        ))}
-        
-        {/* 중간 줄 (3, 중앙, 4) */}
-        <MandalartCellComponent
-          key={`middle-left-${block.id}-${middleCells[0].id}`}
-          cell={middleCells[0]}
-          onClick={() => onCellClick(middleCells[0].id)}
-          onEdit={() => onCellEdit && onCellEdit(middleCells[0].id)}
-          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[0].id)}
-        />
-        <MandalartCellComponent
-          key={`middle-center-${block.id}-${middleCells[1].id}`}
-          cell={middleCells[1]}
-          isCenter={isCenter}
-          className="font-medium border-blue-300"
-          onClick={() => onCellClick(middleCells[1].id)}
-          onEdit={() => onCellEdit && onCellEdit(middleCells[1].id)}
-          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[1].id)}
-        />
-        <MandalartCellComponent
-          key={`middle-right-${block.id}-${middleCells[2].id}`}
-          cell={middleCells[2]}
-          onClick={() => onCellClick(middleCells[2].id)}
-          onEdit={() => onCellEdit && onCellEdit(middleCells[2].id)}
-          onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(middleCells[2].id)}
-        />
-        
-        {/* 하단 줄 (5, 6, 7) */}
-        {bottomCells.map((cell: MandalartCell, index: number) => (
-          <MandalartCellComponent
-            key={`bottom-${block.id}-${index}-${cell.id}`}
-            cell={cell}
-            onClick={() => onCellClick(cell.id)}
-            onEdit={() => onCellEdit && onCellEdit(cell.id)}
-            onToggleComplete={() => onCellToggleComplete && onCellToggleComplete(cell.id)}
-          />
-        ))}
-      </div>
-    );
-  };
+    // 표시할 때 position 기준으로 정렬
+    return children.sort((a, b) => (a.position || 0) - (b.position || 0));
+  }, [currentCell, mandalart]);
   
   // 새 구조에서 3x3 그리드 렌더링 (currentCell의 자식 8개 + 현재 셀)
   const renderGrid = () => {
@@ -219,58 +135,6 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     );
   };
 
-  // 레거시 렌더링
-  if (isLegacyStructure) {
-    const legacyMandalart = mandalart as MandalartLegacy;
-    const { centerBlock, surroundingBlocks } = legacyMandalart;
-    
-    // 확장 모드가 아닐 때는 중앙 블록만 렌더링
-    if (!isExpanded) {
-      return (
-        <div className={`w-full overflow-auto ${className}`}>
-          <div className="w-full max-w-md mx-auto">
-            <div className="border-2 border-blue-400 rounded-lg p-1 bg-white shadow-md">
-              {centerBlock && renderLegacyBlock(centerBlock, true)} 
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // 확장 모드일 때는 전체 9x9 그리드 렌더링
-    return (
-      <div className={`w-full overflow-auto ${className}`}>
-        <div className="grid grid-cols-3 grid-rows-3 gap-2 p-2">
-          {/* 첫 번째 줄: 블록 0, 1, 2 */}
-          {surroundingBlocks?.slice(0, 3).map((block: MandalartBlock) => (
-            <div key={block.id} className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
-              {renderLegacyBlock(block)}
-            </div>
-          ))}
-          
-          {/* 두 번째 줄: 블록 3, 중앙, 4 */}
-          <div className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
-            {surroundingBlocks && surroundingBlocks[3] && renderLegacyBlock(surroundingBlocks[3])}
-          </div>
-          <div className="border-2 border-blue-400 rounded-lg p-0.5 bg-white shadow-md">
-            {centerBlock && renderLegacyBlock(centerBlock, true)}
-          </div>
-          <div className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
-            {surroundingBlocks && surroundingBlocks[4] && renderLegacyBlock(surroundingBlocks[4])}
-          </div>
-          
-          {/* 세 번째 줄: 블록 5, 6, 7 */}
-          {surroundingBlocks?.slice(5, 8).map((block: MandalartBlock) => (
-            <div key={block.id} className="border border-gray-200 rounded-lg p-0.5 bg-white shadow-sm">
-              {renderLegacyBlock(block)}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  
-  // 새 계층 구조 렌더링
   return (
     <div className={`w-full overflow-auto ${className}`}>
       {depth > 0 && onNavigateBack && (
