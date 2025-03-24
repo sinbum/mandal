@@ -277,41 +277,9 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
 
   // 만다라트 목록 조회
   const fetchMandalartList = useCallback(async () => {
-    // 캐싱을 위한 세션 스토리지 키
-    const CACHE_KEY = 'mandalartListCache';
-    
     try {
-      // 브라우저 환경에서만 localStorage 사용
-      if (typeof window !== 'undefined') {
-        // 캐시된 데이터가 있는지 확인
-        const cachedData = sessionStorage.getItem(CACHE_KEY);
-        if (cachedData) {
-          const { data, timestamp } = JSON.parse(cachedData);
-          const now = new Date().getTime();
-          
-          // 캐시 유효 시간 (30초)
-          const CACHE_VALIDITY = 30 * 1000;
-          
-          // 캐시가 유효한 경우 캐시된 데이터 반환
-          if (now - timestamp < CACHE_VALIDITY) {
-            console.log('캐시된 만다라트 목록 사용');
-            return data;
-          }
-        }
-      }
-      
-      // 캐시가 없거나 만료된 경우 API 호출
+      // API 직접 호출
       const data = await fetchMandalartListForUser();
-      
-      // 데이터 캐싱
-      if (typeof window !== 'undefined') {
-        const cacheData = {
-          data,
-          timestamp: new Date().getTime()
-        };
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-      }
-      
       return data;
     } catch (err) {
       console.error('만다라트 목록 조회 실패:', err);
