@@ -1,6 +1,6 @@
 // 길이 제한
 export const LIMITS = {
-  TOPIC_MAX_LENGTH: 10, // 주제 입력 최대 길이
+  TOPIC_MAX_LENGTH: 7, // 주제 입력 최대 길이
   TITLE_MAX_LENGTH: 30, // 만다라트 제목 최대 길이
   MEMO_MAX_LENGTH: 300, // 메모 최대 길이 (필요시)
 };

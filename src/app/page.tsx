@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import AuthButton from '@/components/AuthButton';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AuthButton from '@/components/ui/AuthButton';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시

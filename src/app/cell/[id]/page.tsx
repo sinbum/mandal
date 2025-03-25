@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import MandalartBoard from '@/components/MandalartBoard';
-import MandalartBreadcrumbs from '@/components/MandalartBreadcrumbs';
+import MandalartBoard from '@/components/ui/MandalartBoard';
+import MandalartBreadcrumbs from '@/components/ui/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';
 import Toast from '@/components/ui/Toast';
 import { checkSession } from '@/app/auth/checkSession';
-import { handleLogout } from '@/app/auth/logOut';
 import CellEditorForm from '@/components/cells/CellEditorForm';
 
 /**

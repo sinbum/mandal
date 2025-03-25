@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CellEditorFormProps } from '@/types/mandalart';
 import { LIMITS } from '@/lib/constants';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 import InputField from '../ui/InputField';
 import TextArea from '../ui/TextArea';
 import ColorPalette from '../ui/ColorPalette';
@@ -174,14 +174,10 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
           type="button"
           variant="ghost"
           onClick={onCancel}
-          fullWidth
         >
           취소
         </Button>
         <Button
-          type="submit"
-          variant="primary"
-          fullWidth
         >
           저장
         </Button>
