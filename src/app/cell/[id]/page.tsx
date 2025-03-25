@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import MandalartBoard from '@/components/ui/MandalartBoard';
-import MandalartBreadcrumbs from '@/components/ui/MandalartBreadcrumbs';
+import MandalartBreadcrumbs from '@/components/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';

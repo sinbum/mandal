@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import AuthButton from '@/components/ui/AuthButton';
+import { Button } from '@/components/ui/Button';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -58,12 +58,11 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">목록</h1>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        <Button
           onClick={handleCreateMandalart}
         >
           새 만다라트 만들기
-        </button>
+        </Button>
       </div>
 
       {error && (
