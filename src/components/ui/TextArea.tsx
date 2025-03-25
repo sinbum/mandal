@@ -1,56 +1,18 @@
-import React from 'react';
-import { TextAreaProps } from '@/types/ui';
+import * as React from "react"
 
-const TextArea: React.FC<TextAreaProps> = ({
-  label,
-  placeholder,
-  value,
-  onChange,
-  maxLength,
-  rows = 4,
-  required = false,
-  disabled = false,
-  className = '',
-  error,
-}) => {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
-  };
+import { cn } from "@/lib/utils"
 
-  const textareaStyles = `
-    w-full px-3 py-2 border rounded-md resize-none
-    ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'} 
-    focus:outline-none focus:ring-2 focus:border-transparent
-    disabled:bg-gray-100 disabled:text-gray-400
-    ${className}
-  `;
-
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
-    <div className="w-full">
-      {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
+    <textarea
+      data-slot="textarea"
+      className={cn(
+        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        className
       )}
-      <textarea
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        rows={rows}
-        required={required}
-        disabled={disabled}
-        className={textareaStyles}
-      />
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-      {maxLength && (
-        <p className="mt-1 text-xs text-gray-500 text-right">
-          {value.length}/{maxLength}
-        </p>
-      )}
-    </div>
-  );
-};
+      {...props}
+    />
+  )
+}
 
-export default TextArea;
+export { Textarea }
