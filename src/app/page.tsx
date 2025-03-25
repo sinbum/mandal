@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import LoadingSpinner from '@/components/LoadingSpinner';
-
+import AuthButton from '@/components/AuthButton';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -14,7 +14,7 @@ export default function HomePage() {
   const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // 사용자의 루트 셀 로드
   useEffect(() => {
     async function loadUserCells() {
@@ -29,18 +29,18 @@ export default function HomePage() {
         setIsLoading(false);
       }
     }
-    
+
     loadUserCells();
   }, []);
-  
+
   // 새 만다라트 생성 처리
   const handleCreateMandalart = async () => {
     try {
       const title = window.prompt('새 만다라트 제목을 입력하세요:') || '새 만다라트';
-      
+
       setIsLoading(true);
       const rootCellId = await mandalartAPI.createMandalart(title);
-      
+
       // 생성 후 해당 셀 페이지로 이동
       window.location.href = `/cell/${rootCellId}`;
     } catch (err) {
@@ -49,15 +49,15 @@ export default function HomePage() {
       setIsLoading(false);
     }
   };
-  
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">나의 만다라트</h1>
+        <h1 className="text-2xl font-bold">목록</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           onClick={handleCreateMandalart}
@@ -65,13 +65,13 @@ export default function HomePage() {
           새 만다라트 만들기
         </button>
       </div>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {rootCells.length === 0 ? (
         <div className="bg-gray-50 p-8 rounded-lg shadow text-center">
           <p className="text-lg text-gray-600 mb-4">
@@ -87,13 +87,13 @@ export default function HomePage() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {rootCells.map(cell => (
-            <Link 
+            <Link
               key={cell.id}
               href={`/cell/${cell.id}`}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col"
             >
-              <div 
-                className="h-48 mb-2 rounded" 
+              <div
+                className="h-48 mb-2 rounded"
                 style={{
                   backgroundColor: cell.color || '#f0f4f8',
                   backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,

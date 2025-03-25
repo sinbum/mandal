@@ -72,6 +72,7 @@ export interface HeaderBarProps {
   showBackButton?: boolean;
   onBackClick?: () => void;
   rightElement?: ReactNode;
+  href?: string;
 }
 
 export interface MobileLayoutProps {

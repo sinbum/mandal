@@ -26,25 +26,47 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   // 셀 배열이 8개 미만이면 빈 셀로 채움
   const filledCells = [...cells];
   
-  while (filledCells.length < 8) {
-    filledCells.push({
-      id: `empty-${filledCells.length + 1}`,
+  // 현재 사용 중인 position 값들을 추적
+  const usedPositions = new Set(cells.map(cell => cell.position));
+  
+  // 1부터 8까지의 모든 위치에 대해 빈 셀 생성
+  const allCells = Array.from({ length: 8 }, (_, index) => {
+    const position = index + 1;
+    const existingCell = cells.find(cell => cell.position === position);
+    
+    if (existingCell) {
+      return existingCell;
+    }
+    
+    return {
+      id: `empty-${position}`,
       topic: '',
       memo: '클릭하여 새 셀을 추가하세요',
       isCompleted: false,
       parentId: centerCell.id,
       depth: (centerCell.depth || 0) + 1,
-      position: filledCells.length + 1
-    });
-  }
+      position: position
+    };
+  });
   
   // 위치에 따라 셀 정렬
-  const sortedCells = [...filledCells].sort((a, b) => 
-    (a.position || 0) - (b.position || 0)
-  );
+  const sortedCells = allCells.sort((a, b) => a.position - b.position);
   
   // 3x3 그리드 레이아웃을 위해 셀 배치 (중앙에는 centerCell)
   const renderGrid = () => {
+    // 그리드 위치와 position 매핑
+    const gridToPosition: Record<number, number | null> = {
+      0: 1, // 좌상
+      1: 2, // 상
+      2: 3, // 우상
+      3: 4, // 좌
+      4: null, // 중앙
+      5: 5, // 우
+      6: 6, // 좌하
+      7: 7, // 하
+      8: 8  // 우하
+    };
+    
     // 그리드 위치 계산 (순서: 좌상, 상, 우상, 좌, 중앙, 우, 좌하, 하, 우하)
     const gridPositions = [
       [0, 0], [0, 1], [0, 2],
@@ -70,18 +92,24 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         );
       }
       
-      // 주변 8개 셀 (index 0~3은 중앙 셀 제외하고 4개, 그 다음에 중앙, 그 다음 4개)
-      const cellIndex = index > 4 ? index - 1 : index;
-      const cell = sortedCells[cellIndex];
+      // 해당 그리드 위치의 position 값 가져오기
+      const targetPosition = gridToPosition[index];
+      
+      // position에 해당하는 셀 찾기
+      const displayCell = sortedCells.find(cell => cell.position === targetPosition) || 
+        sortedCells[index > 4 ? index - 1 : index];
+      
+      // 각 그리드 위치별로 고유한 키 생성
+      const gridKey = `grid-${row}-${col}`;
       
       return (
-        <div key={cell.id} className="relative">
+        <div key={gridKey} className="relative">
           <MandalartCellComponent
-            cell={cell}
-            onClick={() => onCellClick(cell)}
-            onUpdate={(updates) => onCellUpdate(cell.id, updates)}
-            onToggleComplete={() => onToggleComplete(cell.id)}
-            onEdit={!cell.id.startsWith('empty-') && onEditCell ? () => onEditCell(cell) : undefined}
+            cell={displayCell}
+            onClick={() => onCellClick(displayCell)}
+            onUpdate={(updates) => onCellUpdate(displayCell.id, updates)}
+            onToggleComplete={() => onToggleComplete(displayCell.id)}
+            onEdit={!displayCell.id.startsWith('empty-') && onEditCell ? () => onEditCell(displayCell) : undefined}
             isCenterCell={false}
           />
         </div>

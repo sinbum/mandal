@@ -1,4 +1,3 @@
-import router from "next/router";
 import { createClient } from "@/utils/supabase/client";
 
 export const handleLogout = async (setToast: (toast: { message: string, type: 'success' | 'error' | 'info' | 'warning' }) => void) => {
@@ -21,7 +20,7 @@ export const handleLogout = async (setToast: (toast: { message: string, type: 's
       });
       
       // 바로 로그인 페이지로 이동
-      router.push('/login');
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
     }

@@ -2,7 +2,8 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/app/globals.css';
-
+import HeaderBar from '@/components/layout/HeaderBar';
+import AuthButton from '@/components/AuthButton';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={inter.className}>
-        <div className="max-w-md mx-auto min-h-screen bg-white">
+        <HeaderBar title="만다라트 플래너" showBackButton={false} rightElement={<AuthButton />} href="/" />
+        <div className="max-w-md mx-auto min-h-screen bg-white relative">
           {children}
         </div>
       </body>

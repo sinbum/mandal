@@ -118,45 +118,59 @@ export default function CellPage() {
   
   // 새 셀 생성 처리
   const handleCreateCell = async (parentId: string, position: number) => {
-    const newCell = await createCell(parentId, position);
-    
-    if (newCell) {
-      // 자식 셀 목록 업데이트
-      setChildCells(prev => {
-        // 해당 위치의 빈 셀 찾기
-        const emptyIndex = prev.findIndex(cell => 
-          cell.id === `empty-${position}` || cell.position === position
-        );
-        
-        if (emptyIndex >= 0) {
-          // 빈 셀을 새 셀로 대체
-          const newCells = [...prev];
-          newCells[emptyIndex] = newCell;
-          return newCells;
-        } else {
-          // 새 셀 추가
-          return [...prev, newCell];
-        }
-      });
+    try {
+      const newCell = await createCell(parentId, position);
       
-      // 새로 생성된 셀을 편집 모드로 설정
-      setEditingCell(newCell);
+      if (newCell) {
+        // 현재 셀과 자식 셀들을 새로 조회
+        const refreshedCell = await loadCell(cellId);
+        if (refreshedCell) {
+          setCurrentCell(refreshedCell);
+          const refreshedChildren = await loadChildCells(cellId);
+          setChildCells(refreshedChildren);
+        }
+        
+        // 새로 생성된 셀을 편집 모드로 설정
+        setEditingCell(newCell);
+      }
+    } catch (error) {
+      console.error('새 셀 생성 중 오류 발생:', error);
+      setToast({
+        message: '새 셀 생성 중 오류가 발생했습니다',
+        type: 'error'
+      });
     }
   };
   
   // 셀 편집 완료 처리
-  const handleEditComplete = (updatedCell: MandalartCell) => {
-    // 셀 업데이트 처리
-    handleCellUpdate(updatedCell.id, updatedCell);
-    
-    // 편집 모드 종료
-    setEditingCell(null);
-    
-    // 성공 메시지 표시
-    setToast({
-      message: '셀이 저장되었습니다',
-      type: 'success'
-    });
+  const handleEditComplete = async (updatedCell: MandalartCell) => {
+    try {
+      // 셀 업데이트 처리
+      await handleCellUpdate(updatedCell.id, updatedCell);
+      
+      // 편집 모드 종료
+      setEditingCell(null);
+      
+      // 현재 셀과 자식 셀들을 새로 조회
+      const refreshedCell = await loadCell(cellId);
+      if (refreshedCell) {
+        setCurrentCell(refreshedCell);
+        const refreshedChildren = await loadChildCells(cellId);
+        setChildCells(refreshedChildren);
+      }
+      
+      // 성공 메시지 표시
+      setToast({
+        message: '셀이 저장되었습니다',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('셀 업데이트 중 오류 발생:', error);
+      setToast({
+        message: '셀 저장 중 오류가 발생했습니다',
+        type: 'error'
+      });
+    }
   };
   
   // 셀 편집 취소
@@ -198,16 +212,6 @@ export default function CellPage() {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        {/* 사용자 정보 및 로그아웃 버튼 */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{userName}님의 만다라트</h1>
-          <button 
-            onClick={() => handleLogout(setToast)}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-          >
-            로그아웃
-          </button>
-        </div>
         
         {/* 브레드크럼 네비게이션 */}
         <MandalartBreadcrumbs path={navigation.breadcrumbPath} />
