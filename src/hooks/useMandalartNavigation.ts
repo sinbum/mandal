@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Mandalart, MandalartCell } from '@/types/mandalart';
+import { MandalartCell } from '@/types/mandalart';
 import { mandalartAPI } from '@/services/mandalartService';
 
 interface UseMandalartNavigationProps {

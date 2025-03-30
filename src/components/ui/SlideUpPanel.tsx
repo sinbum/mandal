@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { SlideUpPanelProps } from '@/types/ui';
-import { ANIMATION, LAYOUT } from '@/lib/constants';
+import { LAYOUT } from '@/lib/constants';
 
 const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   isOpen,

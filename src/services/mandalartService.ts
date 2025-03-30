@@ -1,4 +1,4 @@
-import { Mandalart, MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
+import { Mandalart, MandalartCell } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
 
 /**
@@ -143,28 +143,7 @@ export class MandalartService {
       throw err;
     }
   }
-  
-  /**
-   * 셀 삭제
-   */
-  async deleteCell(cellId: string): Promise<void> {
-    try {
-      if (this.isVirtualId(cellId)) {
-        throw new Error('가상 셀은 삭제할 수 없습니다');
-      }
-      
-      const { error } = await this.supabase
-        .from('mandalart_cells')
-        .delete()
-        .eq('id', cellId);
-      
-      if (error) throw error;
-    } catch (err) {
-      console.error('셀 삭제 실패:', err);
-      throw err;
-    }
-  }
-  
+
   /**
    * 셀 완료 상태 토글
    */

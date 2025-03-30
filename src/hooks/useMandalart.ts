@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Mandalart, MandalartCell, MandalartCellWithChildren, MandalartHierarchical } from '@/types/mandalart';
+import { MandalartCell, MandalartCellWithChildren, MandalartHierarchical } from '@/types/mandalart';
 
 // 분리된 유틸 함수들 임포트
 import { 
   findCellInHierarchy, 
   updateCellChildrenInHierarchy,
-  isHierarchicalMandalart
+  
 } from '@/utils/mandalartUtils';
 
 // 분리된 API 함수들 임포트
@@ -65,12 +65,10 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     currentCellId,
     buildPathForCell,
     navigateToParent,
-    navigateToCell,
     setCurrentCellId,
     setNavigationPath,
     breadcrumbPath,
-    fillEmptyCells,
-    createEmptyCell
+    fillEmptyCells
   } = useMandalartNavigation({ initialCell: mandalart?.rootCell });
 
   // 셀 찾기
@@ -174,8 +172,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   // 새 만다라트 생성
   const createMandalart = useCallback(async (title: string): Promise<string> => {
     try {
-      const mandalartId = await mandalartAPI.createMandalart(title);
-      return mandalartId;
+      return await mandalartAPI.createMandalart(title);
     } catch (err) {
       console.error('만다라트 생성 실패:', err);
       throw err;
@@ -186,8 +183,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
   const fetchMandalartList = useCallback(async () => {
     try {
       // API 직접 호출
-      const data = await mandalartAPI.getUserMandalarts();
-      return data;
+      return await mandalartAPI.getUserMandalarts();
     } catch (err) {
       console.error('만다라트 목록 조회 실패:', err);
       setError('만다라트 목록을 불러오는데 실패했습니다.');

@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getMostRecentMandalartCell } from '@/lib/utils';
 
-// 로컬 스토리지 키 상수
-const RECENT_MANDALART_KEY = 'recent-mandalart-cell';
 
 // 최근 만다라트 데이터 가져오기 (쿠키에서)
 // cell 경로로 요청 이동

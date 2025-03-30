@@ -1,7 +1,6 @@
 import React from 'react';
 import { HeaderBarProps } from '@/types/ui';
 import Link from 'next/link';
-import { Url } from 'next/dist/shared/lib/router/router';
 
 const HeaderBar: React.FC<HeaderBarProps> = ({
   title,

@@ -8,7 +8,6 @@ import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
-import { checkSession } from '@/app/auth/checkSession';
 import CellEditorForm from '@/components/cells/CellEditorForm';
 import { setMostRecentMandalartCell } from '@/lib/utils';
 
@@ -18,15 +17,13 @@ import { setMostRecentMandalartCell } from '@/lib/utils';
  */
 export default function CellPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const cellId = Array.isArray(id) ? id[0] : id;
   
   const [currentCell, setCurrentCell] = useState<MandalartCell | null>(null);
   const [childCells, setChildCells] = useState<MandalartCell[]>([]);
   const [isPending, setIsPending] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('사용자');
-  
+
   // 셀 편집 상태 추가
   const [editingCell, setEditingCell] = useState<MandalartCell | null>(null);
   
@@ -41,11 +38,7 @@ export default function CellPage() {
     createCell,
     toggleCellCompletion
   } = useCellOperations();
-  
-  // 인증 상태 확인
-  useEffect(() => {
-    checkSession(setIsPending, setUserName);
-  }, []);
+
   
   // 초기 데이터 로드
   useEffect(() => {
@@ -173,10 +166,6 @@ export default function CellPage() {
     setEditingCell(null);
   };
 
-  // 페이지 이동 핸들러
-  const handleNavigate = (path: string) => {
-    router.push(path);
-  };
   
   if (isPending || isLoading) {
     return <LoadingSpinner />;

@@ -136,7 +136,7 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
           </Button>
           <Button
             type="submit"
-            variant="primary"
+            variant="default"
             disabled={isLoading}
           >
             {isLoading ? '생성 중...' : '만들기'}

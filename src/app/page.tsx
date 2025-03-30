@@ -8,7 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { SupabaseClient, User } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 import { Trash } from 'lucide-react';
 import {
   AlertDialog,
@@ -18,8 +18,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import {
   Form,
@@ -60,7 +59,7 @@ export default function HomePage() {
         // 사용자 정보 가져오기
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
-        
+
         const cells = await mandalartAPI.fetchUserCells();
         setRootCells(cells);
       } catch (err) {

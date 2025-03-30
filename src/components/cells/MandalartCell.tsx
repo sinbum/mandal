@@ -17,7 +17,6 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   cell,
   isCenterCell = false,
   onClick,
-  onUpdate,
   onToggleComplete,
   hasChildren = false,
   className = '',

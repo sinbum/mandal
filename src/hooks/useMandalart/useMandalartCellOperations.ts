@@ -2,7 +2,7 @@
  * 만다라트의 셀 조작 관련 기능을 모아둔 훅
  * 셀 업데이트, 생성, 완료 토글, 자식 로드 등의 기능을 담당
  */
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef } from 'react';
 import { Mandalart, MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
 import { updateCellChildrenInHierarchy, isHierarchicalMandalart, findCellInHierarchy } from '@/utils/mandalartUtils';
 import { mandalartAPI } from '@/services/mandalartService';
@@ -87,7 +87,7 @@ const useMandalartCellOperations = ({
       const updatedRootCell = updateCellChildrenInHierarchy(
         prev.rootCell,
         cellId,
-        updates as any // 타입 캐스팅 사용
+        updates as MandalartCell & CellWithChildren // 타입 캐스팅 사용
       );
 
       if (!updatedRootCell) return prev;
@@ -225,20 +225,6 @@ const useMandalartCellOperations = ({
     } as MandalartCell; // 타입 캐스팅
   }, []);
 
-  /**
-   * 강제 depth 적용 헬퍼 함수
-   */
-  const applyForcedDepth = useCallback((
-    children: MandalartCell[], 
-    parentId: string, 
-    parentDepth: number
-  ) => {
-    return children.map(child => ({
-      ...child,
-      depth: parentDepth + 1,
-      parentId
-    }));
-  }, []);
 
   /**
    * 특정 셀의 자식 셀 로드 함수

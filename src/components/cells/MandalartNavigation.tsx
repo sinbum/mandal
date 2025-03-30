@@ -9,7 +9,7 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
   const renderBreadcrumbs = () => {
     // 경로가 없거나 한 개만 있으면 그대로 표시 (루트 경로)
     if (path.length <= 1) {
-      return path.map((cell, index) => (
+      return path.map((cell) => (
         <React.Fragment key={cell.id}>
           <button
             onClick={() => onNavigate(cell.id)}

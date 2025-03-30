@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Mandalart, MandalartCell, MandalartCellWithChildren } from '@/types/mandalart';
-import { findCellInHierarchy, findCellAndBuildPathInHierarchy } from '@/utils/mandalartUtils';
+import { Mandalart, MandalartCell } from '@/types/mandalart';
+import {  findCellAndBuildPathInHierarchy } from '@/utils/mandalartUtils';
 
 interface UseMandalartNavigationProps {
   data?: Mandalart | null;

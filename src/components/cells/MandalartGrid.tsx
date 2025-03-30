@@ -24,11 +24,9 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   onEditCell
 }) => {
   // 셀 배열이 8개 미만이면 빈 셀로 채움
-  const filledCells = [...cells];
-  
+
   // 현재 사용 중인 position 값들을 추적
-  const usedPositions = new Set(cells.map(cell => cell.position));
-  
+
   // 1부터 8까지의 모든 위치에 대해 빈 셀 생성
   const allCells = Array.from({ length: 8 }, (_, index) => {
     const position = index + 1;
