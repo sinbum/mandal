@@ -304,7 +304,18 @@ export class MandalartService {
   /**
    * DB 셀 데이터를 프론트엔드 모델로 변환
    */
-  private convertDbCellToModel(dbCell: any): MandalartCell {
+  private convertDbCellToModel(dbCell: {
+    id: string;
+    topic?: string;
+    memo?: string;
+    color?: string;
+    image_url?: string;
+    is_completed?: boolean;
+    parent_id?: string | null;
+    depth?: number;
+    position?: number;
+    mandalart_id?: string;
+  }): MandalartCell {
     return {
       id: dbCell.id,
       topic: dbCell.topic || '',
@@ -347,7 +358,11 @@ export class MandalartService {
   async createCellWithData(
     mandalartId: string, 
     position: number, 
-    parentData: any
+    parentData: {
+      parentId?: string;
+      parentDepth?: number;
+      depth?: number;
+    }
   ): Promise<MandalartCell> {
     return createNewCellAndGetEditData(mandalartId, position, parentData);
   }
@@ -424,7 +439,7 @@ export const fetchMandalartById = async (id: string): Promise<Mandalart | null> 
       }
       
       // 자식 셀 데이터 준비 - 8개가 되지 않으면 빈 셀 자동 추가
-      let processedChildren = (directChildrenData || []).map(child => ({
+      const processedChildren = (directChildrenData || []).map(child => ({
         id: child.id,
         topic: child.topic || '',
         memo: child.memo,

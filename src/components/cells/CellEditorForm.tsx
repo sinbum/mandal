@@ -23,30 +23,8 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
   const [topic, setTopic] = useState(cell.topic || '');
   const [memo, setMemo] = useState(cell.memo || '');
   const [color, setColor] = useState(cell.color || '');
-  const [imageUrl, setImageUrl] = useState(cell.imageUrl || '');
+  const [imageUrl] = useState(cell.imageUrl || '');
   const [isCompleted, setIsCompleted] = useState(cell.isCompleted || false);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // 이미지 업로드 핸들러 (임시 구현)
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    
-    // 파일 리더를 사용하여 미리보기 URL 생성 (실제로는 서버에 업로드)
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageUrl(reader.result as string);
-      setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // 이미지 제거 핸들러
-  const handleRemoveImage = () => {
-    setImageUrl('');
-  };
 
   // 저장 핸들러
   const handleSubmit = (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import MandalartBoard from '@/components/ui/MandalartBoard';
 import MandalartBreadcrumbs from '@/components/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
@@ -73,7 +73,7 @@ export default function CellPage() {
     if (cellId) {
       loadData();
     }
-  }, [cellId]);
+  }, [cellId]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // 셀 업데이트 처리
   const handleCellUpdate = async (cellId: string, updates: Partial<MandalartCell>) => {

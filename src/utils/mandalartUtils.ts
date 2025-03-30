@@ -40,7 +40,7 @@ export const findCellInHierarchy = (root: MandalartCellWithChildren | undefined,
 export const updateCellChildrenInHierarchy = (
   root: MandalartCellWithChildren, 
   cellId: string, 
-  update: Partial<MandalartCell> | any
+  update: Partial<MandalartCell | MandalartCellWithChildren>
 ): MandalartCellWithChildren | null => {
   // 루트 셀이 업데이트 대상인 경우
   if (root.id === cellId) {

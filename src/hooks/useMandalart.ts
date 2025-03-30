@@ -261,7 +261,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.error('셀 생성 실패:', err);
       throw err;
     }
-  }, [mandalart, findCell]);
+  }, [mandalart]);
 
   // 셀 완료 상태 토글
   const toggleCellCompletion = useCallback(async (cellId: string) => {
@@ -304,7 +304,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.error('셀 완료 상태 토글 실패:', err);
       setError('셀 완료 상태를 변경하는데 실패했습니다.');
     }
-  }, [mandalart, findCell]);
+  }, [mandalart]);
 
   // 만다라트 삭제
   const deleteMandalart = useCallback(async (id: string) => {
@@ -462,13 +462,17 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         });
       }
       
-      console.log('셀 생성 및 UI 업데이트 완료, 반환 데이터:', newCell);
-      return newCell;
+      // 루트 레벨 셀 반환
+      return {
+        ...newCell,
+        depth: 0,
+        parentId: undefined
+      };
     } catch (err) {
       console.error('통합 셀 생성 및 편집 실패:', err);
       throw err;
     }
-  }, [mandalart, fetchMandalart, loadChildrenForCell]);
+  }, [mandalart, fetchMandalart, setMandalart, loadChildrenForCell]);
 
   // 현재 활성화된 셀 가져오기
   const getCurrentCell = useCallback(() => {
@@ -531,7 +535,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
         console.log('실제 셀 추출됨:', realCells.length);
         
         // Depth 레벨에 따른 빈 셀 추가
-        let processedChildren = [...realCells];
+        const processedChildren = [...realCells];
         
         // 빈 셀이 없는 경우 8개의 빈 셀 추가
         if (processedChildren.length < 8) {
@@ -568,7 +572,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.error('자식 셀 로드 오류:', err);
       throw err;
     }
-  }, [mandalart, findCellInHierarchy]);
+  }, [mandalart]);
 
   /**
    * 새 셀 생성 함수를 훅에서 제공

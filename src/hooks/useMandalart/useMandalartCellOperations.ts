@@ -61,7 +61,7 @@ const useMandalartCellOperations = ({
         // 이미 같은 값이면 업데이트하지 않음 (children 비교는 별도 처리 필요)
         const hasChanges = Object.entries(updates).some(([key, value]) => {
           if (key === 'children') return false; // children은 별도 비교
-          return (prev.rootCell as Record<string, any>)[key] !== value;
+          return (prev.rootCell as unknown as Record<string, unknown>)[key] !== value;
         });
 
         // children 비교 (깊은 비교 대신 단순 참조 비교)
@@ -87,7 +87,7 @@ const useMandalartCellOperations = ({
       const updatedRootCell = updateCellChildrenInHierarchy(
         prev.rootCell,
         cellId,
-        updates as MandalartCell & CellWithChildren // 타입 캐스팅 사용
+        updates as unknown as MandalartCell & CellWithChildren // 타입 캐스팅 사용
       );
 
       if (!updatedRootCell) return prev;
@@ -162,8 +162,8 @@ const useMandalartCellOperations = ({
         
         if (parentCell) {
           // 부모 셀의 자식 배열에 새 셀 추가
-          const existingChildren = Array.isArray((parentCell as any).children) 
-            ? (parentCell as any).children 
+          const existingChildren = Array.isArray((parentCell as unknown as Record<string, unknown>).children) 
+            ? (parentCell as unknown as { children: MandalartCell[] }).children 
             : [];
             
           updateMandalartState(cellData.parentId, {
@@ -211,7 +211,7 @@ const useMandalartCellOperations = ({
     parentId: string, 
     position: number, 
     depth: number
-  ): MandalartCell => {
+  ) => {
     return {
       id: `empty-${position}`,
       topic: '',
@@ -219,10 +219,10 @@ const useMandalartCellOperations = ({
       color: '',
       imageUrl: '',
       isCompleted: false,
-      parentId: parentId, // 명시적으로 항상 문자열 값 보장
+      parentId, // 타입 호환성 문제 해결
       depth,
       position
-    } as MandalartCell; // 타입 캐스팅
+    };
   }, []);
 
 
@@ -304,8 +304,8 @@ const useMandalartCellOperations = ({
           if (!existingPositions.has(i)) {
             // 유효한 parentId와 함께 빈 셀 생성
             if (cellId) {
-              // 타입 호환성 문제 해결을 위한 캐스팅
-              enrichedChildren.push(createEmptyCell(cellId, i, parentDepth + 1) as any);
+              // 타입 문제 수정
+              enrichedChildren.push(createEmptyCell(cellId, i, parentDepth + 1));
             }
           }
         }
@@ -315,7 +315,7 @@ const useMandalartCellOperations = ({
       }
 
       // 만다라트 상태 업데이트
-      updateMandalartState(cellId, { children: enrichedChildren } as any);
+      updateMandalartState(cellId, { children: enrichedChildren } as unknown as Partial<MandalartCellWithChildren>);
 
       // 네비게이션 업데이트 (skipNavigation이 true가 아닐 때만)
       if (!skipNavigation) {
@@ -381,8 +381,8 @@ const useMandalartCellOperations = ({
         // 부모 셀의 자식 셀 배열에 추가
         const foundParentCell = findCell(parentCell.id);
         if (foundParentCell) {
-          const existingChildren = Array.isArray((foundParentCell as any).children) 
-            ? (foundParentCell as any).children 
+          const existingChildren = Array.isArray((foundParentCell as unknown as Record<string, unknown>).children) 
+            ? (foundParentCell as unknown as { children: MandalartCell[] }).children 
             : [];
           
           updateMandalartState(parentCell.id, {

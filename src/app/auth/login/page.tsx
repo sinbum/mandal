@@ -69,9 +69,9 @@ export default function AuthPage() {
       
       // 즉시 대시보드로 이동
       router.push('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('로그인 오류:', err);
-      setError(err.message || '로그인 중 오류가 발생했습니다.');
+      setError(err instanceof Error ? err.message : '로그인 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }

@@ -71,7 +71,7 @@ export default function HomePage() {
     }
 
     loadData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 새 만다라트 생성 처리
   const handleCreateMandalart = async (data: { title: string }) => {
