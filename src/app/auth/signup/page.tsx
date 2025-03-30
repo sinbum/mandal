@@ -42,7 +42,7 @@ export default function SignupPage() {
         email, 
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/login/confirm`
+          emailRedirectTo: `${window.location.origin}/auth/login/confirm`
         }
       });
       
@@ -57,7 +57,7 @@ export default function SignupPage() {
       
       // 로그인 페이지로 이동
       setTimeout(() => {
-        router.push('/login');
+        router.push('/auth/login');
       }, 3000);
     } catch (err: any) {
       setError(err.message || '회원가입 중 오류가 발생했습니다.');
@@ -68,7 +68,7 @@ export default function SignupPage() {
   
   return (
     <MobileLayout
-      header={<HeaderBar title="회원가입" showBackButton onBackClick={() => router.push('/login')} />}
+      header={<HeaderBar title="회원가입" showBackButton onBackClick={() => router.push('/auth/login')} />}
     >
       <div className="p-6 flex flex-col h-full">
         <div className="mb-8 text-center">
@@ -137,7 +137,7 @@ export default function SignupPage() {
             <p className="text-sm text-gray-600">이미 계정이 있으신가요?</p>
             <button 
               type="button" 
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/auth/login')}
               className="text-blue-600 text-sm font-medium"
             >
               로그인하기

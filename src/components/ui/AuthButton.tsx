@@ -46,7 +46,7 @@ export default function AuthButton() {
             const data = await response.json();
             if (data.status === 'success') {
               setToast({ message: data.message, type: 'success' });
-              router.push('/');
+              router.push('/auth/login');
             } else {
               setToast({ message: data.error, type: 'error' });
             }
@@ -56,7 +56,7 @@ export default function AuthButton() {
           로그아웃
         </button>
       ) : (
-        <Link href="/login">
+        <Link href="/auth/login">
           <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
             로그인
           </button>

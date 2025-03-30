@@ -119,7 +119,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
           </div>
           
           {/* 이미지 업로드 */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label>이미지</Label>
             {imageUrl ? (
               <div className="relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
@@ -167,7 +167,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                 </label>
               </div>
             )}
-          </div>
+          </div> */}
           
           {/* 완료 체크박스 */}
           <div className="flex items-center space-x-2">

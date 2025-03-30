@@ -78,7 +78,7 @@ export default function AuthPage() {
   };
 
   const handleSignUp = () => {
-    router.push('/signup');
+    router.push('/auth/signup');
   };
 
   return (

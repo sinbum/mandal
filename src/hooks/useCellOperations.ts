@@ -153,8 +153,8 @@ const useCellOperations = () => {
       setIsLoading(true);
       setError(null);
       
-      // 현재 셀 확인
-      const cell = navigation.currentCell || await mandalartAPI.fetchCellById(cellId);
+      // 셀 정보 확인 - 항상 직접 API를 통해 현재 상태 가져오기
+      const cell = await mandalartAPI.fetchCellById(cellId);
       
       if (!cell) {
         setError('셀 정보를 찾을 수 없습니다');
@@ -174,7 +174,7 @@ const useCellOperations = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigation.currentCell]);
+  }, []);
   
   /**
    * 새 만다라트 생성

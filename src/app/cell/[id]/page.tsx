@@ -7,9 +7,10 @@ import MandalartBreadcrumbs from '@/components/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';
-import Toast from '@/components/ui/Toast';
+import { toast } from "sonner";
 import { checkSession } from '@/app/auth/checkSession';
 import CellEditorForm from '@/components/cells/CellEditorForm';
+import { setMostRecentMandalartCell } from '@/lib/utils';
 
 /**
  * 셀 상세 페이지
@@ -25,7 +26,6 @@ export default function CellPage() {
   const [isPending, setIsPending] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('사용자');
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info' | 'warning'} | null>(null);
   
   // 셀 편집 상태 추가
   const [editingCell, setEditingCell] = useState<MandalartCell | null>(null);
@@ -63,6 +63,9 @@ export default function CellPage() {
           // 자식 셀 로드
           const children = await loadChildCells(cellId);
           setChildCells(children);
+          
+          // 최근 사용 셀 ID를 localStorage에 저장
+          setMostRecentMandalartCell(cellId);
         } else {
           setPageError('셀 정보를 찾을 수 없습니다');
         }
@@ -134,10 +137,7 @@ export default function CellPage() {
       }
     } catch (error) {
       console.error('새 셀 생성 중 오류 발생:', error);
-      setToast({
-        message: '새 셀 생성 중 오류가 발생했습니다',
-        type: 'error'
-      });
+      toast.error('새 셀 생성 중 오류가 발생했습니다');
     }
   };
   
@@ -159,16 +159,12 @@ export default function CellPage() {
       }
       
       // 성공 메시지 표시
-      setToast({
-        message: '셀이 저장되었습니다',
-        type: 'success'
-      });
+      toast.success('셀이 저장되었습니다');
+      // 최근 사용 셀 ID를 localStorage에 저장
+      setMostRecentMandalartCell(cellId);
     } catch (error) {
       console.error('셀 업데이트 중 오류 발생:', error);
-      setToast({
-        message: '셀 저장 중 오류가 발생했습니다',
-        type: 'error'
-      });
+      toast.error('셀 저장 중 오류가 발생했습니다');
     }
   };
   
@@ -242,14 +238,7 @@ export default function CellPage() {
         />
       </div>
 
-      {/* 토스트 메시지 */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+
     </>
   );
 } 

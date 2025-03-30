@@ -87,3 +87,50 @@ export interface User {
 | `historyLog` | 셀 단위 변경 이력 관리 (추후 도입 가능) |
 | `sharedUsers` | 협업 시 권한 관리 (장기 로드맵 항목) |
 | `tags` | 템플릿 또는 문서 분류 시 사용 가능 |
+
+## 🎯 컴포넌트 Props 타입
+
+```ts
+// 만다라트 카드 컴포넌트 Props
+export interface MandalartCardProps {
+  mandalart: {
+    id: string;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  onClick: () => void;
+  className?: string;
+}
+
+// 새 만다라트 생성 모달 Props
+export interface NewMandalartModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreateMandalart: (title: string, templateId?: string) => void;
+  templates?: Array<{id: string, title: string}>;
+}
+
+// 만다라트 네비게이션 Props
+export interface MandalartNavigationProps {
+  path: MandalartCell[];
+  onNavigate: (cellId: string) => void;
+}
+```
+
+## 🔄 네비게이션 관련 타입
+
+```ts
+// 네비게이션을 위한 셀 타입
+export interface MandalartCell {
+  id: string;
+  position: number;
+  topic?: string;
+  parentId?: string;
+}
+
+// 자식 셀 정보를 포함한 확장 타입
+export interface MandalartCellWithChildren extends MandalartCell {
+  children?: MandalartCell[];
+}
+```

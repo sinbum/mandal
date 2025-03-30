@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ModalContainer from '@/components/ui/ModalContainer';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import InputField from '@/components/ui/InputField';
 
 interface NewMandalartModalProps {

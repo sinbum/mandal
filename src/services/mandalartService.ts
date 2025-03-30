@@ -275,7 +275,7 @@ export class MandalartService {
         .order('created_at', { ascending: false });
       
       if (cellsError) throw cellsError;
-      
+      console.log('rootCells', rootCells);
       return rootCells.map(cell => this.convertDbCellToModel(cell));
     } catch (err) {
       console.error('사용자 셀 목록 조회 실패:', err);
@@ -357,8 +357,8 @@ export class MandalartService {
     return fetchMandalartListForUser();
   }
 
-  async deleteMandalart(id: string): Promise<void> {
-    return deleteMandalartById(id);
+  async deleteMandalart(mandalartId: string): Promise<void> {
+    return deleteMandalartById(mandalartId);
   }
 
   async getChildCells(cellId: string): Promise<MandalartCell[]> {
@@ -608,6 +608,7 @@ export const createNewCellAndGetEditData = async (
  */
 export const deleteMandalartById = async (id: string): Promise<void> => {
   try {
+    console.log('deleteMandalartById 호출됨:', id);
     const supabase = createClient();
     
     // 현재 로그인한 사용자 정보 가져오기
@@ -617,21 +618,8 @@ export const deleteMandalartById = async (id: string): Promise<void> => {
       throw new Error('인증된 사용자가 없습니다. 로그인이 필요합니다.');
     }
     
-    // 만다라트 소유자 확인
-    const { data: mandalartData, error: ownerError } = await supabase
-      .from('mandalarts')
-      .select('user_id')
-      .eq('id', id)
-      .single();
-    
-    if (ownerError) {
-      throw new Error('만다라트 정보를 확인할 수 없습니다.');
-    }
-    
-    if (mandalartData.user_id !== user.id) {
-      throw new Error('본인의 만다라트만 삭제할 수 있습니다.');
-    }
-    
+    console.log('사용자 인증 확인:', user.id);
+        
     // 만다라트 삭제 (관계된 셀들은 cascade 옵션으로 자동 삭제됨)
     const { error: deleteError } = await supabase
       .from('mandalarts')
@@ -639,8 +627,11 @@ export const deleteMandalartById = async (id: string): Promise<void> => {
       .eq('id', id);
     
     if (deleteError) {
+      console.error('만다라트 삭제 에러:', deleteError);
       throw new Error(deleteError.message);
     }
+    
+    console.log('만다라트 삭제 성공:', id);
   } catch (err) {
     console.error('만다라트 삭제 API 오류:', err);
     throw err;
