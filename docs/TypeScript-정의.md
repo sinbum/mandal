@@ -52,6 +52,100 @@ export type MandalartHierarchical = Mandalart;
 
 ---
 
+## 📁 유틸리티 함수
+
+```ts
+// 계층적 구조에서 특정 ID를 가진 셀을 찾는 함수
+export const findCellInHierarchy = (
+  root: MandalartCellWithChildren | undefined, 
+  cellId: string
+): MandalartCell | null => {
+  if (!root) return null;
+  
+  if (root.id === cellId) {
+    return root;
+  }
+  
+  // root.children이 없으면 빈 배열로 처리
+  const children = root.children || [];
+  
+  for (const child of children) {
+    if (child.id === cellId) {
+      return child;
+    }
+    
+    if ('children' in child && Array.isArray(child.children) && child.children.length > 0) {
+      const found = findCellInHierarchy(child as MandalartCellWithChildren, cellId);
+      if (found) return found;
+    }
+  }
+  
+  return null;
+};
+
+// 계층적 구조에서 특정 셀을 업데이트하는 함수
+export const updateCellChildrenInHierarchy = (
+  root: MandalartCellWithChildren | undefined,
+  cellId: string,
+  updates: Partial<MandalartCellWithChildren>
+): MandalartCellWithChildren | undefined => {
+  if (!root) return undefined;
+  
+  // 루트 셀이 업데이트 대상인 경우
+  if (root.id === cellId) {
+    return {
+      ...root,
+      ...updates,
+      children: 'children' in updates ? updates.children : root.children
+    };
+  }
+  
+  // root.children이 없으면 빈 배열로 처리
+  const children = root.children || [];
+  
+  // 자식 셀들 확인
+  const updatedChildren = children.map(child => {
+    if (child.id === cellId) {
+      // 현재 자식이 업데이트 대상인 경우
+      return {
+        ...child,
+        ...updates,
+        children: 'children' in updates && 'children' in child
+          ? updates.children
+          : ('children' in child ? child.children : undefined)
+      } as MandalartCellWithChildren;
+    } else if ('children' in child && Array.isArray(child.children) && child.children.length > 0) {
+      // 현재 자식의 하위에 업데이트 대상이 있을 수 있는 경우
+      const updatedChild = updateCellChildrenInHierarchy(
+        child as MandalartCellWithChildren,
+        cellId,
+        updates
+      );
+      
+      // 업데이트된 자식이 있으면 반환, 없으면 원래 자식 반환
+      return updatedChild || child;
+    }
+    
+    // 변경 없음
+    return child;
+  });
+  
+  // 변경된 자식이 있는지 확인
+  const hasChanges = updatedChildren.some((updated, index) => updated !== children[index]);
+  
+  if (hasChanges) {
+    // 변경이 있는 경우 새 루트 셀 반환
+    return {
+      ...root,
+      children: updatedChildren
+    };
+  }
+  
+  // 변경 없음
+  return root;
+};
+```
+
 ## 📌 컴포넌트 Props 타입
 
 ```ts

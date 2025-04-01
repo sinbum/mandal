@@ -1,4 +1,4 @@
-# /cell/[id]
+# /cell/[id] 페이지 구조
 
 ## 🧩 `/cell/[id]` 계층형 셀 보기 및 편집 페이지
 
@@ -204,3 +204,41 @@ URL (cell ID) → useEffect → mandalartAPI → Supabase → 상태 업데이�
 4. 셀 완료 상태 토글:
 사용자 액션 → handleToggleComplete → mandalartAPI.toggleCellCompletion
                                   → 상태 업데이트 → 렌더링
+```
+
+## 🧪 React 훅 최적화
+
+useMandalart 훅에서 의존성 배열 최적화를 통해 불필요한 재생성과 리렌더링 문제를 해결했습니다:
+
+### 기존 코드
+```tsx
+// 특정 셀의 자식 셀 로드
+const loadChildrenForCell = useCallback(async (cellId: string) => {
+  // ... 함수 내용 ...
+}, [mandalart, mandalartId, isLoading, setCurrentCellId, buildPathForCell, findCell]); // 잘못된 의존성
+
+// 특정 셀의 자식 셀 로드 (ID로)
+const loadChildrenForCellById = useCallback(async (cellId: string) => {
+  // ... 함수 내용 ...
+}, [mandalart]); // 누락된 의존성
+```
+
+### 개선된 코드
+```tsx
+// 특정 셀의 자식 셀 로드
+const loadChildrenForCell = useCallback(async (cellId: string) => {
+  // ... 함수 내용 ...
+}, [mandalart, mandalartId, isLoading, setCurrentCellId, buildPathForCell, findCellInHierarchy]); // 정확한 의존성
+
+// 특정 셀의 자식 셀 로드 (ID로)
+const loadChildrenForCellById = useCallback(async (cellId: string) => {
+  // ... 함수 내용 ...
+}, [mandalart, findCellInHierarchy]); // 모든 의존성 포함
+```
+
+이러한 최적화를 통해:
+1. React 훅 규칙 준수
+2. 불필요한 함수 재생성 방지
+3. 정확한 의존성으로 일관된 동작 보장
+4. 더 나은 성능과 버그 감소
+``` 

@@ -304,7 +304,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       console.error('셀 완료 상태 토글 실패:', err);
       setError('셀 완료 상태를 변경하는데 실패했습니다.');
     }
-  }, [mandalart]);
+  }, [mandalart, findCell]);
 
   // 만다라트 삭제
   const deleteMandalart = useCallback(async (id: string) => {
@@ -388,7 +388,8 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [mandalart, mandalartId, isLoading, setCurrentCellId, buildPathForCell, findCell]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mandalart, mandalartId, isLoading, setCurrentCellId, buildPathForCell, findCellInHierarchy, findCell]);
 
   // 통합된 셀 생성 및 편집 함수 (UI 효율성 개선)
   const createCellAndEdit = useCallback(async (
@@ -488,7 +489,7 @@ const useMandalart = (mandalartId?: string): UseMandalartResult => {
       setCurrentCellId(cell.id);
       buildPathForCell(cell.id);
     }
-  }, [findCell, setCurrentCellId, buildPathForCell]);
+  }, [setCurrentCellId, buildPathForCell, findCell]);
 
   // 특정 셀의 자식 셀 로드
   const loadChildrenForCellById = useCallback(async (cellId: string) => {
