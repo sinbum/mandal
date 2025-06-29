@@ -250,8 +250,8 @@ export default function HomePage() {
           </Button>
         </div>
       ) : (
-        <div className="px-4 pb-24 sm:pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 max-w-7xl mx-auto">
+        <div className="px-4 pb-24 sm:pb-4 scrollbar-hide">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 max-w-7xl mx-auto scrollbar-hide">
             {rootCells.map(cell => {
               return (
               <Link
