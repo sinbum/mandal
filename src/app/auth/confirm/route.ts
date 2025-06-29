@@ -1,28 +1,29 @@
-import { type EmailOtpType } from '@supabase/supabase-js'
-import { type NextRequest } from 'next/server'
-
 import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type') as EmailOtpType | null
-  const next = searchParams.get('next') ?? '/'
+  const type = searchParams.get('type')
+  const redirectTo = searchParams.get('redirect_to') ?? '/'
 
   if (token_hash && type) {
     const supabase = await createClient()
 
     const { error } = await supabase.auth.verifyOtp({
-      type,
+      type: type as any,
       token_hash,
     })
+
     if (!error) {
-      // redirect user to specified redirect URL or root of app
-      redirect(next)
+      // 인증 성공 시 메인 페이지로 리다이렉트
+      return NextResponse.redirect(new URL(redirectTo, request.url))
+    } else {
+      // 인증 실패 시 에러 페이지로 리다이렉트
+      return NextResponse.redirect(new URL('/auth/login?error=confirmation_failed', request.url))
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect('/error')
+  // 파라미터가 없는 경우 로그인 페이지로 리다이렉트
+  return NextResponse.redirect(new URL('/auth/login', request.url))
 }

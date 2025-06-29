@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import MobileLayout from '@/components/layout/MobileLayout';
 import HeaderBar from '@/components/layout/HeaderBar';
 import InputField from '@/components/ui/InputField';
@@ -11,11 +11,61 @@ import { Button } from '@/components/ui/Button';
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info' | 'warning'} | null>(null);
+
+  // 이메일 인증 처리 및 에러 처리
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      const tokenHash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+      const errorParam = searchParams.get('error');
+
+      // URL에서 에러 파라미터 확인
+      if (errorParam === 'confirmation_failed') {
+        setError('이메일 인증에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      if (tokenHash && type === 'email') {
+        setIsLoading(true);
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'email'
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          if (data.session) {
+            setToast({
+              message: '이메일 인증이 완료되었습니다! 자동 로그인됩니다.',
+              type: 'success'
+            });
+            
+            // 성공 후 메인 페이지로 이동
+            setTimeout(() => {
+              router.push('/');
+            }, 1500);
+          }
+        } catch (err: unknown) {
+          console.error('이메일 인증 오류:', err);
+          setError(err instanceof Error ? err.message : '이메일 인증 중 오류가 발생했습니다.');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    handleEmailConfirmation();
+  }, [searchParams, router]);
 
   // 이미 로그인되어 있는지 확인
   useEffect(() => {
