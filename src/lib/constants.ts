@@ -20,6 +20,19 @@ export const LAYOUT = {
   SLIDEUP_MAX_HEIGHT: '80vh',
 };
 
+// Z-index 관리
+export const Z_INDEX = {
+  HEADER: 10,
+  BOTTOM_BAR: 10,
+  FAB: 50,
+  TOAST: 50,
+  MODAL_OVERLAY: 60,
+  SLIDE_UP_OVERLAY: 69,
+  SLIDE_UP_PANEL: 70,
+  ALERT_DIALOG: 80,
+  CELL_EDITOR_MODAL: 9999,
+};
+
 // 애니메이션 시간 (ms)
 export const ANIMATION = {
   SLIDEUP_DURATION: 300,

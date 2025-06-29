@@ -10,6 +10,10 @@ import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
 import CellEditorForm from '@/components/cells/CellEditorForm';
 import { setMostRecentMandalartCell } from '@/lib/utils';
+import HeaderBar from '@/components/layout/HeaderBar';
+import MobileLayout from '@/components/layout/MobileLayout';
+import BottomBar from '@/components/layout/BottomBar';
+import { Z_INDEX } from '@/lib/constants';
 
 /**
  * 셀 상세 페이지
@@ -194,15 +198,24 @@ export default function CellPage() {
   }
   
   return (
-    <>
-      <div className="container mx-auto px-4 py-8">
+    <MobileLayout
+      header={
+        <HeaderBar
+          title={currentCell?.topic || '만다라트'}
+          showBackButton
+          href="/"
+        />
+      }
+      footer={<div className="sm:hidden"><BottomBar /></div>}
+    >
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         
         {/* 브레드크럼 네비게이션 */}
         <MandalartBreadcrumbs path={navigation.breadcrumbPath} />
         
         {/* 셀 편집 모달 */}
         {editingCell && (
-          <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">            
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/50 z-[9997]">            
               <CellEditorForm 
                 cell={editingCell}
                 onSave={handleEditComplete}
@@ -226,8 +239,6 @@ export default function CellPage() {
           onEditCell={setEditingCell}
         />
       </div>
-
-
-    </>
+    </MobileLayout>
   );
 } 

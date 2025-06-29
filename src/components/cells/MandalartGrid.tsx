@@ -116,7 +116,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   };
   
   return (
-    <div className="grid grid-cols-3 gap-2 w-full max-w-3xl">
+    <div className="grid grid-cols-3 gap-1 sm:gap-2 w-full max-w-sm sm:max-w-3xl">
       {renderGrid()}
     </div>
   );

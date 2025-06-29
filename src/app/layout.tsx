@@ -2,7 +2,6 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/app/globals.css';
-import BottomBar from '@/components/layout/BottomBar';
 import { Toaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,9 +19,8 @@ export default function RootLayout({
     <html lang="ko">
       <body className={inter.className}>
         <Toaster />
-        <div className="max-w-md mx-auto min-h-screen bg-white relative pb-14">
+        <div className="min-h-screen bg-white">
           {children}
-          <BottomBar />
         </div>
       </body>
     </html>

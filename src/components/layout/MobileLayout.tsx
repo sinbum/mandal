@@ -12,7 +12,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   const footerHeight = footer ? `${LAYOUT.FOOTER_HEIGHT}px` : '0px';
   
   return (
-    <div className={`w-full h-full flex flex-col bg-gray-50 ${className}`}>
+    <div className={`w-full h-full flex flex-col bg-white ${className}`}>
       {header && (
         <div className="w-full">
           {header}
@@ -20,7 +20,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       )}
       
       <main 
-        className="flex-1 overflow-y-auto overscroll-contain"
+        className="flex-1 overflow-y-auto overscroll-contain p-4"
         style={{
           height: `calc(100vh - ${headerHeight} - ${footerHeight})`,
         }}

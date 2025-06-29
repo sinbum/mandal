@@ -9,6 +9,9 @@ import ColorPalette from '@/components/ui/ColorPalette';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import HeaderBar from '@/components/layout/HeaderBar';
+import MobileLayout from '@/components/layout/MobileLayout';
+import BottomBar from '@/components/layout/BottomBar';
 
 export default function ProfilePage() {
   const [name, setName] = useState('');
@@ -119,75 +122,88 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">프로필 설정</h1>
-      
-      <Card style={getCardStyle()}>
-        <CardHeader style={{ borderBottom: `1px solid ${themeColor}20` }}>
-          <CardTitle>개인 정보</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <InputField
-            id="name"
-            label="이름"
-            value={name}
-            onChange={setName}
-            required
-          />
-          
-          <InputField
-            id="email"
-            label="이메일"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            required
-            disabled
-          />
-          
-          <div className="space-y-2">
-            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-              소개
-            </label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="min-h-[100px]"
-              placeholder="자기소개를 입력하세요"
+    <MobileLayout
+      header={
+        <HeaderBar
+          title="프로필 설정"
+          showBackButton
+          href="/"
+        />
+      }
+      footer={<div className="sm:hidden"><BottomBar /></div>}
+    >
+      <div className="container mx-auto py-6 sm:py-10 px-4 max-w-2xl">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">프로필 설정</h1>
+        
+        <Card style={getCardStyle()}>
+          <CardHeader style={{ borderBottom: `1px solid ${themeColor}20` }}>
+            <CardTitle>개인 정보</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 sm:space-y-6">
+            <InputField
+              id="name"
+              label="이름"
+              value={name}
+              onChange={setName}
+              required
             />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              테마 색상
-            </label>
-            <p className="text-xs text-gray-500 mb-2">
-              선택한 색상은 프로필 카드에 즉시 반영됩니다
-            </p>
-            <ColorPalette
-              selectedColor={themeColor}
-              onColorSelect={handleColorChange}
-              className="mt-2"
+            
+            <InputField
+              id="email"
+              label="이메일"
+              type="email"
+              value={email}
+              onChange={setEmail}
+              required
+              disabled
             />
-          </div>
-        </CardContent>
-        <CardFooter className="justify-end space-x-4" style={{ borderTop: `1px solid ${themeColor}20` }}>
-          <Button
-            variant="outline"
-            onClick={() => window.history.back()}
-          >
-            취소
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isLoading}
-            style={{ backgroundColor: themeColor, color: 'black' }}
-          >
-            {isLoading ? '저장 중...' : '저장하기'}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                소개
+              </label>
+              <Textarea
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                className="min-h-[100px]"
+                placeholder="자기소개를 입력하세요"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                테마 색상
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                선택한 색상은 프로필 카드에 즉시 반영됩니다
+              </p>
+              <ColorPalette
+                selectedColor={themeColor}
+                onColorSelect={handleColorChange}
+                className="mt-2"
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="justify-end space-x-2 sm:space-x-4" style={{ borderTop: `1px solid ${themeColor}20` }}>
+            <Button
+              variant="outline"
+              onClick={() => window.history.back()}
+              size="sm"
+            >
+              취소
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isLoading}
+              style={{ backgroundColor: themeColor, color: 'black' }}
+              size="sm"
+            >
+              {isLoading ? '저장 중...' : '저장하기'}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </MobileLayout>
   );
 }

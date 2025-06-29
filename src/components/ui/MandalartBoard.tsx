@@ -45,8 +45,8 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full my-8">
-      <h1 className="text-2xl font-bold mb-6">{centerCell.topic || '무제 셀'}</h1>
+    <div className="flex flex-col items-center justify-center w-full my-4 sm:my-8">
+      <h1 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 text-center px-4">{centerCell.topic || '무제 셀'}</h1>
       <MandalartGrid
         centerCell={centerCell}
         cells={cells}

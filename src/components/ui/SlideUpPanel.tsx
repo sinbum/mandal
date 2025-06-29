@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { SlideUpPanelProps } from '@/types/ui';
-import { LAYOUT } from '@/lib/constants';
+import { LAYOUT, Z_INDEX } from '@/lib/constants';
 
 const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   isOpen,
@@ -52,7 +52,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
   const slideUpStyles = {
     panel: `
-      fixed bottom-0 left-0 right-0 z-[9999]
+      fixed bottom-0 left-0 right-0 z-[${Z_INDEX.SLIDE_UP_PANEL}]
       rounded-t-2xl shadow-xl
       transform transition-all duration-300 ease-in-out
       ${isOpen ? 'translate-y-0' : 'translate-y-full'}
@@ -60,7 +60,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       ${className}
     `,
     overlay: `
-      fixed inset-0 z-[9998]
+      fixed inset-0 z-[${Z_INDEX.SLIDE_UP_OVERLAY}]
       transition-opacity duration-300
     `,
     dragHandle: `

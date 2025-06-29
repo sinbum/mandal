@@ -34,6 +34,7 @@ import Image from 'next/image';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
+import { Z_INDEX } from '@/lib/constants';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -198,7 +199,7 @@ export default function HomePage() {
     >
       {/* FAB: 모바일에서만 노출 */}
       <button
-        className="fixed bottom-20 right-4 z-50 sm:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center hover:bg-blue-700 transition-colors"
+        className={`fixed bottom-20 right-4 z-[${Z_INDEX.FAB}] sm:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center hover:bg-blue-700 transition-colors`}
         onClick={() => setCreateDialogOpen(true)}
         aria-label="새 만다라트 만들기"
       >
@@ -239,7 +240,7 @@ export default function HomePage() {
       )}
 
       {rootCells.length === 0 ? (
-        <div className="bg-gray-50 p-8 rounded-lg shadow text-center">
+        <div className="bg-gray-50 p-8 rounded-lg shadow text-center mx-auto">
           <p className="text-lg text-gray-600 mb-4">
             아직 만다라트가 없습니다.
           </p>
@@ -250,40 +251,40 @@ export default function HomePage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mx-auto h-screen overflow-auto">
           {rootCells.map(cell => {
             return (
             <Link
               key={cell.id}
               href={`/cell/${cell.id}`}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col relative"
+              className="group rounded-lg overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative outline-none focus:outline-none border border-gray-200 hover:border-gray-300 max-w-sm max-h-80"
             >
               <div
-                className="h-48 mb-2 rounded"
+                className="aspect-[4/3] relative max-h-64"
                 style={{
-                  backgroundColor: cell.color || '#f0f4f8',
+                  backgroundColor: cell.color || '#ffffff',
                   backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               >
                 {/* 배경 오버레이 */}
-                <div className="h-full w-full bg-black bg-opacity-10 flex items-center justify-center">
-                  <h2 className="text-2xl font-bold text-center text-white drop-shadow-md px-2">
+                <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center">
+                  <h2 className="text-xl xl:text-lg font-bold text-center text-white drop-shadow-md px-2">
                     {cell.topic || '무제'}
                   </h2>
                 </div>
               </div>
-              <div className="mt-auto flex justify-between items-center">
+              <div className="bg-white p-3 flex justify-between items-center">
                 <span className="text-sm text-gray-500">
                   {cell.isCompleted ? '완료됨' : '진행 중'}
                 </span>
                 <Button
-                  className="p-2 rounded-full text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded-full text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
                   onClick={(e) => openDeleteDialog(cell.id, e)}
                   aria-label="삭제"
                 >
-                  <Trash size={16} />
+                  <Trash size={14} />
                 </Button>
               </div>
             </Link>
