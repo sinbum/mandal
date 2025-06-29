@@ -1,75 +1,65 @@
 import React, { ReactNode, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ModalContainerProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
   children: ReactNode;
+  className?: string;
+  overlayClassName?: string;
+  closeOnOverlayClick?: boolean;
 }
 
 const ModalContainer: React.FC<ModalContainerProps> = ({
   isOpen,
   onClose,
-  title,
   children,
+  className = '',
+  overlayClassName = '',
+  closeOnOverlayClick = true,
 }) => {
-  // ESC 키를 누르면 모달 닫기
+  // ESC 키로 모달 닫기
   useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (isOpen && event.key === 'Escape') {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleEscKey);
-    
+    document.addEventListener('keydown', handleEscape);
+    // 모달이 열릴 때 body 스크롤 방지
+    document.body.style.overflow = 'hidden';
+
     return () => {
-      window.removeEventListener('keydown', handleEscKey);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
-  // 모달이 열려있지 않으면 렌더링하지 않음
   if (!isOpen) return null;
 
-  // 배경 클릭 시 모달 닫기 (버블링 방지)
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-      onClick={handleBackdropClick}
-    >
-      <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-fadeIn"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* 모달 헤더 */}
-        <div className="border-b border-gray-200 p-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {title}
-          </h2>
-          <button
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-            onClick={onClose}
-            aria-label="닫기"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        {/* 모달 콘텐츠 */}
-        <div className="p-4 overflow-y-auto flex-1">
+  const modalContent = (
+    <>
+      {/* 배경 오버레이 */}
+      <div 
+        className={`fixed inset-0 backdrop-blur-sm bg-black/50 animate-in fade-in duration-200 ${overlayClassName}`}
+        onClick={closeOnOverlayClick ? onClose : undefined}
+      />
+      {/* 모달 컨텐츠 */}
+      <div className={`fixed inset-0 flex items-center justify-center p-4 overflow-y-auto pointer-events-none ${className}`}>
+        <div className="pointer-events-auto">
           {children}
         </div>
       </div>
-    </div>
+    </>
   );
+
+  // Portal을 사용하여 body에 직접 렌더링
+  return typeof window !== 'undefined' 
+    ? createPortal(modalContent, document.body)
+    : null;
 };
 
 export default ModalContainer;

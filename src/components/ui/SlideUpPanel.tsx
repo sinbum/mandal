@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { SlideUpPanelProps } from '@/types/ui';
-import { LAYOUT, Z_INDEX } from '@/lib/constants';
+import { LAYOUT } from '@/lib/constants';
 
 const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   isOpen,
@@ -52,7 +53,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
   const slideUpStyles = {
     panel: `
-      fixed bottom-0 left-0 right-0 z-[${Z_INDEX.SLIDE_UP_PANEL}]
+      fixed bottom-0 left-0 right-0
       rounded-t-2xl shadow-xl
       transform transition-all duration-300 ease-in-out
       ${isOpen ? 'translate-y-0' : 'translate-y-full'}
@@ -60,7 +61,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       ${className}
     `,
     overlay: `
-      fixed inset-0 z-[${Z_INDEX.SLIDE_UP_OVERLAY}]
+      fixed inset-0
       transition-opacity duration-300
     `,
     dragHandle: `
@@ -80,7 +81,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
     `
   };
 
-  return (
+  const panelContent = (
     <>
       <div 
         ref={overlayRef}
@@ -124,6 +125,11 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       </div>
     </>
   );
+
+  // Portal을 사용하여 body에 직접 렌더링
+  return typeof window !== 'undefined' 
+    ? createPortal(panelContent, document.body)
+    : null;
 };
 
 export default SlideUpPanel;

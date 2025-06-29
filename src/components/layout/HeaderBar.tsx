@@ -1,7 +1,6 @@
 import React from 'react';
 import { HeaderBarProps } from '@/types/ui';
 import Link from 'next/link';
-import { Z_INDEX } from '@/lib/constants';
 
 const HeaderBar: React.FC<HeaderBarProps> = ({
   title,
@@ -11,7 +10,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   href,
 }) => {
   return (
-    <header className={`bg-white border-b border-gray-200 h-14 flex items-center px-4 justify-between sticky top-0 z-[${Z_INDEX.HEADER}]`}>
+    <header className="bg-white border-b border-gray-200 h-14 flex items-center px-4 justify-between sticky top-0">
       <div className="flex items-center">
         {showBackButton && (
           onBackClick ? (

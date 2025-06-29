@@ -13,7 +13,6 @@ import { setMostRecentMandalartCell } from '@/lib/utils';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
-import { Z_INDEX } from '@/lib/constants';
 
 /**
  * 셀 상세 페이지
@@ -215,13 +214,11 @@ export default function CellPage() {
         
         {/* 셀 편집 모달 */}
         {editingCell && (
-          <div className="fixed inset-0 backdrop-blur-sm bg-black/50 z-[9997]">            
-              <CellEditorForm 
-                cell={editingCell}
-                onSave={handleEditComplete}
-                onCancel={handleEditCancel}
-              />            
-          </div>
+          <CellEditorForm 
+            cell={editingCell}
+            onSave={handleEditComplete}
+            onCancel={handleEditCancel}
+          />
         )}
         
         {/* 만다라트 보드 */}

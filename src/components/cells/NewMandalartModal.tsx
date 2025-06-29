@@ -63,7 +63,6 @@ const NewMandalartModal: React.FC<NewMandalartModalProps> = ({
     <ModalContainer
       isOpen={isOpen}
       onClose={handleClose}
-      title="새 만다라트 만들기"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
