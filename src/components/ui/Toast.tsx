@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Z_INDEX } from '@/lib/constants';
 
 interface ToastProps {
   message: string;
@@ -56,7 +55,7 @@ const Toast: React.FC<ToastProps> = ({
   }, [duration, onClose]);
 
   return (
-    <div className={`fixed bottom-4 left-0 right-0 z-[${Z_INDEX.TOAST}] flex justify-center items-center pointer-events-none`}>
+    <div className={`fixed bottom-4 left-0 right-0 flex justify-center items-center pointer-events-none`}>
       <div 
         className={`
           ${colors[type]} text-white py-2 px-4 rounded-lg shadow-lg 
