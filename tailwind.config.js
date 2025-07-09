@@ -359,6 +359,7 @@ module.exports = {
     },
   },
   plugins: [
+    require('daisyui'),
     function({ addUtilities, addComponents, addVariant }) {
       // 스크롤바 유틸리티
       addUtilities({
@@ -513,4 +514,21 @@ module.exports = {
       addVariant('high-contrast', '@media (prefers-contrast: high)');
     }
   ],
+  daisyui: {
+    themes: [
+      {
+        light: {
+          "primary": "#2563eb",
+          "secondary": "#7c3aed",
+          "accent": "#06b6d4",
+          "neutral": "#374151",
+          "base-100": "#ffffff",
+          "info": "#3b82f6",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+        },
+      },
+    ],
+  },
 } 

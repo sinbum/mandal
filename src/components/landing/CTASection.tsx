@@ -15,17 +15,19 @@ export default function CTASection() {
         <div className="text-center">
           {/* Main CTA */}
           <div className="mb-8">
+            <div className="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-3 rounded-full text-sm font-bold mb-6 animate-pulse">
+              <Clock className="w-4 h-4" />
+              <span>⚠️ 작심삼일 또 반복할 건가요?</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-              지금 시작하면
+              <span className="text-red-300">2025년도 실패</span>하기 전에
               <br />
-              <span className="text-yellow-300">30일 후 첫 번째 목표를 달성</span>
-              <br />
-              할 수 있습니다
+              <span className="text-yellow-300">이번엔 정말 달성</span>해보세요
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              미루고 있던 그 목표, 이제 현실로 만들어보세요.
+              <strong className="text-white">오타니 쇼헤이</strong>처럼 체계적으로 접근하면
               <br />
-              과학적으로 검증된 만다라트 기법으로 확실한 성과를 경험할 수 있습니다.
+              <span className="bg-yellow-400 text-gray-900 px-3 py-1 rounded font-bold">누구든지 목표를 달성할 수 있습니다</span>
             </p>
           </div>
 
