@@ -1,346 +1,271 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { mandalartAPI } from '@/services/mandalartService';
-import { MandalartCell } from '@/types/mandalart';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Button } from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { Trash } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import HeaderBar from '@/components/layout/HeaderBar';
 import Image from 'next/image';
-import MobileLayout from '@/components/layout/MobileLayout';
-import BottomBar from '@/components/layout/BottomBar';
-import SlideUpPanel from '@/components/ui/SlideUpPanel';
-/**
- * 홈 페이지 컴포넌트
- * 사용자가 가진 만다라트 루트 셀 목록 표시
- */
-export default function HomePage() {
-  const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [cellToDelete, setCellToDelete] = useState<string | null>(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+import { Button } from '@/components/ui/Button';
+import { APP_CONFIG } from '@/constants/app';
+import { ChevronRight, Target, Grid3X3, Users, Trophy, ArrowRight, Check } from 'lucide-react';
 
-  const createForm = useForm({
-    defaultValues: {
-      title: '새 만다라트'
+export default function LandingPage() {
+
+  const features = [
+    {
+      icon: <Target className="w-8 h-8 text-blue-600" />,
+      title: "목표 세분화",
+      description: "큰 목표를 8개의 구체적인 하위 목표로 나누어 단계별로 달성하세요"
+    },
+    {
+      icon: <Grid3X3 className="w-8 h-8 text-green-600" />,
+      title: "체계적 관리",
+      description: "3x3 만다라트 매트릭스로 목표를 시각화하고 체계적으로 관리하세요"
+    },
+    {
+      icon: <Users className="w-8 h-8 text-purple-600" />,
+      title: "협업 기능",
+      description: "팀원들과 목표를 공유하고 함께 달성해 나가세요"
+    },
+    {
+      icon: <Trophy className="w-8 h-8 text-yellow-600" />,
+      title: "성취 추적",
+      description: "목표 달성률을 실시간으로 확인하고 성취감을 느끼세요"
     }
-  });
+  ];
 
-  const supabase = createClient();
-  const router = useRouter();
+  const benefits = [
+    "명확한 목표 설정과 계획 수립",
+    "단계별 실행으로 부담 감소",
+    "시각적 진행상황 파악",
+    "동기부여 및 지속성 향상",
+    "체계적인 목표 관리 습관 형성"
+  ];
 
-  // 사용자 정보와 루트 셀 로드
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setIsLoading(true);
-        // 사용자 정보 가져오기
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-
-        const cells = await mandalartAPI.fetchUserCells();
-        setRootCells(cells);
-      } catch (err) {
-        console.error('데이터 로드 오류:', err);
-        setError('만다라트 목록을 불러오는데 실패했습니다');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 새 만다라트 생성 처리
-  const handleCreateMandalart = async (data: { title: string }) => {
-    try {
-      setIsLoading(true);
-      setCreateDialogOpen(false);
-      
-      const title = data.title || '새 만다라트';
-      const rootCellId = await mandalartAPI.createMandalart(title);
-
-      // 생성 후 해당 셀 페이지로 이동
-      window.location.href = `/cell/${rootCellId}`;
-    } catch (err) {
-      console.error('만다라트 생성 오류:', err);
-      setError('만다라트 생성에 실패했습니다');
-      setIsLoading(false);
-    }
-  };
-
-  
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-  };
-
-  // 만다라트 삭제 다이얼로그 표시
-  const openDeleteDialog = (cellId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setCellToDelete(cellId);
-    setDeleteDialogOpen(true);
-  };
-
-  // 만다라트 삭제 처리
-  const confirmDelete = async () => {
-    if (!cellToDelete) return;
-
-    try {
-      setIsLoading(true);
-      setDeleteDialogOpen(false);
-      
-      // 해당 셀의 완전한 정보 찾기
-      const cell = rootCells.find(cell => cell.id === cellToDelete);
-      if (!cell) {
-        setError('삭제할 셀을 찾을 수 없습니다');
-        setIsLoading(false);
-        return;
-      }
-
-      // 만다라트 ID를 결정 (셀의 mandalartId가 있으면 그것을 사용, 없으면 셀 ID)
-      const mandalartId = cell.mandalartId || cell.id;
-      
-      // 만다라트 삭제 API 호출
-      await mandalartAPI.deleteMandalart(mandalartId);
-      
-      // 삭제 후 목록 갱신
-      const updatedCells = await mandalartAPI.fetchUserCells();
-      setRootCells(updatedCells);
-      
-    } catch (err) {
-      console.error('만다라트 삭제 오류:', err);
-      setError('만다라트 삭제에 실패했습니다');
-    } finally {
-      setIsLoading(false);
-      setCellToDelete(null);
-    }
-  };
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
 
   return (
-    <MobileLayout
-      header={
-        <HeaderBar
-          title={
-            <div className="flex items-center gap-2">
-              <Image src="/logo/android-chrome-192x192.png" alt="로고" width={32} height={32} className="rounded" />
-              <span className="hidden sm:inline">만월</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Navigation */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <Image 
+                src={APP_CONFIG.logo} 
+                alt={APP_CONFIG.name} 
+                width={32} 
+                height={32} 
+                className="rounded"
+              />
+              <span className="text-xl font-bold text-gray-900">{APP_CONFIG.shortName}</span>
             </div>
-          }
-          rightElement={
-            <div className="flex items-center gap-2">
-              {/* 데스크톱: 기존 버튼들 */}
-              <div className="hidden sm:flex items-center gap-2">
-                {user && (
-                  <Button onClick={handleLogout} size="sm">로그아웃</Button>
-                )}
-                <Link href="/profile" aria-label="프로필">
-                  <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-blue-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </Link>
-                <button aria-label="테마 전환" className="p-1">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-yellow-500">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.95 7.07l-.71-.71M4.05 4.93l-.71-.71M17 12a5 5 0 11-10 0 5 5 0 0110 0z" />
-                  </svg>
-                </button>
-                <button aria-label="설정" className="p-1">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-green-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
-                  </svg>
-                </button>
-                <Button onClick={() => setCreateDialogOpen(true)} size="sm">새 만다라트 만들기</Button>
-              </div>
-              {/* 모바일: 햄버거 메뉴 */}
-              <button className="sm:hidden p-2" aria-label="메뉴" onClick={() => setDrawerOpen(true)}>
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-700">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          }
-        />
-      }
-      footer={<div className="sm:hidden"><BottomBar /></div>}
-    >
-      {/* FAB: 모바일에서만 노출 - 레이아웃에 영향 없이 화면에 고정 */}
-      <button
-        className="fixed bottom-20 right-4 z-10 sm:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center hover:bg-blue-700 transition-colors"
-        onClick={() => setCreateDialogOpen(true)}
-        aria-label="새 만다라트 만들기"
-      >
-        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
-      {/* 햄버거 메뉴 드로어(모바일) */}
-      <SlideUpPanel isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="메뉴">
-        <div className="flex flex-col gap-4">
-          {user && (
-            <Button onClick={handleLogout} variant="secondary">로그아웃</Button>
-          )}
-          <Link href="/profile" className="flex items-center gap-2 text-gray-700 hover:text-blue-600" onClick={() => setDrawerOpen(false)}>
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            프로필
-          </Link>
-          <button className="flex items-center gap-2 text-gray-700 hover:text-yellow-500" aria-label="테마 전환">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.95 7.07l-.71-.71M4.05 4.93l-.71-.71M17 12a5 5 0 11-10 0 5 5 0 0110 0z" />
-            </svg>
-            테마 전환
-          </button>
-          <button className="flex items-center gap-2 text-gray-700 hover:text-green-600" aria-label="설정">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
-            </svg>
-            설정
-          </button>
-        </div>
-      </SlideUpPanel>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {rootCells.length === 0 ? (
-        <div className="bg-gray-50 p-8 rounded-lg shadow text-center mx-auto">
-          <p className="text-lg text-gray-600 mb-4">
-            아직 만다라트가 없습니다.
-          </p>
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            첫 만다라트 만들기
-          </Button>
-        </div>
-      ) : (
-        <div className="px-4 pb-24 sm:pb-4 scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 max-w-7xl mx-auto scrollbar-hide">
-            {rootCells.map(cell => {
-              return (
-              <Link
-                key={cell.id}
-                href={`/cell/${cell.id}`}
-                className="group rounded-lg overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative outline-none focus:outline-none border border-gray-200 hover:border-gray-300 w-full"
-              >
-                <div
-                  className="aspect-[4/3] relative"
-                  style={{
-                    backgroundColor: cell.color || '#ffffff',
-                    backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
-                >
-                  {/* 배경 오버레이 */}
-                  <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center">
-                    <h2 className="text-lg sm:text-xl font-bold text-center text-white drop-shadow-md px-2">
-                      {cell.topic || '무제'}
-                    </h2>
-                  </div>
-                </div>
-                <div className="bg-white p-3 flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
-                    {cell.isCompleted ? '완료됨' : '진행 중'}
-                  </span>
-                  <Button
-                    className="p-1.5 rounded-full text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
-                    onClick={(e) => openDeleteDialog(cell.id, e)}
-                    aria-label="삭제"
-                  >
-                    <Trash size={14} />
-                  </Button>
-                </div>
+            
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/login">
+                <Button variant="outline" size="sm">로그인</Button>
               </Link>
-            );
-            })}
+              <Link href="/auth/signup">
+                <Button size="sm">무료 시작하기</Button>
+              </Link>
+            </div>
           </div>
         </div>
-      )}
+      </nav>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>만다라트 삭제</AlertDialogTitle>
-            <AlertDialogDescription>
-              이 만다라트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>삭제</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>새 만다라트 만들기</AlertDialogTitle>
-            <AlertDialogDescription>
-              새 만다라트의 제목을 입력해주세요.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <Form {...createForm}>
-            <form onSubmit={createForm.handleSubmit(handleCreateMandalart)} className="space-y-4">
-              <FormField
-                control={createForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>제목</FormLabel>
-                    <FormControl>
-                      <Input placeholder="새 만다라트" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-20 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+            <div className="lg:col-span-6">
+              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                목표를 
+                <span className="text-blue-600"> 체계적으로</span>
+                <br />
+                관리하는 가장 
+                <span className="text-purple-600">스마트한</span> 방법
+              </h1>
               
-              <AlertDialogFooter>
-                <AlertDialogCancel>취소</AlertDialogCancel>
-                <AlertDialogAction type="submit">생성</AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
-    </MobileLayout>
+              <p className="mt-6 text-xl text-gray-600 leading-relaxed">
+                만다라트 기법을 활용해 큰 목표를 작은 단위로 나누고, 
+                단계별로 달성해나가며 성공의 경험을 쌓아보세요.
+              </p>
+              
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link href="/auth/signup">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    무료로 시작하기
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link href="/auth/login">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    로그인
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="mt-8 flex items-center space-x-6 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-green-500 mr-2" />
+                  무료 사용
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-green-500 mr-2" />
+                  계정 생성 간편
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-green-500 mr-2" />
+                  언제든 접근
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-12 lg:mt-0 lg:col-span-6">
+              <div className="relative">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 mx-auto max-w-md">
+                  <div className="grid grid-cols-3 gap-3">
+                    {Array.from({ length: 9 }, (_, i) => (
+                      <div
+                        key={i}
+                        className={`
+                          aspect-square rounded-lg flex items-center justify-center text-sm font-medium
+                          ${i === 4 
+                            ? 'bg-blue-600 text-white' 
+                            : i % 2 === 0 
+                            ? 'bg-blue-50 text-blue-700' 
+                            : 'bg-gray-50 text-gray-600'
+                          }
+                        `}
+                      >
+                        {i === 4 ? '목표' : `세부${i + 1}`}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-center text-gray-600 text-sm mt-4">
+                    3x3 만다라트 매트릭스 예시
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              왜 만다라트 플래너를 선택해야 할까요?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              과학적으로 검증된 만다라트 기법을 디지털로 구현하여 
+              더욱 효과적인 목표 관리 경험을 제공합니다.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center group">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 group-hover:bg-gray-100 transition-colors mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+            <div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+                만다라트로 얻을 수 있는 
+                <br />5가지 핵심 효과
+              </h2>
+              <div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center text-white">
+                    <Check className="w-6 h-6 text-green-300 mr-3 flex-shrink-0" />
+                    <span className="text-lg">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mt-12 lg:mt-0">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 text-white">
+                <h3 className="text-2xl font-bold mb-4">지금 시작해보세요!</h3>
+                <p className="text-lg mb-6 text-white/90">
+                  수많은 사용자들이 만다라트 플래너로 목표를 달성하고 있습니다.
+                </p>
+                <div className="space-y-3 text-white/80">
+                  <div>✨ 회원가입 후 바로 사용 가능</div>
+                  <div>🎯 개인 맞춤형 목표 설정</div>
+                  <div>📱 모바일과 데스크톱 모두 지원</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+            오늘부터 체계적인 목표 관리를 시작하세요
+          </h2>
+          <p className="text-xl text-gray-300 mb-8">
+            만다라트 플래너와 함께 꿈을 현실로 만들어보세요. 
+            지금 시작하면 더 나은 내일을 만날 수 있습니다.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/auth/signup">
+              <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+                무료로 시작하기
+                <ChevronRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-gray-900">
+                기존 계정으로 로그인
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-950 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+              <Image 
+                src={APP_CONFIG.logo} 
+                alt={APP_CONFIG.name} 
+                width={24} 
+                height={24} 
+                className="rounded"
+              />
+              <span className="text-lg font-semibold text-white">{APP_CONFIG.name}</span>
+            </div>
+            
+            <div className="text-gray-400 text-sm">
+              © 2024 {APP_CONFIG.name}. All rights reserved.
+            </div>
+          </div>
+          
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+            {APP_CONFIG.description}
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MandalartCell } from '@/types/mandalart';
-import MandalartGrid from '../cells/MandalartGrid';
+import MandalartGrid from './cells/MandalartGrid';
 
 interface MandalartBoardProps {
   centerCell: MandalartCell;

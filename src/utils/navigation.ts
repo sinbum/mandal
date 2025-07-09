@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 export interface NavigationUtils {
   navigateToHome: () => void;
+  navigateToApp: () => void;
   navigateToLogin: () => void;
   navigateToSignup: () => void;
   navigateToProfile: () => void;
@@ -16,6 +17,10 @@ export function useNavigation(): NavigationUtils {
 
   const navigateToHome = useCallback(() => {
     router.push('/');
+  }, [router]);
+
+  const navigateToApp = useCallback(() => {
+    router.push('/app');
   }, [router]);
 
   const navigateToLogin = useCallback(() => {
@@ -44,6 +49,7 @@ export function useNavigation(): NavigationUtils {
 
   return {
     navigateToHome,
+    navigateToApp,
     navigateToLogin,
     navigateToSignup,
     navigateToProfile,

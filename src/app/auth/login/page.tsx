@@ -59,9 +59,9 @@ export default function AuthPage() {
               type: 'success'
             });
             
-            // 성공 후 메인 페이지로 이동
+            // 성공 후 앱 페이지로 이동
             setTimeout(() => {
-              navigation.navigateToHome();
+              navigation.navigateToApp();
             }, 1500);
           }
         } catch (err: unknown) {
@@ -83,7 +83,7 @@ export default function AuthPage() {
         const result = await checkUserSession();
         
         if (result.success && result.data) {
-          navigation.navigateToHome();
+          navigation.navigateToApp();
         }
       } catch (error) {
         console.error('세션 확인 오류:', error);
@@ -118,8 +118,8 @@ export default function AuthPage() {
         type: 'success'
       });
       
-      // 즉시 대시보드로 이동
-      navigation.navigateToHome();
+      // 즉시 앱으로 이동
+      navigation.navigateToApp();
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
       formState.setError(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);

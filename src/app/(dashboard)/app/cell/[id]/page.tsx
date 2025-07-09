@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import MandalartBoard from '@/components/ui/MandalartBoard';
-import MandalartBreadcrumbs from '@/components/cells/MandalartBreadcrumbs';
+import MandalartBoard from '@/components/dashboard/MandalartBoard';
+import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
-import CellEditorForm from '@/components/cells/CellEditorForm';
+import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
 import { setMostRecentMandalartCell } from '@/lib/utils';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';

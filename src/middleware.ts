@@ -3,12 +3,22 @@ import type { NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  // 정적 자산 및 public 파일은 미들웨어를 건너뜁니다
+  // 공개 경로들 (인증이 필요없는 페이지들)
+  const publicPaths = [
+    '/',  // 랜딩 페이지
+    '/auth/login',
+    '/auth/signup',
+    '/auth/confirm',
+    '/auth/logout',
+    '/error'
+  ];
+
+  // 정적 자산 및 공개 페이지는 미들웨어를 건너뜁니다
   if (request.nextUrl.pathname.startsWith('/_next') || 
       request.nextUrl.pathname.startsWith('/static') ||
       request.nextUrl.pathname.startsWith('/api') ||
-      request.nextUrl.pathname.startsWith('/auth/login') ||
-      request.nextUrl.pathname.startsWith('/auth/signup')
+      request.nextUrl.pathname.startsWith('/favicon.ico') ||
+      publicPaths.includes(request.nextUrl.pathname)
     ) {
     return NextResponse.next()
   }
