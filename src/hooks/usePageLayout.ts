@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { checkUserSession } from '@/app/auth/utils';
+import { checkUserSession } from '@/lib/auth/utils';
 
 export interface PageLayoutState {
   isLoading: boolean;

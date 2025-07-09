@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/Button';
 import InputField from '@/components/ui/InputField';
 import Toast from '@/components/ui/Toast';
-import { ToastMessage } from '../utils';
+import { ToastMessage } from '@/lib/auth/utils';
 
 interface AuthFormProps {
   email: string;

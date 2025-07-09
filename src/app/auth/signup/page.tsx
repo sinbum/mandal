@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthLayout from '../components/AuthLayout';
-import AuthForm from '../components/AuthForm';
-import { signUpWithEmail, validateAuthForm, ToastMessage } from '../utils';
-import { useFormState } from '@/app/hooks/useFormState';
-import { useNavigation } from '@/app/utils/navigation';
-import { AUTH_MESSAGES, LOADING_STATES } from '@/app/constants/app';
+import AuthLayout from '@/components/auth/AuthLayout';
+import AuthForm from '@/components/auth/AuthForm';
+import { signUpWithEmail, validateAuthForm, ToastMessage } from '@/lib/auth/utils';
+import { useFormState } from '@/hooks/useFormState';
+import { useNavigation } from '@/utils/navigation';
+import { AUTH_MESSAGES, LOADING_STATES } from '@/constants/app';
 
 interface SignupFormData {
   email: string;

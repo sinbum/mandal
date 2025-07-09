@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AuthLayout from '../components/AuthLayout';
-import AuthForm from '../components/AuthForm';
+import AuthLayout from '@/components/auth/AuthLayout';
+import AuthForm from '@/components/auth/AuthForm';
 import { 
   verifyEmailToken, 
   signInWithEmail, 
   checkUserSession, 
   validateAuthForm,
   ToastMessage 
-} from '../utils';
-import { useFormState } from '@/app/hooks/useFormState';
-import { useNavigation } from '@/app/utils/navigation';
-import { AUTH_MESSAGES, LOADING_STATES } from '@/app/constants/app';
+} from '@/lib/auth/utils';
+import { useFormState } from '@/hooks/useFormState';
+import { useNavigation } from '@/utils/navigation';
+import { AUTH_MESSAGES, LOADING_STATES } from '@/constants/app';
 
 interface LoginFormData {
   email: string;

@@ -1,5 +1,5 @@
-import { checkUserSession, extractDisplayName, SESSION_CACHE } from './utils';
-import { redirectToLogin } from '../utils/navigation';
+import { checkUserSession, extractDisplayName, SESSION_CACHE } from '@/lib/auth/utils';
+import { redirectToLogin } from '@/utils/navigation';
 
 export const checkSession = async (setLoading: (loading: boolean) => void, setUserName: (userName: string) => void) => {
   try {
