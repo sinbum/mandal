@@ -89,7 +89,7 @@ export default function HomePage() {
       const rootCellId = await mandalartAPI.createMandalart(title);
 
       // 생성 후 해당 셀 페이지로 이동
-      window.location.href = `/cell/${rootCellId}`;
+      window.location.href = `/app/cell/${rootCellId}`;
     } catch (err) {
       console.error('만다라트 생성 오류:', err);
       setError('만다라트 생성에 실패했습니다');
@@ -256,7 +256,7 @@ export default function HomePage() {
               return (
               <Link
                 key={cell.id}
-                href={`/cell/${cell.id}`}
+                href={`/app/cell/${cell.id}`}
                 className="group rounded-lg overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative outline-none focus:outline-none border border-gray-200 hover:border-gray-300 w-full"
               >
                 <div
