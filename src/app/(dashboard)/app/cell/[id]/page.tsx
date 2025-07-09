@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import MandalartBoard from '@/components/dashboard/MandalartBoard';
 import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
@@ -13,6 +13,8 @@ import { setMostRecentMandalartCell } from '@/lib/utils';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 /**
  * 셀 상세 페이지
@@ -21,6 +23,7 @@ import BottomBar from '@/components/layout/BottomBar';
 export default function CellPage() {
   const { id } = useParams<{ id: string }>();
   const cellId = Array.isArray(id) ? id[0] : id;
+  const router = useRouter();
   
   const [currentCell, setCurrentCell] = useState<MandalartCell | null>(null);
   const [childCells, setChildCells] = useState<MandalartCell[]>([]);
@@ -29,6 +32,9 @@ export default function CellPage() {
 
   // 셀 편집 상태 추가
   const [editingCell, setEditingCell] = useState<MandalartCell | null>(null);
+  
+  // 삭제 상태 추가
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // 셀 조작 훅 사용
   const { 
@@ -39,6 +45,7 @@ export default function CellPage() {
     loadChildCells, 
     updateCell,
     createCell,
+    deleteCell,
     toggleCellCompletion
   } = useCellOperations();
 
@@ -169,6 +176,39 @@ export default function CellPage() {
     setEditingCell(null);
   };
 
+  // 셀 삭제 처리
+  const handleDeleteCell = async () => {
+    if (!currentCell || isDeleting) return;
+    
+    const confirmDelete = window.confirm('정말로 이 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다.');
+    
+    if (!confirmDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      
+      const success = await deleteCell(currentCell.id);
+      
+      if (success) {
+        toast.success('셀이 삭제되었습니다');
+        
+        // 부모 셀로 이동하거나 홈으로 이동
+        if (currentCell.parentId) {
+          router.push(`/app/cell/${currentCell.parentId}`);
+        } else {
+          router.push('/app');
+        }
+      } else {
+        toast.error('셀 삭제에 실패했습니다');
+      }
+    } catch (error) {
+      console.error('셀 삭제 중 오류 발생:', error);
+      toast.error('셀 삭제 중 오류가 발생했습니다');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   
   if (isPending || isLoading) {
     return <LoadingSpinner />;
@@ -202,7 +242,7 @@ export default function CellPage() {
         <HeaderBar
           title={currentCell?.topic || '만다라트'}
           showBackButton
-          href="/"
+          href="/app"
         />
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}
@@ -211,6 +251,20 @@ export default function CellPage() {
         
         {/* 브레드크럼 네비게이션 */}
         <MandalartBreadcrumbs path={navigation.breadcrumbPath} />
+        
+        {/* 셀 삭제 버튼 */}
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={handleDeleteCell}
+            variant="destructive"
+            size="sm"
+            disabled={isDeleting || !currentCell}
+            className="flex items-center gap-2"
+          >
+            <Trash2 size={16} />
+            {isDeleting ? '삭제 중...' : '셀 삭제'}
+          </Button>
+        </div>
         
         {/* 셀 편집 모달 */}
         {editingCell && (
@@ -231,7 +285,7 @@ export default function CellPage() {
           onNavigate={(cellId) => {
             // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
             navigation.navigateToCell(cellId);
-            window.location.href = `/cell/${cellId}`;
+            window.location.href = `/app/cell/${cellId}`;
           }}
           onEditCell={setEditingCell}
         />

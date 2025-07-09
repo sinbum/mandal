@@ -1,17 +1,25 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* 디자인 토큰 기반 CSS 변수 시스템 */
+  
+  /* 기본 반지름 */
   --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  /* 라이트 모드 색상 (oklch 기반) */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.695 0.17 264);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -19,34 +27,74 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.64 0.21 22);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.695 0.17 264);
+  
+  /* 시맨틱 색상 */
+  --success: oklch(0.68 0.15 152);
+  --success-foreground: oklch(0.985 0 0);
+  --error: oklch(0.64 0.21 22);
+  --error-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.78 0.15 85);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.69 0.17 230);
+  --info-foreground: oklch(0.985 0 0);
+  
+  /* 차트 색상 */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  
+  /* 사이드바 색상 */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.695 0.17 264);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.695 0.17 264);
+  
+  /* 그림자 시스템 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* 애니메이션 지속 시간 */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  
+  /* 이징 함수 */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-sharp: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* 터치 타겟 크기 */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+  --touch-target-large: 56px;
+  
+  /* 포커스 링 */
+  --focus-ring: 2px solid var(--primary);
+  --focus-ring-offset: 2px;
 }
 
 .dark {
+  /* 다크 모드 색상 오버라이드 */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.695 0.17 264);
+  --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -56,27 +104,38 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.695 0.17 264);
+  
+  /* 다크 모드 시맨틱 색상 */
+  --success: oklch(0.68 0.15 152);
+  --success-foreground: oklch(0.145 0 0);
+  --error: oklch(0.704 0.191 22.216);
+  --error-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.78 0.15 85);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.69 0.17 230);
+  --info-foreground: oklch(0.985 0 0);
+  
+  /* 다크 모드 차트 색상 */
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  
+  /* 다크 모드 사이드바 색상 */
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.695 0.17 264);
+  --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.695 0.17 264);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Tailwind CSS 토큰 매핑 */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -95,11 +154,25 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  
+  /* 시맨틱 색상 매핑 */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  
+  /* 차트 색상 매핑 */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  
+  /* 사이드바 색상 매핑 */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -112,50 +185,296 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    /* 기본 폰트 설정 */
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Roboto', 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    /* 텍스트 렌더링 최적화 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 터치 스크롤 최적화 */
+    -webkit-overflow-scrolling: touch;
+    /* 텍스트 크기 조정 방지 (모바일) */
+    -webkit-text-size-adjust: 100%;
+    /* 탭 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* 기본 헤딩 스타일 */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    line-height: 1.2;
+  }
+  
+  h1 {
+    @apply text-4xl;
+  }
+  
+  h2 {
+    @apply text-3xl;
+  }
+  
+  h3 {
+    @apply text-2xl;
+  }
+  
+  h4 {
+    @apply text-xl;
+  }
+  
+  h5 {
+    @apply text-lg;
+  }
+  
+  h6 {
+    @apply text-base;
+  }
+  
+  /* 기본 링크 스타일 */
+  a {
+    @apply text-primary;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-default);
+  }
+  
+  a:hover {
+    @apply text-primary/80;
+  }
+  
+  a:focus-visible {
+    @apply outline-2 outline-primary outline-offset-2;
+  }
+  
+  /* 기본 폼 요소 스타일 */
+  input, textarea, select {
+    @apply border-border bg-background text-foreground;
+    border-radius: var(--radius-md);
+    transition: border-color var(--duration-fast) var(--ease-default);
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    @apply border-primary outline-none;
+    box-shadow: 0 0 0 2px var(--primary) / 0.1;
+  }
+  
+  /* 기본 버튼 스타일 */
+  button {
+    @apply font-medium;
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-default);
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  
+  /* 기본 이미지 스타일 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* 기본 코드 스타일 */
+  code {
+    @apply font-mono text-sm bg-muted px-1 py-0.5 rounded;
+  }
+  
+  pre {
+    @apply font-mono text-sm bg-muted p-4 rounded overflow-x-auto;
+  }
+  
+  pre code {
+    @apply bg-transparent px-0 py-0;
+  }
+  
+  /* 기본 테이블 스타일 */
+  table {
+    @apply w-full border-collapse;
+  }
+  
+  th, td {
+    @apply border-border p-2 text-left;
+    border-bottom: 1px solid;
+  }
+  
+  th {
+    @apply font-semibold bg-muted;
+  }
+  
+  /* 기본 선택 스타일 */
+  ::selection {
+    @apply bg-primary/20;
+  }
+  
+  /* 기본 플레이스홀더 스타일 */
+  ::placeholder {
+    @apply text-muted-foreground;
+  }
+  
+  /* 기본 마크 스타일 */
+  mark {
+    @apply bg-warning/20 text-warning-foreground;
+  }
+  
+  /* 기본 수평선 스타일 */
+  hr {
+    @apply border-border my-4;
+  }
+  
+  /* 기본 인용 스타일 */
+  blockquote {
+    @apply border-l-4 border-primary pl-4 my-4 italic;
+  }
+  
+  /* 기본 리스트 스타일 */
+  ul, ol {
+    @apply ml-6;
+  }
+  
+  li {
+    @apply mb-1;
   }
 }
 
-/* 스크롤바 숨기기 - 크로스 브라우저 지원 */
-* {
-  /* Firefox */
-  scrollbar-width: none;
-  /* IE and Edge */
+/* 접근성을 고려한 스크롤바 처리 */
+/* 전역 스크롤바 숨김 제거 - 접근성 개선 */
+
+/* 선택적 스크롤바 숨김 (접근성 고려) */
+.scrollbar-hide {
   -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* WebKit 브라우저 (Chrome, Safari, Edge) */
-*::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-/* 스크롤 기능은 유지하면서 스크롤바만 숨김 */
-.hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+/* 사용자 정의 스크롤바 (기본 권장) */
+.scrollbar-thin {
+  scrollbar-width: thin;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* 커스텀 스크롤바 (필요시 사용) */
-.custom-scrollbar::-webkit-scrollbar {
+.scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(62% 0 0 / 0.2);
   border-radius: 3px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(62% 0 0 / 0.3);
+}
+
+/* 다크 모드 스크롤바 */
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(70% 0 0 / 0.3);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(70% 0 0 / 0.4);
+}
+
+/* 접근성 개선 */
+/* 포커스 표시 개선 */
+*:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 4px;
+}
+
+/* 건너뛰기 링크 */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  z-index: 1600;
+  transition: top var(--duration-fast) var(--ease-default);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* 모션 감소 설정 고려 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  :root {
+    --border: oklch(0.5 0 0);
+    --ring: oklch(0.3 0 0);
+  }
+  
+  .dark {
+    --border: oklch(0.7 0 0);
+    --ring: oklch(0.8 0 0);
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 터치 디바이스에서 호버 효과 비활성화 */
+  .hover\:bg-hover:hover {
+    background-color: inherit;
+  }
+  
+  /* 터치 타겟 크기 보장 */
+  button, 
+  [role="button"], 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"] {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+}
+
+/* 프린트 최적화 */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break-before {
+    page-break-before: always;
+  }
+  
+  .print-break-after {
+    page-break-after: always;
+  }
+  
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+  }
 }

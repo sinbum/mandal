@@ -163,6 +163,9 @@ export default function HomePage() {
           rightElement={
             <div className="flex items-center gap-2">
               {/* 데스크톱: 기존 버튼들 */}
+              <div className="flex items-center gap-2">
+                <Button onClick={() => setCreateDialogOpen(true)} size="sm">새 만다라트 만들기</Button>
+              </div>
               <div className="hidden sm:flex items-center gap-2">
                 {user && (
                   <Button onClick={handleLogout} size="sm">로그아웃</Button>
@@ -171,18 +174,8 @@ export default function HomePage() {
                   <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-blue-600">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                </Link>
-                <button aria-label="테마 전환" className="p-1">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-yellow-500">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.95 7.07l-.71-.71M4.05 4.93l-.71-.71M17 12a5 5 0 11-10 0 5 5 0 0110 0z" />
-                  </svg>
-                </button>
-                <button aria-label="설정" className="p-1">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-green-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
-                  </svg>
-                </button>
-                <Button onClick={() => setCreateDialogOpen(true)} size="sm">새 만다라트 만들기</Button>
+                </Link>           
+               
               </div>
               {/* 모바일: 햄버거 메뉴 */}
               <button className="sm:hidden p-2" aria-label="메뉴" onClick={() => setDrawerOpen(true)}>
@@ -196,23 +189,14 @@ export default function HomePage() {
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >
-      {/* FAB: 모바일에서만 노출 - 레이아웃에 영향 없이 화면에 고정 */}
-      <button
-        className="fixed bottom-20 right-4 z-10 sm:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center hover:bg-blue-700 transition-colors"
-        onClick={() => setCreateDialogOpen(true)}
-        aria-label="새 만다라트 만들기"
-      >
-        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
+      
       {/* 햄버거 메뉴 드로어(모바일) */}
       <SlideUpPanel isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="메뉴">
         <div className="flex flex-col gap-4">
           {user && (
             <Button onClick={handleLogout} variant="secondary">로그아웃</Button>
           )}
-          <Link href="/profile" className="flex items-center gap-2 text-gray-700 hover:text-blue-600" onClick={() => setDrawerOpen(false)}>
+          <Link href="/app/profile" className="flex items-center gap-2 text-gray-700 hover:text-blue-600" onClick={() => setDrawerOpen(false)}>
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -240,7 +224,7 @@ export default function HomePage() {
 
       {rootCells.length === 0 ? (
         <div className="bg-gray-50 p-8 rounded-lg shadow text-center mx-auto">
-          <p className="text-lg text-gray-600 mb-4">
+          <p className="text-lg text-gray-800 mb-4">
             아직 만다라트가 없습니다.
           </p>
           <Button
@@ -269,14 +253,14 @@ export default function HomePage() {
                   }}
                 >
                   {/* 배경 오버레이 */}
-                  <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center">
-                    <h2 className="text-lg sm:text-xl font-bold text-center text-white drop-shadow-md px-2">
+                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                    <h2 className="text-lg sm:text-xl font-bold text-center text-white drop-shadow-lg px-2">
                       {cell.topic || '무제'}
                     </h2>
                   </div>
                 </div>
                 <div className="bg-white p-3 flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-700">
                     {cell.isCompleted ? '완료됨' : '진행 중'}
                   </span>
                   <Button

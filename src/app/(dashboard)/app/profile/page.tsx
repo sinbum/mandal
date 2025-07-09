@@ -127,7 +127,7 @@ export default function ProfilePage() {
         <HeaderBar
           title="프로필 설정"
           showBackButton
-          href="/"
+          href="/app"
         />
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}

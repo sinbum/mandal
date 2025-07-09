@@ -169,6 +169,28 @@ export class MandalartService {
   }
   
   /**
+   * 셀 삭제
+   */
+  async deleteCell(cellId: string): Promise<void> {
+    try {
+      if (this.isVirtualId(cellId)) {
+        throw new Error('가상 셀은 삭제할 수 없습니다');
+      }
+      
+      // 자식 셀들도 함께 삭제 (CASCADE)
+      const { error } = await this.supabase
+        .from('mandalart_cells')
+        .delete()
+        .eq('id', cellId);
+      
+      if (error) throw error;
+    } catch (err) {
+      console.error('셀 삭제 실패:', err);
+      throw err;
+    }
+  }
+
+  /**
    * 새 만다라트 생성
    */
   async createMandalart(title: string): Promise<string> {

@@ -6,11 +6,11 @@ export const APP_CONFIG = {
 } as const;
 
 export const ROUTES = {
-  HOME: '/',
+  HOME: '/app',
   LOGIN: '/auth/login',
   SIGNUP: '/auth/signup',
   PROFILE: '/profile',
-  CELL: '/cell',
+  CELL: '/app/cell',
   ERROR: '/error',
   PRIVATE: '/private'
 } as const;

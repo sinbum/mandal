@@ -49,7 +49,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({ path }) => 
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={`/cell/${cell.id}`}>
+                    <Link href={`/app/cell/${cell.id}`}>
                       {cell.topic || '무제 셀'}
                     </Link>
                   </BreadcrumbLink>

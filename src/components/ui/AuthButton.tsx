@@ -48,13 +48,13 @@ export default function AuthButton() {
             } else {
             }
           }}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium"
         >
           로그아웃
         </button>
       ) : (
         <Link href="/auth/login">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
             로그인
           </button>
         </Link>

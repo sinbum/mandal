@@ -177,6 +177,32 @@ const useCellOperations = () => {
   }, []);
   
   /**
+   * 셀 삭제
+   */
+  const deleteCell = useCallback(async (cellId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // 가상 ID 확인
+      if (cellId.startsWith('empty-')) {
+        setError('가상 셀은 삭제할 수 없습니다');
+        return false;
+      }
+      
+      await mandalartAPI.deleteCell(cellId);
+      
+      return true;
+    } catch (err) {
+      console.error('셀 삭제 오류:', err);
+      setError('셀 삭제에 실패했습니다');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  /**
    * 새 만다라트 생성
    */
   const createMandalart = useCallback(async (title: string) => {
@@ -206,6 +232,7 @@ const useCellOperations = () => {
     loadChildCells,
     updateCell,
     createCell,
+    deleteCell,
     toggleCellCompletion,
     createMandalart
   };

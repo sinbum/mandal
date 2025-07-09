@@ -13,8 +13,8 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-} from '../ui/card';
-import ColorPalette from '../ui/ColorPalette';
+} from '../../ui/card';
+import ColorPalette from '../../ui/ColorPalette';
 
 const CellEditorForm: React.FC<CellEditorFormProps> = ({
   cell,
