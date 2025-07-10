@@ -294,7 +294,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           "grid grid-cols-3 w-full max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto",
           
           // 간격 설정
-          "gap-1 sm:gap-2 md:gap-3",
+          "gap-2 sm:gap-3 md:gap-4",
           
           // 반응형 크기 조정
           "text-sm sm:text-base",
@@ -303,13 +303,13 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           disabled && "opacity-50 pointer-events-none",
           
           // 애니메이션
-          animationEnabled && "transition-all duration-200",
+          animationEnabled && "transition-all duration-300",
           
           // 터치 최적화
           touchOptimized && "touch-manipulation",
           
           // 다크 모드 지원
-          "dark:bg-gray-900/50",
+          "dark:bg-gray-800",
           
           // 모션 감소 설정
           "motion-reduce:transition-none"

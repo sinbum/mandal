@@ -65,7 +65,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
       />
       {/* 모달 컨텐츠 */}
       <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto pointer-events-none">
-        <Card className="relative w-full max-w-md bg-white shadow-2xl border-2 border-gray-300 my-8 pointer-events-auto">
+        <Card className="relative w-full max-w-lg bg-white shadow-2xl rounded-2xl border-gray-200 my-8 pointer-events-auto transform transition-all duration-300 ease-in-out scale-95 animate-in fade-in-90 slide-in-from-bottom-10">
           <form onSubmit={handleSubmit}>
             <CardHeader className="mb-4">
               <CardTitle>셀 편집</CardTitle>

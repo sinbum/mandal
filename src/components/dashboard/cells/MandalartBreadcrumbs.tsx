@@ -112,8 +112,8 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-              <div className="py-1">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-10 animate-in fade-in-90 duration-200">
+              <div className="py-2">
                 <button
                   onClick={handleDeleteClick}
                   disabled={isDeleting}

@@ -140,39 +140,40 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
     <div
       className={cn(
         // 기본 스타일
-        "aspect-square border border-gray-200 rounded p-1 sm:p-2 relative",
+        "aspect-square border border-gray-200 rounded-lg p-2 sm:p-3 relative shadow-sm",
         "overflow-hidden", // 이미지 오버플로우 방지
         
         // 상태별 스타일
         isCenterCell && [
-          "font-semibold",
-          "bg-primary-50 border-primary-200",
-          "dark:bg-primary-900/20 dark:border-primary-700",
+          "font-bold",
+          "bg-primary-50 border-primary-300",
+          "dark:bg-primary-900/30 dark:border-primary-700",
+          "shadow-lg"
         ],
         
         isCompleted && [
-          "border-success",
-          "bg-success-light/20",
-          "dark:bg-success-dark/20",
+          "border-green-500",
+          "bg-green-50",
+          "dark:bg-green-900/30",
         ],
         
         isSelected && [
-          "ring-2 ring-primary/30",
-          "border-primary",
+          "ring-2 ring-offset-2 ring-indigo-500",
+          "border-indigo-500",
         ],
         
         isHighlighted && [
-          "bg-primary-50",
-          "border-primary-300",
-          "dark:bg-primary-900/30",
+          "bg-yellow-50",
+          "border-yellow-400",
+          "dark:bg-yellow-900/30",
         ],
         
         // 인터랙션 스타일
         onClick && [
           "cursor-pointer",
-          "hover:shadow-md hover:brightness-95",
-          "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
-          "active:scale-98",
+          "hover:shadow-xl hover:border-gray-400 hover:-translate-y-1",
+          "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+          "active:scale-95",
         ],
         
         // 애니메이션
