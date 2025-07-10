@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, PanInfo } from 'framer-motion';
 import { SlideUpPanelProps } from '@/types/ui';
 import { LAYOUT } from '@/lib/constants';
+import { savePanelHeight, getPanelHeight } from '@/utils/cookies';
 
 const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   isOpen,
@@ -13,6 +15,52 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  
+  // 드래그 리사이즈를 위한 상태
+  const [panelHeight, setPanelHeight] = useState<number>(() => {
+    return typeof height === 'number' ? height : 400;
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragStartHeight, setDragStartHeight] = useState(0);
+
+  // 컴포넌트 마운트 시 저장된 높이 가져오기
+  useEffect(() => {
+    if (isOpen) {
+      const savedHeight = getPanelHeight(typeof height === 'number' ? height : 400);
+      setPanelHeight(savedHeight);
+    }
+  }, [isOpen, height]);
+
+  // 드래그 핸들러들
+  const handleDragStart = useCallback((event: React.PointerEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    setDragStartY(clientY);
+    setDragStartHeight(panelHeight);
+    
+    // 포인터 캡처 설정 (마우스인 경우에만)
+    if ('setPointerCapture' in event.currentTarget) {
+      (event.currentTarget as HTMLElement).setPointerCapture((event as React.PointerEvent).pointerId);
+    }
+  }, [panelHeight]);
+
+  const handleDragMove = useCallback((event: React.PointerEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    const deltaY = dragStartY - clientY; // 위로 드래그하면 양수
+    const newHeight = Math.max(200, Math.min(dragStartHeight + deltaY, window.innerHeight * 0.9));
+    
+    setPanelHeight(newHeight);
+  }, [isDragging, dragStartY, dragStartHeight]);
+
+  const handleDragEnd = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+      savePanelHeight(panelHeight); // 쿠키에 저장
+    }
+  }, [isDragging, panelHeight]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -67,17 +115,16 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
     panel: `
       fixed bottom-0 left-0 right-0
       rounded-t-2xl shadow-xl
-      transform transition-all duration-300 ease-in-out
-      ${isOpen ? 'translate-y-0' : 'translate-y-full'}
       border-t border-l border-r border-gray-200
       ${className}
     `,
     overlay: `
       fixed inset-0
-      transition-opacity duration-300
     `,
     dragHandle: `
-      w-12 h-1.5 mx-auto my-3 rounded-full bg-gray-300
+      w-12 h-2 mx-auto my-3 rounded-full bg-gray-300 cursor-ns-resize select-none
+      ${isDragging ? 'bg-primary-400' : 'hover:bg-gray-400'}
+      transition-colors duration-200
     `,
     header: `
       px-4 py-3 border-b border-gray-200 flex justify-between items-center
@@ -89,31 +136,53 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       text-gray-500 hover:text-gray-700 focus:outline-none
     `,
     content: `
-      p-4 overflow-y-auto max-h-[70vh]
+      p-4 overflow-y-auto
     `
   };
 
   const panelContent = (
     <>
-      <div 
+      <motion.div 
         ref={overlayRef}
         className={slideUpStyles.overlay}
         style={overlayStyle}
         onClick={onClose}
         aria-hidden="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
       />
-      <div
+      <motion.div
         ref={panelRef}
         className={slideUpStyles.panel}
         style={{ 
           ...glassStyle,
-          height: height === 'auto' ? 'auto' : (typeof height === 'number' ? `${height}px` : height),
-          maxHeight: '80vh'
+          height: `${panelHeight}px`,
+          maxHeight: '90vh'
         }}
         role="dialog"
         aria-modal="true"
+        initial={{ y: '100%' }}
+        animate={{ y: isOpen ? 0 : '100%' }}
+        transition={{ 
+          type: 'spring',
+          damping: 30,
+          stiffness: 300,
+          duration: 0.5
+        }}
+        onPointerMove={handleDragMove}
+        onPointerUp={handleDragEnd}
+        onTouchMove={handleDragMove}
+        onTouchEnd={handleDragEnd}
       >
-        <div className={slideUpStyles.dragHandle} />
+        <div 
+          className={slideUpStyles.dragHandle}
+          onPointerDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          style={{
+            touchAction: 'none', // 터치 스크롤 방지
+          }}
+        />
         
         {title && (
           <div className={slideUpStyles.header}>
@@ -131,10 +200,15 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
           </div>
         )}
         
-        <div className={slideUpStyles.content}>
+        <div 
+          className={slideUpStyles.content}
+          style={{
+            height: `${panelHeight - (title ? 120 : 60)}px`, // 헤더와 드래그 핸들 높이 제외
+          }}
+        >
           {children}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 

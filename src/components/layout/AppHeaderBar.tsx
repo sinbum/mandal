@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import HeaderBar from '@/components/layout/HeaderBar';
 import { Button } from '@/components/ui/Button';
+import AnimatedButton from '@/components/animations/AnimatedButton';
+import HamburgerIcon from '@/components/animations/HamburgerIcon';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
@@ -71,11 +73,11 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
           <div className="flex items-center gap-2">
             {/* 데스크톱: 기존 버튼들 */}
             <div className="flex items-center gap-2">
-              <Button onClick={handleCreateMandalart} size="sm">새 만다라트 만들기</Button>
+              <AnimatedButton onClick={handleCreateMandalart} size="sm">새 만다라트 만들기</AnimatedButton>
             </div>
             <div className="hidden sm:flex items-center gap-2">
               {user && (
-                <Button onClick={handleLogout} size="sm">로그아웃</Button>
+                <AnimatedButton onClick={handleLogout} size="sm">로그아웃</AnimatedButton>
               )}
               <Link href="/app/profile" aria-label="프로필">
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-blue-600">
@@ -84,11 +86,12 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
               </Link>           
             </div>
             {/* 모바일: 햄버거 메뉴 */}
-            <button className="sm:hidden p-2" aria-label="메뉴" onClick={() => setDrawerOpen(true)}>
-              <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-700">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <div className="sm:hidden">
+              <HamburgerIcon 
+                isOpen={drawerOpen} 
+                onClick={() => setDrawerOpen(!drawerOpen)}
+              />
+            </div>
           </div>
         }
       />
@@ -96,7 +99,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
       {/* 햄버거 메뉴 드로어(모바일) */}
       <SlideUpPanel isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="메뉴">
         <div className="flex flex-col gap-4">
-          <Button 
+          <AnimatedButton 
             onClick={() => {
               setDrawerOpen(false);
               window.location.href = '/app/profile';
@@ -108,8 +111,8 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             프로필
-          </Button>
-          <Button 
+          </AnimatedButton>
+          <AnimatedButton 
             onClick={() => {
               setDrawerOpen(false);
               // 설정 기능은 추후 구현
@@ -122,14 +125,14 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             설정
-          </Button>
+          </AnimatedButton>
           {user && (
-            <Button onClick={handleLogout} variant="secondary" className="flex items-center gap-2">
+            <AnimatedButton onClick={handleLogout} variant="secondary" className="flex items-center gap-2">
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               로그아웃
-            </Button>
+            </AnimatedButton>
           )}
         </div>
       </SlideUpPanel>

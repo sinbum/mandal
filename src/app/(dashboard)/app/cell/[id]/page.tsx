@@ -15,6 +15,7 @@ import { setMostRecentMandalartCell } from '@/lib/utils';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
+import PageTransition from '@/components/animations/PageTransition';
 
 /**
  * 셀 상세 페이지
@@ -237,10 +238,11 @@ export default function CellPage() {
   }
   
   return (
-    <MobileLayout
-      header={<AppHeaderBar showBackButton backHref="/app" />}
-      footer={<div className="sm:hidden"><BottomBar /></div>}
-    >
+    <PageTransition>
+      <MobileLayout
+        header={<AppHeaderBar showBackButton backHref="/app" />}
+        footer={<div className="sm:hidden"><BottomBar /></div>}
+      >
 
       <div className="container mx-auto px-4 py-4 sm:py-8 h-full flex flex-col">
         
@@ -277,6 +279,7 @@ export default function CellPage() {
           />
         </div>
       </div>
-    </MobileLayout>
+      </MobileLayout>
+    </PageTransition>
   );
 } 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
@@ -32,6 +33,7 @@ import { Input } from '@/components/ui/input';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
+import PageTransition from '@/components/animations/PageTransition';
 import {
   Card,
   CardContent,
@@ -145,10 +147,11 @@ export default function HomePage() {
   }
 
   return (
-    <MobileLayout
-      header={<AppHeaderBar onCreateMandalart={() => setCreateDialogOpen(true)} />}
-      footer={<div className="sm:hidden"><BottomBar /></div>}
-    >
+    <PageTransition>
+      <MobileLayout
+        header={<AppHeaderBar onCreateMandalart={() => setCreateDialogOpen(true)} />}
+        footer={<div className="sm:hidden"><BottomBar /></div>}
+      >
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
@@ -169,9 +172,28 @@ export default function HomePage() {
       ) : (
         <div className="px-4 pb-24 sm:pb-4 scrollbar-hide">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto scrollbar-hide">
-            {rootCells.slice(0, 4).map(cell => {
+            {rootCells.slice(0, 4).map((cell, index) => {
               return (
-                <Card key={cell.id} className="group hover:shadow-lg transition-shadow cursor-pointer relative aspect-[4/3] flex flex-col">
+                <motion.div 
+                  key={cell.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{
+                    y: -8,
+                    scale: 1.02,
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{
+                    scale: 0.98,
+                    transition: { duration: 0.1 }
+                  }}
+                >
+                  <Card className="cursor-pointer relative aspect-[4/3] flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300">
                   <Link href={`/app/cell/${cell.id}`} className="block flex-1">
                     <div
                       className="h-full relative rounded-t-xl overflow-hidden"
@@ -204,6 +226,7 @@ export default function HomePage() {
                     </Button>
                   </CardFooter>
                 </Card>
+                </motion.div>
               );
             })}
           </div>
@@ -265,6 +288,7 @@ export default function HomePage() {
           </Form>
         </AlertDialogContent>
       </AlertDialog>
-    </MobileLayout>
+      </MobileLayout>
+    </PageTransition>
   );
 }

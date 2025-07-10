@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { MandalartCell as MandalartCellType } from '@/types/mandalart';
 import { CELL_COLORS } from '@/lib/colors';
 import { cn } from '@/lib/utils';
@@ -76,7 +77,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   // 빈 셀인 경우 기본 스타일로 표시
   if (isEmpty) {
     return (
-      <div
+      <motion.div
         className={cn(
           // 기본 스타일
           "aspect-square border-2 border-dashed border-gray-300 rounded p-1 sm:p-2",
@@ -84,20 +85,14 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           // 인터랙션 스타일
           onClick && [
             "cursor-pointer",
-            "hover:bg-gray-100 hover:border-primary-400",
             "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
-            "active:bg-gray-200",
           ],
-          // 애니메이션
-          animationEnabled && "transition-all duration-200",
           // 터치 최적화
-          touchOptimized && "touch-target active-scale",
+          touchOptimized && "touch-target",
           // 상태
           isHighlighted && "border-primary-400 bg-primary-50",
           // 다크 모드
-          "dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700",
-          // 모션 감소
-          "motion-reduce:transition-none",
+          "dark:bg-gray-800 dark:border-gray-600",
           className
         )}
         onClick={onClick}
@@ -105,6 +100,17 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         role="button"
         tabIndex={onClick ? 0 : -1}
         {...a11yProps}
+        whileHover={animationEnabled && onClick ? {
+          scale: 1.02,
+          borderColor: "rgb(99 102 241)", // primary-500
+          backgroundColor: "rgb(238 242 255)", // primary-50
+          transition: { duration: 0.2 }
+        } : {}}
+        whileTap={animationEnabled && onClick ? {
+          scale: 0.98,
+          transition: { duration: 0.1 }
+        } : {}}
+        initial={{ scale: 1 }}
       >
         <div className="flex flex-col items-center justify-center h-full text-center">
           <svg 
@@ -120,7 +126,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
             클릭하여<br/>추가
           </span>
         </div>
-      </div>
+      </motion.div>
     );
   }
   
@@ -137,7 +143,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       className={cn(
         // 기본 스타일
         "aspect-square border border-gray-200 rounded-lg p-2 sm:p-3 relative shadow-sm",
@@ -171,22 +177,14 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         // 인터랙션 스타일
         onClick && [
           "cursor-pointer",
-          "hover:shadow-xl hover:border-gray-400 hover:-translate-y-1",
           "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-          "active:scale-95",
         ],
         
-        // 애니메이션
-        animationEnabled && "transition-all duration-200",
-        
         // 터치 최적화
-        touchOptimized && "touch-target active-scale",
+        touchOptimized && "touch-target",
         
         // 다크 모드
-        "dark:border-gray-600 dark:hover:shadow-lg",
-        
-        // 모션 감소
-        "motion-reduce:transition-none motion-reduce:transform-none",
+        "dark:border-gray-600",
         
         className
       )}
@@ -197,6 +195,22 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
       onKeyDown={handleKeyDown}
       data-grid-index={gridIndex}
       {...a11yProps}
+      whileHover={animationEnabled && onClick && !isCenterCell ? {
+        scale: 1.03,
+        y: -4,
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        borderColor: "rgb(156 163 175)", // gray-400
+        transition: { 
+          duration: 0.2,
+          ease: "easeOut"
+        }
+      } : {}}
+      whileTap={animationEnabled && onClick ? {
+        scale: 0.97,
+        y: 0,
+        transition: { duration: 0.1 }
+      } : {}}
+      initial={{ scale: 1, y: 0 }}
     >
       {/* 이미지가 있는 경우 반투명 오버레이 추가 */}
       {imageUrl && (
@@ -396,7 +410,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
