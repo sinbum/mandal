@@ -250,17 +250,6 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   
   return (
     <div className={cn("relative", className)}>
-      {/* 그리드 제목 및 설명 */}
-      <div className="sr-only">
-        <h2>{gridTitle}</h2>
-        <p id="grid-description">{gridDescription}</p>
-        {enableKeyboardNavigation && (
-          <div id="keyboard-instructions">
-            화살표 키로 셀을 이동하고, Enter나 Space로 선택할 수 있습니다.
-            Home키로 첫 번째 셀, End키로 마지막 셀로 이동할 수 있습니다.
-          </div>
-        )}
-      </div>
       
       {/* 로딩 상태 */}
       {loading && (
@@ -291,7 +280,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       <div 
         className={cn(
           // 기본 그리드 스타일
-          "grid grid-cols-3 w-full max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto",
+          "grid grid-cols-3 w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl",
           
           // 간격 설정
           "gap-2 sm:gap-3 md:gap-4",
@@ -323,7 +312,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       </div>
       
       {/* 그리드 통계 정보 */}
-      <div className="mt-4 text-center">
+      <div className="mt-12 text-center">
         <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 bg-success rounded-full"></div>

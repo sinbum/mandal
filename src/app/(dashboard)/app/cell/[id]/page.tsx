@@ -244,7 +244,7 @@ export default function CellPage() {
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >
-      <div className="container mx-auto px-4 py-4 sm:py-8 h-screen">
+      <div className="container mx-auto px-4 py-4 sm:py-8 h-full flex flex-col">
         
         {/* 브레드크럼 네비게이션 */}
         <MandalartBreadcrumbs 
@@ -263,19 +263,21 @@ export default function CellPage() {
         )}
         
         {/* 만다라트 보드 */}
-        <MandalartBoard
-          centerCell={currentCell}
-          cells={childCells}
-          onUpdateCell={handleCellUpdate}
-          onToggleComplete={handleToggleCompletion}
-          onCreateCell={handleCreateCell}
-          onNavigate={(cellId) => {
-            // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
-            navigation.navigateToCell(cellId);
-            window.location.href = `/app/cell/${cellId}`;
-          }}
-          onEditCell={setEditingCell}
-        />
+        <div className="flex-grow w-full flex items-center justify-center p-2 sm:p-4">
+          <MandalartBoard
+            centerCell={currentCell}
+            cells={childCells}
+            onUpdateCell={handleCellUpdate}
+            onToggleComplete={handleToggleCompletion}
+            onCreateCell={handleCreateCell}
+            onNavigate={(cellId) => {
+              // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
+              navigation.navigateToCell(cellId);
+              window.location.href = `/app/cell/${cellId}`;
+            }}
+            onEditCell={setEditingCell}
+          />
+        </div>
       </div>
     </MobileLayout>
   );
