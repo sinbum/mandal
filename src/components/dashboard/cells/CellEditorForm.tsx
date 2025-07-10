@@ -20,6 +20,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
   cell,
   onSave,
   onCancel,
+  isNewCell = false,
 }) => {
   const [topic, setTopic] = useState(cell.topic || '');
   const [memo, setMemo] = useState(cell.memo || '');
@@ -68,7 +69,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
         <Card className="relative w-full max-w-lg bg-white shadow-2xl rounded-2xl border-gray-200 my-8 pointer-events-auto transform transition-all duration-300 ease-in-out scale-95 animate-in fade-in-90 slide-in-from-bottom-10">
           <form onSubmit={handleSubmit}>
             <CardHeader className="mb-4">
-              <CardTitle>셀 편집</CardTitle>
+              <CardTitle>{isNewCell ? '새 셀 생성' : '셀 편집'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* 주제 입력 */}
@@ -127,7 +128,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
               <Button
                 type="submit"
               >
-                저장
+                {isNewCell ? '생성' : '저장'}
               </Button>
             </CardFooter>
           </form>

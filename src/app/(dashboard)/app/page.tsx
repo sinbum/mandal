@@ -143,7 +143,7 @@ export default function HomePage() {
   return (
     <PageTransition>
       <MobileLayout
-        header={<AppHeaderBar onCreateMandalart={() => setCreateDialogOpen(true)} />}
+        header={<AppHeaderBar />}
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
       {rootCells.length === 0 ? (
@@ -199,8 +199,6 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">내 만다라트</h2>
-            <p className="text-gray-600">목표 달성을 위한 체계적인 계획을 확인하세요</p>
           </motion.div>
 
           {/* 모바일 카드 그리드 */}
@@ -218,6 +216,28 @@ export default function HomePage() {
                   }}
                 />
               ))}
+              {/* 새 만다라트 만들기 카드 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: (rootCells.slice(0, 6).length) * 0.1 }}
+                className="relative"
+              >
+                <div
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="w-full p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex flex-col items-center justify-center h-32 text-center">
+                    <div className="w-12 h-12 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-1">새 만다라트</h3>
+                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
 
@@ -236,6 +256,28 @@ export default function HomePage() {
                   }}
                 />
               ))}
+              {/* 새 만다라트 만들기 카드 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: (rootCells.slice(0, 6).length) * 0.1 }}
+                className="relative"
+              >
+                <div
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="w-full p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex flex-col items-center justify-center h-32 text-center">
+                    <div className="w-12 h-12 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-1">새 만다라트</h3>
+                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
 
@@ -254,6 +296,28 @@ export default function HomePage() {
                   }}
                 />
               ))}
+              {/* 새 만다라트 만들기 카드 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: (rootCells.slice(0, 9).length) * 0.1 }}
+                className="relative"
+              >
+                <div
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="w-full p-8 rounded-3xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex flex-col items-center justify-center h-48 text-center">
+                    <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">새 만다라트</h3>
+                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
           

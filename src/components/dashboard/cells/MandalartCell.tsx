@@ -4,6 +4,7 @@ import { MandalartCell as MandalartCellType } from '@/types/mandalart';
 import { CELL_COLORS } from '@/lib/colors';
 import { cn } from '@/lib/utils';
 import { designUtils } from '@/design-system/utils';
+import { useLongPress } from '@/hooks/useLongPress';
 
 interface MandalartCellProps {
   cell: MandalartCellType;
@@ -14,6 +15,8 @@ interface MandalartCellProps {
   hasChildren?: boolean;
   className?: string;
   onEdit?: (cell: MandalartCellType) => void;
+  // Long press 기능
+  onLongPress?: (cell: MandalartCellType) => void;
   // 접근성 개선
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -38,6 +41,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   hasChildren = false,
   className = '',
   onEdit,
+  onLongPress,
   'aria-label': ariaLabel,
   'aria-describedby': ariaDescribedby,
   touchOptimized = true,
@@ -51,6 +55,17 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   
   // 빈 셀인 경우 (id가 empty- 로 시작)
   const isEmpty = cell?.id?.startsWith('empty-');
+  
+  // Long press 핸들러 설정
+  const longPressHandlers = useLongPress({
+    onLongPress: () => {
+      if (!isEmpty && onLongPress) {
+        onLongPress(cell);
+      }
+    },
+    onClick: onClick,
+    delay: 600
+  });
   
   // 접근성 props 생성
   const a11yProps = designUtils.a11y.createAriaProps({
@@ -82,6 +97,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           // 기본 스타일
           "aspect-square border-2 border-dashed border-gray-300 rounded p-1 sm:p-2",
           "bg-gray-50 flex items-center justify-center",
+          // 텍스트 선택 방지
+          "select-none",
           // 인터랙션 스타일
           onClick && [
             "cursor-pointer",
@@ -95,10 +112,15 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           "dark:bg-gray-800 dark:border-gray-600",
           className
         )}
-        onClick={onClick}
+        {...longPressHandlers}
         onKeyDown={handleKeyDown}
         role="button"
         tabIndex={onClick ? 0 : -1}
+        style={{
+          touchAction: 'manipulation',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none'
+        }}
         {...a11yProps}
         whileHover={animationEnabled && onClick ? {
           scale: 1.02,
@@ -149,6 +171,9 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         "aspect-square border border-gray-200 rounded-lg p-2 sm:p-3 relative shadow-sm",
         "overflow-hidden", // 이미지 오버플로우 방지
         
+        // 텍스트 선택 방지
+        "select-none",
+        
         // 상태별 스타일
         isCenterCell && [
           "font-bold",
@@ -188,10 +213,16 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         
         className
       )}
-      style={{...colorStyle, ...backgroundStyle}}
+              style={{
+          ...colorStyle, 
+          ...backgroundStyle,
+          touchAction: 'manipulation',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none'
+        }}
       role={onClick ? "button" : "gridcell"}
       tabIndex={onClick ? 0 : -1}
-      onClick={onClick}
+      {...longPressHandlers}
       onKeyDown={handleKeyDown}
       data-grid-index={gridIndex}
       {...a11yProps}

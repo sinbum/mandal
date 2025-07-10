@@ -10,22 +10,21 @@ import HamburgerIcon from '@/components/animations/HamburgerIcon';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
-import { mandalartAPI } from '@/services/mandalartService';
+import { signOut } from '@/lib/auth/utils';
 import { toast } from "sonner";
 
 interface AppHeaderBarProps {
   showBackButton?: boolean;
   backHref?: string;
-  onCreateMandalart?: () => void;
 }
 
 const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
   showBackButton = false,
-  backHref = "/app",
-  onCreateMandalart
+  backHref = "/app"
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -35,28 +34,54 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
       setUser(user);
     }
     getUser();
+
+    // 인증 상태 변경 구독으로 실시간 동기화
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
-  const handleCreateMandalart = async () => {
-    if (onCreateMandalart) {
-      onCreateMandalart();
-    } else {
-      try {
-        setDrawerOpen(false);
-        const title = '새 만다라트';
-        const rootCellId = await mandalartAPI.createMandalart(title);
-        
-        window.location.href = `/app/cell/${rootCellId}`;
-      } catch (err) {
-        console.error('만다라트 생성 오류:', err);
-        toast.error('만다라트 생성에 실패했습니다');
+  const handleLogout = async () => {
+    if (isLoggingOut) return; // 중복 클릭 방지
+    
+    try {
+      setIsLoggingOut(true);
+      
+      // 즉시 UI 상태 초기화 (사용자 경험 개선)
+      setUser(null);
+      setDrawerOpen(false);
+      
+      // 기존 auth utils의 signOut 함수 사용 (에러 처리 포함)
+      const result = await signOut();
+      
+      if (!result.success) {
+        // 실패 시 사용자 상태 복원
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        toast.error(result.error || '로그아웃 중 오류가 발생했습니다');
+        return;
       }
+      
+      toast.success('성공적으로 로그아웃되었습니다');
+      router.push('/');
+      
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      // 실패 시 사용자 상태 복원
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      toast.error('로그아웃 중 예상치 못한 오류가 발생했습니다');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
+  const handleProfileNavigation = () => {
+    router.push('/app/profile');
   };
 
   return (
@@ -71,19 +96,25 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
         }
         rightElement={
           <div className="flex items-center gap-2">
-            {/* 데스크톱: 기존 버튼들 */}
-            <div className="flex items-center gap-2">
-              <AnimatedButton onClick={handleCreateMandalart} size="sm">새 만다라트 만들기</AnimatedButton>
-            </div>
             <div className="hidden sm:flex items-center gap-2">
               {user && (
-                <AnimatedButton onClick={handleLogout} size="sm">로그아웃</AnimatedButton>
+                <AnimatedButton 
+                  onClick={handleLogout} 
+                  size="sm"
+                  disabled={isLoggingOut}
+                >
+                  {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+                </AnimatedButton>
               )}
-              <Link href="/app/profile" aria-label="프로필">
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-blue-600">
+              <button 
+                onClick={handleProfileNavigation}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="프로필"
+              >
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-600 hover:text-blue-600">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-              </Link>           
+              </button>           
             </div>
             {/* 모바일: 햄버거 메뉴 */}
             <div className="sm:hidden">
@@ -102,7 +133,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
           <AnimatedButton 
             onClick={() => {
               setDrawerOpen(false);
-              window.location.href = '/app/profile';
+              router.push('/app/profile');
             }} 
             variant="secondary" 
             className="flex items-center gap-2"
@@ -127,11 +158,16 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
             설정
           </AnimatedButton>
           {user && (
-            <AnimatedButton onClick={handleLogout} variant="secondary" className="flex items-center gap-2">
+            <AnimatedButton 
+              onClick={handleLogout} 
+              variant="secondary" 
+              className="flex items-center gap-2"
+              disabled={isLoggingOut}
+            >
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              로그아웃
+              {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
             </AnimatedButton>
           )}
         </div>

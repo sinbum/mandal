@@ -31,10 +31,10 @@ interface MandalartCardProps {
 const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, onEdit }) => {
   const [showActions, setShowActions] = useState(false);
 
-  // 진행률 계산 (실제로는 자식 셀 완성도를 계산해야 하지만, 여기서는 임시로 랜덤 값 사용)
-  const progress = Math.floor(Math.random() * 100);
-  const completedTasks = Math.floor(progress * 8 / 100);
-  const totalTasks = 8;
+  // 진행률 계산 (실제 데이터 사용)
+  const progress = cell.progressInfo?.progressPercentage || 0;
+  const completedTasks = cell.progressInfo?.completedCells || 0;
+  const totalTasks = cell.progressInfo?.totalCells || 0;
 
   // 색상 테마 결정
   const getThemeColors = (color?: string) => {

@@ -13,6 +13,12 @@ export interface MandalartCell {
   position: number;
   mandalartId?: string; // 셀이 속한 만다라트 ID
   children?: MandalartCell[]; // 자식 셀 목록 (UI를 위해 확장)
+  // 진행률 관련 정보 (루트 셀에만 적용)
+  progressInfo?: {
+    totalCells: number;
+    completedCells: number;
+    progressPercentage: number;
+  };
 }
 
 /**
@@ -67,6 +73,7 @@ export interface CellEditorFormProps {
   cell: MandalartCell;
   onSave: (updatedCell: MandalartCell) => void;
   onCancel: () => void;
+  isNewCell?: boolean; // 새로 생성하는 셀인지 여부
 }
 
 export interface NewMandalartModalProps {

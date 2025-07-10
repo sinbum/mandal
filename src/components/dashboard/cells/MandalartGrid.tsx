@@ -11,6 +11,7 @@ interface MandalartGridProps {
   onCellUpdate: (cellId: string, updates: Partial<MandalartCell>) => void;
   onToggleComplete: (cellId: string) => void;
   onEditCell?: (cell: MandalartCell) => void;
+  onLongPress?: (cell: MandalartCell) => void;
   // 접근성 및 UX 개선
   className?: string;
   disabled?: boolean;
@@ -38,6 +39,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   onCellUpdate,
   onToggleComplete,
   onEditCell,
+  onLongPress,
   className,
   disabled = false,
   loading = false,
@@ -183,6 +185,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               onUpdate={(updates) => onCellUpdate(centerCell.id, updates)}
               onToggleComplete={() => onToggleComplete(centerCell.id)}
               onEdit={onEditCell ? () => onEditCell(centerCell) : undefined}
+              onLongPress={onLongPress}
               onKeyDown={(e) => handleKeyDown(e, index)}
               isCenterCell={true}
               isSelected={isSelected}
@@ -220,6 +223,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             onUpdate={(updates) => onCellUpdate(displayCell.id, updates)}
             onToggleComplete={() => onToggleComplete(displayCell.id)}
             onEdit={!isEmpty && onEditCell ? () => onEditCell(displayCell) : undefined}
+            onLongPress={!isEmpty ? onLongPress : undefined}
             onKeyDown={(e) => handleKeyDown(e, index)}
             isCenterCell={false}
             isSelected={isSelected}

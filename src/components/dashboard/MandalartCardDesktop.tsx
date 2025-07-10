@@ -41,10 +41,11 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
-  // 진행률 계산 및 가상 데이터
-  const progress = Math.floor(Math.random() * 100);
-  const completedTasks = Math.floor(progress * 8 / 100);
-  const totalTasks = 8;
+  // 진행률 계산 (실제 데이터 사용)
+  const progress = cell.progressInfo?.progressPercentage || 0;
+  const completedTasks = cell.progressInfo?.completedCells || 0;
+  const totalTasks = cell.progressInfo?.totalCells || 0;
+  // 가상 데이터 (추후 실제 데이터로 대체 예정)
   const daysLeft = Math.floor(Math.random() * 30) + 1;
   const priority = ['높음', '보통', '낮음'][Math.floor(Math.random() * 3)];
 

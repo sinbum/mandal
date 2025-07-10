@@ -11,6 +11,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
 import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
+import CellContextMenu from '@/components/dashboard/cells/CellContextMenu';
 import { setMostRecentMandalartCell } from '@/lib/utils';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
@@ -36,6 +37,9 @@ export default function CellPage() {
   
   // 삭제 상태 추가
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 컨텍스트 메뉴 상태 추가
+  const [contextMenuCell, setContextMenuCell] = useState<MandalartCell | null>(null);
   
   // 셀 조작 훅 사용
   const { 
@@ -122,34 +126,59 @@ export default function CellPage() {
     );
   };
   
-  // 새 셀 생성 처리
+  // 새 셀 생성 처리 (임시 셀 객체만 생성)
   const handleCreateCell = async (parentId: string, position: number) => {
-    try {
-      const newCell = await createCell(parentId, position);
-      
-      if (newCell) {
-        // 현재 셀과 자식 셀들을 새로 조회
-        const refreshedCell = await loadCell(cellId);
-        if (refreshedCell) {
-          setCurrentCell(refreshedCell);
-          const refreshedChildren = await loadChildCells(cellId);
-          setChildCells(refreshedChildren);
-        }
-        
-        // 새로 생성된 셀을 편집 모드로 설정
-        setEditingCell(newCell);
-      }
-    } catch (error) {
-      console.error('새 셀 생성 중 오류 발생:', error);
-      toast.error('새 셀 생성 중 오류가 발생했습니다');
-    }
+    // 부모 셀의 깊이 계산
+    const parentDepth = currentCell?.depth || 0;
+    
+    // 임시 셀 객체 생성 (DB에는 저장하지 않음)
+    const tempCell: MandalartCell = {
+      id: `temp-new-${Date.now()}`, // 임시 ID
+      topic: '새 셀',
+      memo: '',
+      color: '',
+      imageUrl: '',
+      isCompleted: false,
+      parentId: parentId,
+      depth: parentDepth + 1,
+      position: position,
+      mandalartId: currentCell?.mandalartId
+    };
+    
+    // 임시 셀을 편집 모드로 설정
+    setEditingCell(tempCell);
   };
   
   // 셀 편집 완료 처리
   const handleEditComplete = async (updatedCell: MandalartCell) => {
     try {
-      // 셀 업데이트 처리
-      await handleCellUpdate(updatedCell.id, updatedCell);
+      const isNewCell = updatedCell.id.startsWith('temp-new-');
+      
+      if (isNewCell) {
+        // 새 셀인 경우: DB에 실제로 생성
+        const newCell = await createCell(
+          updatedCell.parentId!, 
+          updatedCell.position,
+          {
+            topic: updatedCell.topic,
+            memo: updatedCell.memo,
+            color: updatedCell.color,
+            imageUrl: updatedCell.imageUrl,
+            isCompleted: updatedCell.isCompleted
+          }
+        );
+        
+        if (!newCell) {
+          toast.error('새 셀 생성에 실패했습니다');
+          return;
+        }
+        
+        toast.success('새 셀이 생성되었습니다');
+      } else {
+        // 기존 셀인 경우: 업데이트
+        await handleCellUpdate(updatedCell.id, updatedCell);
+        toast.success('셀이 저장되었습니다');
+      }
       
       // 편집 모드 종료
       setEditingCell(null);
@@ -162,12 +191,10 @@ export default function CellPage() {
         setChildCells(refreshedChildren);
       }
       
-      // 성공 메시지 표시
-      toast.success('셀이 저장되었습니다');
       // 최근 사용 셀 ID를 localStorage에 저장
       setMostRecentMandalartCell(cellId);
     } catch (error) {
-      console.error('셀 업데이트 중 오류 발생:', error);
+      console.error('셀 저장 중 오류 발생:', error);
       toast.error('셀 저장 중 오류가 발생했습니다');
     }
   };
@@ -175,6 +202,60 @@ export default function CellPage() {
   // 셀 편집 취소
   const handleEditCancel = () => {
     setEditingCell(null);
+  };
+
+  // Long press 핸들러
+  const handleCellLongPress = (cell: MandalartCell) => {
+    setContextMenuCell(cell);
+  };
+
+  // 컨텍스트 메뉴에서 편집 선택
+  const handleContextMenuEdit = () => {
+    if (contextMenuCell) {
+      setEditingCell(contextMenuCell);
+    }
+  };
+
+  // 컨텍스트 메뉴에서 완료 상태 토글
+  const handleContextMenuToggleComplete = () => {
+    if (contextMenuCell) {
+      handleToggleCompletion(contextMenuCell.id);
+    }
+  };
+
+  // 컨텍스트 메뉴에서 삭제 선택
+  const handleContextMenuDelete = async () => {
+    if (!contextMenuCell) return;
+    
+    const confirmDelete = window.confirm(`'${contextMenuCell.topic || '제목 없음'}' 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다.`);
+    
+    if (!confirmDelete) return;
+    
+    try {
+      const success = await deleteCell(contextMenuCell.id);
+      
+      if (success) {
+        toast.success('셀이 삭제되었습니다');
+        
+        // 현재 페이지의 셀이 삭제된 경우 부모로 이동
+        if (contextMenuCell.id === currentCell?.id) {
+          if (currentCell.parentId) {
+            router.push(`/app/cell/${currentCell.parentId}`);
+          } else {
+            router.push('/app');
+          }
+        } else {
+          // 자식 셀이 삭제된 경우 목록 새로고침
+          const refreshedChildren = await loadChildCells(cellId);
+          setChildCells(refreshedChildren);
+        }
+      } else {
+        toast.error('셀 삭제에 실패했습니다');
+      }
+    } catch (error) {
+      console.error('셀 삭제 중 오류 발생:', error);
+      toast.error('셀 삭제 중 오류가 발생했습니다');
+    }
   };
 
   // 셀 삭제 처리
@@ -259,8 +340,19 @@ export default function CellPage() {
             cell={editingCell}
             onSave={handleEditComplete}
             onCancel={handleEditCancel}
+            isNewCell={editingCell.id.startsWith('temp-new-')}
           />
         )}
+
+        {/* 컨텍스트 메뉴 */}
+        <CellContextMenu
+          isOpen={!!contextMenuCell}
+          onClose={() => setContextMenuCell(null)}
+          cell={contextMenuCell}
+          onEdit={handleContextMenuEdit}
+          onToggleComplete={handleContextMenuToggleComplete}
+          onDelete={handleContextMenuDelete}
+        />
         
         {/* 만다라트 보드 */}
         <div className="flex-grow w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
@@ -276,6 +368,7 @@ export default function CellPage() {
               window.location.href = `/app/cell/${cellId}`;
             }}
             onEditCell={setEditingCell}
+            onLongPress={handleCellLongPress}
           />
         </div>
       </div>

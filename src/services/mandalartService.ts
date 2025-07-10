@@ -276,14 +276,62 @@ export class MandalartService {
         .order('created_at', { ascending: false });
       
       if (cellsError) throw cellsError;
-      console.log('rootCells', rootCells);
-      return rootCells.map(cell => this.convertDbCellToModel(cell));
+      
+      // 각 루트 셀에 대해 진행률 계산
+      const rootCellsWithProgress = await Promise.all(
+        rootCells.map(async (cell) => {
+          const progressInfo = await this.calculateMandalartProgress(cell.mandalart_id);
+          const convertedCell = this.convertDbCellToModel(cell);
+          convertedCell.progressInfo = progressInfo;
+          return convertedCell;
+        })
+      );
+      
+      console.log('rootCells with progress', rootCellsWithProgress);
+      return rootCellsWithProgress;
     } catch (err) {
       console.error('사용자 셀 목록 조회 실패:', err);
       throw err;
     }
   }
   
+  /**
+   * 만다라트의 진행률 계산
+   */
+  private async calculateMandalartProgress(mandalartId: string): Promise<{
+    totalCells: number;
+    completedCells: number;
+    progressPercentage: number;
+  }> {
+    try {
+      // 해당 만다라트의 모든 셀 조회 (루트 제외)
+      const { data: allCells, error } = await this.supabase
+        .from('mandalart_cells')
+        .select('is_completed')
+        .eq('mandalart_id', mandalartId)
+        .not('parent_id', 'is', null); // 루트 셀 제외
+      
+      if (error) throw error;
+      
+      const totalCells = allCells.length;
+      const completedCells = allCells.filter(cell => cell.is_completed).length;
+      const progressPercentage = totalCells > 0 ? Math.round((completedCells / totalCells) * 100) : 0;
+      
+      return {
+        totalCells,
+        completedCells,
+        progressPercentage
+      };
+    } catch (err) {
+      console.error('진행률 계산 실패:', err);
+      return {
+        totalCells: 0,
+        completedCells: 0,
+        progressPercentage: 0
+      };
+    }
+  }
+
   /**
    * 셀 경로 구성
    */
