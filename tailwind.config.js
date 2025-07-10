@@ -359,6 +359,7 @@ module.exports = {
     },
   },
   plugins: [
+    require('@tailwindcss/line-clamp'),
     require('daisyui'),
     function({ addUtilities, addComponents, addVariant }) {
       // 스크롤바 유틸리티

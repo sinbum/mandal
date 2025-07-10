@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
 import { 
   verifyEmailToken, 
   signInWithEmail, 
   checkUserSession, 
-  validateAuthForm,
-  ToastMessage 
+  validateAuthForm
 } from '@/lib/auth/utils';
 import { useFormState } from '@/hooks/useFormState';
 import { useNavigation } from '@/utils/navigation';
@@ -24,7 +24,6 @@ export default function AuthPage() {
   const router = useRouter();
   const navigation = useNavigation();
   const searchParams = useSearchParams();
-  const [toast, setToast] = useState<ToastMessage | null>(null);
   
   const formState = useFormState<LoginFormData>({
     email: '',
@@ -40,7 +39,7 @@ export default function AuthPage() {
 
       // URL에서 에러 파라미터 확인
       if (errorParam === 'confirmation_failed') {
-        formState.setError(AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
+        toast.error(AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
         return;
       }
 
@@ -54,10 +53,7 @@ export default function AuthPage() {
           }
 
           if (result.data.session) {
-            setToast({
-              message: AUTH_MESSAGES.EMAIL_VERIFICATION_SUCCESS,
-              type: 'success'
-            });
+            toast.success(AUTH_MESSAGES.EMAIL_VERIFICATION_SUCCESS);
             
             // 성공 후 앱 페이지로 이동
             setTimeout(() => {
@@ -66,7 +62,7 @@ export default function AuthPage() {
           }
         } catch (err: unknown) {
           console.error('이메일 인증 오류:', err);
-          formState.setError(err instanceof Error ? err.message : AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
+          toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
         } finally {
           formState.setLoading(false);
         }
@@ -101,7 +97,7 @@ export default function AuthPage() {
     // 유효성 검사
     const validationError = validateAuthForm(formState.data.email, formState.data.password);
     if (validationError) {
-      formState.setError(validationError);
+      toast.error(validationError);
       formState.setLoading(false);
       return;
     }
@@ -113,16 +109,13 @@ export default function AuthPage() {
         throw new Error(result.error);
       }
       
-      setToast({
-        message: AUTH_MESSAGES.LOGIN_SUCCESS,
-        type: 'success'
-      });
+      toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
       
       // 즉시 앱으로 이동
       navigation.navigateToApp();
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
-      formState.setError(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);
+      toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);
     } finally {
       formState.setLoading(false);
     }
@@ -138,8 +131,6 @@ export default function AuthPage() {
         onSubmit={handleLogin}
         isLoading={formState.isLoading}
         error={formState.error}
-        toast={toast}
-        onToastClose={() => setToast(null)}
         submitLabel="로그인"
         loadingLabel={LOADING_STATES.LOGIN}
         alternativeAction={{

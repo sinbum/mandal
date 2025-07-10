@@ -15,10 +15,10 @@ export async function GET() {
       );
     }
     
-    return redirect('/auth/login');
+    return redirect('/');
     
   } catch (error) {
     console.error('Logout error:', error);
-    return redirect('/auth/login');
+    return redirect('/');
   }
 }

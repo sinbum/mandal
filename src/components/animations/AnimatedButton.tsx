@@ -5,13 +5,19 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { Button, ButtonProps } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
+type MotionButtonProps = Omit<HTMLMotionProps<"button">, 
+  'children' | 'className' | 'onClick' | 'onDrag' | 'onDragStart' | 'onDragEnd' | 
+  'onMouseDown' | 'onMouseUp' | 'onTouchStart' | 'onTouchEnd' | 'onPointerDown' | 'onPointerUp' |
+  'disabled' | 'type' | 'ref'
+>;
+
 interface AnimatedButtonProps extends Omit<ButtonProps, 'asChild'> {
-  motionProps?: Omit<HTMLMotionProps<"button">, 'children' | 'className' | 'onClick'>;
+  motionProps?: MotionButtonProps;
   animationEnabled?: boolean;
 }
 
 const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
-  ({ children, motionProps = {}, animationEnabled = true, className, ...buttonProps }, ref) => {
+  ({ children, motionProps = {}, animationEnabled = true, className, variant, size, onClick, disabled, type, ...otherProps }, ref) => {
     const defaultMotionProps: HTMLMotionProps<"button"> = {
       whileHover: animationEnabled ? {
         scale: 1.02,
@@ -42,23 +48,30 @@ const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
       icon: "h-10 w-10",
     };
 
-    const variant = buttonProps.variant || "default";
-    const size = buttonProps.size || "default";
+    const currentVariant = variant || "default";
+    const currentSize = size || "default";
+
+    // Extract safe props for motion.button
+    const { style, id, ...restMotionProps } = defaultMotionProps;
 
     return (
       <motion.button
         ref={ref}
+        id={id}
+        style={style}
         className={cn(
           // 기본 버튼 스타일
           "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           // variant 스타일
-          buttonVariants[variant as keyof typeof buttonVariants],
+          buttonVariants[currentVariant as keyof typeof buttonVariants],
           // size 스타일
-          buttonSizes[size as keyof typeof buttonSizes],
+          buttonSizes[currentSize as keyof typeof buttonSizes],
           className
         )}
-        {...defaultMotionProps}
-        {...buttonProps}
+        onClick={onClick}
+        disabled={disabled}
+        type={type}
+        {...restMotionProps}
       >
         {children}
       </motion.button>

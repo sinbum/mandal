@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
-import { signUpWithEmail, validateAuthForm, ToastMessage } from '@/lib/auth/utils';
+import { signUpWithEmail, validateAuthForm } from '@/lib/auth/utils';
 import { useFormState } from '@/hooks/useFormState';
 import { useNavigation } from '@/utils/navigation';
 import { AUTH_MESSAGES, LOADING_STATES } from '@/constants/app';
@@ -18,7 +19,6 @@ interface SignupFormData {
 export default function SignupPage() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [toast, setToast] = useState<ToastMessage | null>(null);
   
   const formState = useFormState<SignupFormData>({
     email: '',
@@ -38,7 +38,7 @@ export default function SignupPage() {
       formState.data.confirmPassword
     );
     if (validationError) {
-      formState.setError(validationError);
+      toast.error(validationError);
       formState.setLoading(false);
       return;
     }
@@ -50,17 +50,14 @@ export default function SignupPage() {
         throw new Error(result.error);
       }
       
-      setToast({
-        message: AUTH_MESSAGES.SIGNUP_SUCCESS,
-        type: 'success'
-      });
+      toast.success(AUTH_MESSAGES.SIGNUP_SUCCESS);
       
       // 로그인 페이지로 이동
       setTimeout(() => {
         navigation.navigateToLogin();
       }, 3000);
     } catch (err: unknown) {
-      formState.setError(err instanceof Error ? err.message : AUTH_MESSAGES.SIGNUP_FAILED);
+      toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.SIGNUP_FAILED);
     } finally {
       formState.setLoading(false);
     }
@@ -82,8 +79,6 @@ export default function SignupPage() {
         onSubmit={handleSignUp}
         isLoading={formState.isLoading}
         error={formState.error}
-        toast={toast}
-        onToastClose={() => setToast(null)}
         submitLabel="회원가입"
         loadingLabel={LOADING_STATES.SIGNUP}
         alternativeAction={{

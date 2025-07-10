@@ -56,7 +56,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/auth/login');
+    router.push('/');
   };
 
   return (

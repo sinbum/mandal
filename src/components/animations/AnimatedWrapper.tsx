@@ -57,8 +57,19 @@ const AnimatedWrapper: React.FC<AnimatedWrapperProps> = ({
   const transition = {
     duration,
     delay,
-    ease: "easeOut"
+    ease: "easeOut" as const
   };
+
+  if (animation === 'custom') {
+    return (
+      <motion.div
+        transition={transition}
+        {...motionProps}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -66,7 +77,6 @@ const AnimatedWrapper: React.FC<AnimatedWrapperProps> = ({
       animate={animationConfig.animate}
       exit={animationConfig.exit}
       transition={transition}
-      {...motionProps}
     >
       {children}
     </motion.div>
