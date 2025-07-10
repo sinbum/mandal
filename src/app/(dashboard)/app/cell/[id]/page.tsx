@@ -13,8 +13,6 @@ import { setMostRecentMandalartCell } from '@/lib/utils';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
-import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 
 /**
  * 셀 상세 페이지
@@ -240,31 +238,20 @@ export default function CellPage() {
     <MobileLayout
       header={
         <HeaderBar
-          title={currentCell?.topic || '만다라트'}
           showBackButton
           href="/app"
         />
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >
-      <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8 h-screen">
         
         {/* 브레드크럼 네비게이션 */}
-        <MandalartBreadcrumbs path={navigation.breadcrumbPath} />
-        
-        {/* 셀 삭제 버튼 */}
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={handleDeleteCell}
-            variant="destructive"
-            size="sm"
-            disabled={isDeleting || !currentCell}
-            className="flex items-center gap-2"
-          >
-            <Trash2 size={16} />
-            {isDeleting ? '삭제 중...' : '셀 삭제'}
-          </Button>
-        </div>
+        <MandalartBreadcrumbs 
+          path={navigation.breadcrumbPath} 
+          onDeleteCell={handleDeleteCell}
+          isDeleting={isDeleting}
+        />
         
         {/* 셀 편집 모달 */}
         {editingCell && (

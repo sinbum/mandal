@@ -68,7 +68,7 @@ export interface ToastProps {
 }
 
 export interface HeaderBarProps {
-  title: ReactNode;
+  title?: ReactNode;
   showBackButton?: boolean;
   onBackClick?: () => void;
   rightElement?: ReactNode;

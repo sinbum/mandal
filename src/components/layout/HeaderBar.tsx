@@ -35,13 +35,15 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
             </Link>
           )
         )}
-        <Link href="/app" className="hover:text-gray-600">
-          {typeof title === 'string' ? (
-            <h1 className="text-lg font-semibold text-gray-800 truncate">{title}</h1>
-          ) : (
-            title
-          )}
-        </Link>
+        {title && (
+          <Link href="/app" className="hover:text-gray-600">
+            {typeof title === 'string' ? (
+              <h1 className="text-lg font-semibold text-gray-800 truncate">{title}</h1>
+            ) : (
+              title
+            )}
+          </Link>
+        )}
       </div>
 
       
