@@ -45,7 +45,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full max-w-xl mx-auto">
       <MandalartGrid
         centerCell={centerCell}
         cells={cells}
