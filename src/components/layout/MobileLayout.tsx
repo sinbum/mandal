@@ -29,7 +29,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       </main>
       
       {footer && (
-        <div className="w-full bg-white border-t border-gray-200">
+        <div className="w-full bg-white">
           {footer}
         </div>
       )}

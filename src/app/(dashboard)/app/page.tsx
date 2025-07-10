@@ -29,11 +29,9 @@ import {
 } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import HeaderBar from '@/components/layout/HeaderBar';
-import Image from 'next/image';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
-import SlideUpPanel from '@/components/ui/SlideUpPanel';
+import AppHeaderBar from '@/components/layout/AppHeaderBar';
 import {
   Card,
   CardContent,
@@ -50,12 +48,10 @@ import {
 export default function HomePage() {
   const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cellToDelete, setCellToDelete] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const createForm = useForm({
     defaultValues: {
@@ -63,18 +59,13 @@ export default function HomePage() {
     }
   });
 
-  const supabase = createClient();
   const router = useRouter();
 
-  // 사용자 정보와 루트 셀 로드
+  // 루트 셀 로드
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        // 사용자 정보 가져오기
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-
         const cells = await mandalartAPI.fetchUserCells();
         setRootCells(cells);
       } catch (err) {
@@ -104,12 +95,6 @@ export default function HomePage() {
       setError('만다라트 생성에 실패했습니다');
       setIsLoading(false);
     }
-  };
-
-  
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
   };
 
   // 만다라트 삭제 다이얼로그 표시
@@ -161,70 +146,9 @@ export default function HomePage() {
 
   return (
     <MobileLayout
-      header={
-        <HeaderBar
-          title={
-            <div className="flex items-center gap-2">
-              <Image src="/logo/android-chrome-192x192.png" alt="로고" width={32} height={32} className="rounded" />
-              <span className="hidden sm:inline">만월</span>
-            </div>
-          }
-          rightElement={
-            <div className="flex items-center gap-2">
-              {/* 데스크톱: 기존 버튼들 */}
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setCreateDialogOpen(true)} size="sm">새 만다라트 만들기</Button>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                {user && (
-                  <Button onClick={handleLogout} size="sm">로그아웃</Button>
-                )}
-                <Link href="/app/profile" aria-label="프로필">
-                  <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500 hover:text-blue-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </Link>           
-               
-              </div>
-              {/* 모바일: 햄버거 메뉴 */}
-              <button className="sm:hidden p-2" aria-label="메뉴" onClick={() => setDrawerOpen(true)}>
-                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-700">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          }
-        />
-      }
+      header={<AppHeaderBar onCreateMandalart={() => setCreateDialogOpen(true)} />}
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >
-      
-      {/* 햄버거 메뉴 드로어(모바일) */}
-      <SlideUpPanel isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="메뉴">
-        <div className="flex flex-col gap-4">
-          {user && (
-            <Button onClick={handleLogout} variant="secondary">로그아웃</Button>
-          )}
-          <Link href="/app/profile" className="flex items-center gap-2 text-gray-700 hover:text-blue-600" onClick={() => setDrawerOpen(false)}>
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            프로필
-          </Link>
-          <button className="flex items-center gap-2 text-gray-700 hover:text-yellow-500" aria-label="테마 전환">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.95 7.07l-.71-.71M4.05 4.93l-.71-.71M17 12a5 5 0 11-10 0 5 5 0 0110 0z" />
-            </svg>
-            테마 전환
-          </button>
-          <button className="flex items-center gap-2 text-gray-700 hover:text-green-600" aria-label="설정">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
-            </svg>
-            설정
-          </button>
-        </div>
-      </SlideUpPanel>
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}

@@ -23,16 +23,28 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
     document.addEventListener('keydown', handleEscape);
     
-    // 패널이 열리면 body의 스크롤을 방지
+    // 패널이 열리면 body의 스크롤을 방지하되, 레이아웃 시프트 방지
     if (isOpen) {
+      // 현재 스크롤바 너비 계산
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // 원래 스타일 저장
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // 스크롤 막고 패딩으로 보상
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+      
+      // cleanup 함수에서 원래 스타일 복원하도록 ref에 저장
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      };
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 

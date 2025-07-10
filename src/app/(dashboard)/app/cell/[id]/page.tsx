@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import MandalartBoard from '@/components/dashboard/MandalartBoard';
 import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
@@ -10,9 +12,9 @@ import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
 import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
 import { setMostRecentMandalartCell } from '@/lib/utils';
-import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
+import AppHeaderBar from '@/components/layout/AppHeaderBar';
 
 /**
  * 셀 상세 페이지
@@ -236,14 +238,10 @@ export default function CellPage() {
   
   return (
     <MobileLayout
-      header={
-        <HeaderBar
-          showBackButton
-          href="/app"
-        />
-      }
+      header={<AppHeaderBar showBackButton backHref="/app" />}
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >
+
       <div className="container mx-auto px-4 py-4 sm:py-8 h-full flex flex-col">
         
         {/* 브레드크럼 네비게이션 */}
