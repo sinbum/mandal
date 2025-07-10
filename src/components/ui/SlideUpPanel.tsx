@@ -16,6 +16,9 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
+  // 터치 기기 감지
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  
   // 드래그 리사이즈를 위한 상태
   const [panelHeight, setPanelHeight] = useState<number>(() => {
     return typeof height === 'number' ? height : 400;
@@ -29,6 +32,20 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   const [currentPanelY, setCurrentPanelY] = useState(0);
   const [dragType, setDragType] = useState<'resize' | 'close' | null>(null);
 
+  // 터치 기기 감지
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
+    
+    checkTouchDevice();
+    window.addEventListener('resize', checkTouchDevice);
+    
+    return () => {
+      window.removeEventListener('resize', checkTouchDevice);
+    };
+  }, []);
+
   // 컴포넌트 마운트 시 저장된 높이 가져오기
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +56,11 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
   // 드래그 핸들러들
   const handleDragStart = useCallback((event: React.PointerEvent | React.TouchEvent, source: 'handle' | 'content' = 'handle') => {
+    // 터치 이벤트가 아닌 경우 (마우스 등) content에서의 드래그는 무시
+    if (source === 'content' && !('touches' in event)) {
+      return;
+    }
+    
     setIsDragging(true);
     const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     setDragStartY(clientY);
@@ -261,20 +283,22 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
           style={{
             height: `${panelHeight - (title ? 120 : 60)}px`, // 헤더와 드래그 핸들 높이 제외
           }}
-          onPointerDown={(e) => {
-            // 스크롤이 맨 위에 있을 때만 드래그하여 닫기 활성화
-            const target = e.currentTarget;
-            if (target.scrollTop === 0) {
-              handleDragStart(e, 'content');
+          {...(isTouchDevice && {
+            onPointerDown: (e) => {
+              // 터치 기기에서만 스크롤이 맨 위에 있을 때만 드래그하여 닫기 활성화
+              const target = e.currentTarget;
+              if (target.scrollTop === 0) {
+                handleDragStart(e, 'content');
+              }
+            },
+            onTouchStart: (e) => {
+              // 터치 기기에서만 스크롤이 맨 위에 있을 때만 드래그하여 닫기 활성화
+              const target = e.currentTarget;
+              if (target.scrollTop === 0) {
+                handleDragStart(e, 'content');
+              }
             }
-          }}
-          onTouchStart={(e) => {
-            // 스크롤이 맨 위에 있을 때만 드래그하여 닫기 활성화
-            const target = e.currentTarget;
-            if (target.scrollTop === 0) {
-              handleDragStart(e, 'content');
-            }
-          }}
+          })}
         >
           {children}
         </div>
