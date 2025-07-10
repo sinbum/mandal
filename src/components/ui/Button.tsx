@@ -167,10 +167,7 @@ function Button({
       return <LoadingSpinner />;
     }
     if (icon) {
-      return React.cloneElement(icon as React.ReactElement, {
-        'aria-hidden': true,
-        className: cn('size-4 shrink-0', (icon as React.ReactElement).props?.className),
-      });
+      return icon;
     }
     return null;
   };

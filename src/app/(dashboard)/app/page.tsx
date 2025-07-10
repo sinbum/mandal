@@ -34,6 +34,15 @@ import Image from 'next/image';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardAction
+} from '@/components/ui/card';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -235,46 +244,53 @@ export default function HomePage() {
         </div>
       ) : (
         <div className="px-4 pb-24 sm:pb-4 scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 max-w-7xl mx-auto scrollbar-hide">
-            {rootCells.map(cell => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto scrollbar-hide">
+            {rootCells.slice(0, 4).map(cell => {
               return (
-              <Link
-                key={cell.id}
-                href={`/app/cell/${cell.id}`}
-                className="group rounded-lg overflow-hidden hover:shadow-lg transition-shadow flex flex-col relative outline-none focus:outline-none border border-gray-200 hover:border-gray-300 w-full"
-              >
-                <div
-                  className="aspect-[4/3] relative"
-                  style={{
-                    backgroundColor: cell.color || '#ffffff',
-                    backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
-                >
-                  {/* 배경 오버레이 */}
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <h2 className="text-lg sm:text-xl font-bold text-center text-white drop-shadow-lg px-2">
-                      {cell.topic || '무제'}
-                    </h2>
-                  </div>
-                </div>
-                <div className="bg-white p-3 flex justify-between items-center">
-                  <span className="text-sm text-gray-700">
-                    {cell.isCompleted ? '완료됨' : '진행 중'}
-                  </span>
-                  <Button
-                    className="p-1.5 rounded-full text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
-                    onClick={(e) => openDeleteDialog(cell.id, e)}
-                    aria-label="삭제"
-                  >
-                    <Trash size={14} />
-                  </Button>
-                </div>
-              </Link>
-            );
+                <Card key={cell.id} className="group hover:shadow-lg transition-shadow cursor-pointer relative aspect-[4/3] flex flex-col">
+                  <Link href={`/app/cell/${cell.id}`} className="block flex-1">
+                    <div
+                      className="h-full relative rounded-t-xl overflow-hidden"
+                      style={{
+                        backgroundColor: cell.color || '#ffffff',
+                        backgroundImage: cell.imageUrl ? `url(${cell.imageUrl})` : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    >
+                      {/* 배경 오버레이 */}
+                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                        <CardTitle className="text-lg sm:text-xl font-bold text-center text-white drop-shadow-lg px-2">
+                          {cell.topic || '무제'}
+                        </CardTitle>
+                      </div>
+                    </div>
+                  </Link>
+                  
+                  <CardFooter className="flex justify-between items-center py-1 px-3">
+                    <CardDescription className="text-sm text-gray-700">
+                      {cell.isCompleted ? '완료됨' : '진행 중'}
+                    </CardDescription>
+                    <Button
+                      className="p-1.5 rounded-full text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
+                      onClick={(e) => openDeleteDialog(cell.id, e)}
+                      aria-label="삭제"
+                    >
+                      <Trash size={14} />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
             })}
           </div>
+          
+          {rootCells.length > 4 && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                {rootCells.length - 4}개의 만다라트가 더 있습니다.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

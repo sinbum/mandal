@@ -263,7 +263,7 @@ export default function CellPage() {
         )}
         
         {/* 만다라트 보드 */}
-        <div className="flex-grow w-full flex items-center justify-center p-2 sm:p-4">
+        <div className="flex-grow w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
           <MandalartBoard
             centerCell={currentCell}
             cells={childCells}
