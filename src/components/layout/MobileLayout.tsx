@@ -8,28 +8,20 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   footer,
   className = '',
 }) => {
-  const headerHeight = header ? `${LAYOUT.HEADER_HEIGHT}px` : '0px';
-  const footerHeight = footer ? `${LAYOUT.FOOTER_HEIGHT}px` : '0px';
-  
   return (
-    <div className={`w-full h-full flex flex-col bg-white ${className}`}>
+    <div className={`w-full h-[100dvh] flex flex-col bg-white ${className}`}>
       {header && (
-        <div className="w-full">
+        <div className="w-full flex-shrink-0">
           {header}
         </div>
       )}
       
-      <main 
-        className="flex-1 overflow-hidden p-4"
-        style={{
-          height: `calc(100vh - ${headerHeight} - ${footerHeight})`,
-        }}
-      >
+      <main className="flex-1 min-h-0 overflow-hidden">
         {children}
       </main>
       
       {footer && (
-        <div className="w-full bg-white">
+        <div className="w-full flex-shrink-0 bg-white">
           {footer}
         </div>
       )}

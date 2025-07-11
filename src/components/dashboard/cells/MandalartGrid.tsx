@@ -288,7 +288,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         <div className="flex-1 flex flex-col">
           {/* 그리드 통계 정보 - 데스크탑 사이드바가 없을 때만 표시 */}
           {showProgressStats && (
-          <div className="mb-4 sm:mb-6 lg:hidden text-center flex-shrink-0">
+          <div className="mb-4 sm:mb-4 md:mb-4 lg:hidden text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-success rounded-full"></div>
@@ -305,7 +305,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             </div>
             
             {/* 진행률 표시 */}
-            <div className="mt-2 sm:mt-[1vh] max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
+            <div className="mt-4 pt-2 sm:mt-4 max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
               <div className="flex items-center justify-between text-xs sm:text-[clamp(0.75rem,1.2vw,1.25rem)] text-muted-foreground mb-1 sm:mb-[0.5vh]">
                 <span>진행률</span>
                 <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
@@ -321,12 +321,13 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           )}
 
           {/* 그리드 컨테이너 */}
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center pt-4 mt-4 sm:pt-0 sm:mt-0">
             <div 
               className={cn(
                 // 기본 그리드 스타일
                 "grid grid-cols-3 w-full",
-                "max-w-[min(85vw,calc(100vh-16rem))] sm:max-w-[min(80vw,80vh,theme(maxWidth.2xl))] md:max-w-[min(80vw,80vh,theme(maxWidth.3xl))] lg:max-w-[min(60vw,60vh,theme(maxWidth.4xl))] xl:max-w-[min(60vw,60vh,theme(maxWidth.5xl))] 2xl:max-w-[min(60vw,60vh,theme(maxWidth.8xl))]",
+                "max-w-[min(90vw,calc(100vh-8rem))] sm:max-w-[min(85vw,calc(100vh-10rem))] md:max-w-[min(80vw,calc(100vh-8rem))] lg:max-w-[min(60vw,calc(100vh-10rem))] xl:max-w-[min(55vw,calc(100vh-10rem))] 2xl:max-w-[min(50vw,calc(100vh-10rem))]",
+                "max-h-[min(90vw,calc(100vh-8rem))] sm:max-h-[min(85vw,calc(100vh-10rem))] md:max-h-[min(80vw,calc(100vh-8rem))] lg:max-h-[min(60vw,calc(100vh-10rem))] xl:max-h-[min(55vw,calc(100vh-10rem))] 2xl:max-h-[min(50vw,calc(100vh-10rem))]",
                 "aspect-square", // 정사각형 비율 유지
                 
                 // 간격 설정

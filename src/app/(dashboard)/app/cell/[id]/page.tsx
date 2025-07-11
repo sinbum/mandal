@@ -332,7 +332,7 @@ export default function CellPage() {
         
         {/* 메인 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-8 h-full flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
+          <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-2 h-full flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
             
             {/* 브레드크럼 네비게이션 */}
             <div className="flex-shrink-0">
@@ -364,7 +364,7 @@ export default function CellPage() {
             />
             
             {/* 만다라트 보드 */}
-            <div className="flex-1 w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
+            <div className="flex-1 w-full flex items-start justify-center pt-8 sm:pt-4 pb-8 sm:pb-2 px-2 sm:p-4 min-h-0">
               <MandalartBoard
                 centerCell={currentCell}
                 cells={childCells}
@@ -385,7 +385,7 @@ export default function CellPage() {
         </div>
 
         {/* 데스크탑 사이드바 - lg 이상에서만 표시 */}
-        <div className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 p-6 bg-gray-50 dark:bg-gray-900">
+        <div className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 p-6 bg-gray-50 dark:bg-gray-900 justify-center">
           <ProgressSidebar cells={childCells} />
         </div>
       </div>
