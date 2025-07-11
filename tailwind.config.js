@@ -19,7 +19,9 @@ module.exports = {
         "2xl": "6rem",
       },
       screens: {
-        "2xl": "1400px",
+        "2xl": "1600px",
+        "3xl": "2000px",
+        "4xl": "2400px",
       },
     },
     screens: {
@@ -229,6 +231,9 @@ module.exports = {
       maxWidth: {
         '8xl': '88rem',
         '9xl': '96rem',
+        '10xl': '120rem',
+        '11xl': '140rem',
+        '12xl': '160rem',
       },
       zIndex: {
         'hide': '-1',

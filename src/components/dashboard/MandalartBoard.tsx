@@ -47,7 +47,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   };
 
   return (
-    <div className="w-full h-full max-w-xl mx-auto ">
+    <div className="w-full max-w-[min(85vw,calc(100vh-16rem))] sm:max-w-[min(80vw,80vh,theme(maxWidth.2xl))] md:max-w-[min(80vw,80vh,theme(maxWidth.3xl))] lg:max-w-[min(80vw,80vh,theme(maxWidth.4xl))] xl:max-w-[min(80vw,80vh,theme(maxWidth.5xl))] 2xl:max-w-[min(80vw,80vh,theme(maxWidth.8xl))] mx-auto">
       <MandalartGrid
         centerCell={centerCell}
         cells={cells}

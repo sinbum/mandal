@@ -20,7 +20,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       )}
       
       <main 
-        className="flex-1 overflow-y-auto overscroll-contain p-4"
+        className="flex-1 overflow-hidden p-4"
         style={{
           height: `calc(100vh - ${headerHeight} - ${footerHeight})`,
         }}

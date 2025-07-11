@@ -141,7 +141,7 @@ export default function HomePage() {
   return (
     <PageTransition>
       <MobileLayout
-        header={<AppHeaderBar />}
+        header={<div className="hidden sm:block"><AppHeaderBar /></div>}
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
       {rootCells.length === 0 ? (

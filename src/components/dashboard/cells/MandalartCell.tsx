@@ -136,7 +136,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
       >
         <div className="flex flex-col items-center justify-center h-full text-center">
           <svg 
-            className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 mb-1" 
+            className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 text-gray-400 mb-1" 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          <span className="text-gray-400 text-[9px] sm:text-[10px] leading-tight">
+          <span className="text-gray-400 text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg leading-tight">
             클릭하여<br/>추가
           </span>
         </div>
@@ -254,7 +254,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         {isCompleted && (
           <div className="bg-success/90 p-1 rounded-full shadow-sm">
             <svg 
-              className="w-3 h-3 sm:w-4 sm:h-4 text-white" 
+              className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 text-white" 
               fill="currentColor" 
               viewBox="0 0 20 20"
               aria-hidden="true"
@@ -268,7 +268,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         {hasChildren && (
           <div className="bg-primary/90 p-1 rounded-full shadow-sm">
             <svg 
-              className="w-3 h-3 sm:w-4 sm:h-4 text-white" 
+              className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 text-white" 
               fill="currentColor" 
               viewBox="0 0 20 20"
               aria-hidden="true"
@@ -284,7 +284,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         className={cn(
           // 기본 텍스트 스타일
           "flex flex-col h-full w-full",
-          "text-[10px] sm:text-xs leading-tight break-words",
+          "text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl leading-tight break-words",
           
           // 색상 스타일
           imageUrl ? [
@@ -325,14 +325,14 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         )}
       </div>
       
-      {/* 액션 버튼 컴타이너 */}
-      <div className="absolute bottom-1 left-1 flex gap-1">
+      {/* 액션 버튼 컴타이너 - 400px 이하에서 숨김 */}
+      <div className="absolute bottom-1 left-1 flex gap-1 hidden min-[450px]:flex">
         {/* 편집 버튼 */}
         {onEdit && (
           <button
             className={cn(
               // 기본 스타일
-              "w-7 h-7 sm:w-8 sm:h-8",
+              "w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12",
               "bg-white/90 backdrop-blur-sm",
               "rounded-full shadow-sm",
               "flex items-center justify-center",
@@ -369,7 +369,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
             title="셀 편집"
           >
             <svg 
-              className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-400" 
+              className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 text-gray-600 dark:text-gray-400" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -385,7 +385,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
           <button
             className={cn(
               // 기본 스타일
-              "w-7 h-7 sm:w-8 sm:h-8",
+              "w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12",
               "backdrop-blur-sm rounded-full shadow-sm",
               "flex items-center justify-center",
               
@@ -430,7 +430,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
             title={isCompleted ? '완료 상태 취소' : '완료 상태로 표시'}
           >
             <svg 
-              className="w-3 h-3 sm:w-4 sm:h-4" 
+              className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"

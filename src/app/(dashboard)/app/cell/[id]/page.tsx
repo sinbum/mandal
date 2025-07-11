@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
 import CellContextMenu from '@/components/dashboard/cells/CellContextMenu';
 import { setMostRecentMandalartCell } from '@/lib/utils';
+import { saveRecentMandalartCell } from '@/utils/cookies';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
@@ -70,8 +71,9 @@ export default function CellPage() {
           const children = await loadChildCells(cellId);
           setChildCells(children);
           
-          // 최근 사용 셀 ID를 localStorage에 저장
+          // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
+          saveRecentMandalartCell(cellId);
         } else {
           setPageError('셀 정보를 찾을 수 없습니다');
         }
@@ -189,8 +191,9 @@ export default function CellPage() {
         setChildCells(refreshedChildren);
       }
       
-      // 최근 사용 셀 ID를 localStorage에 저장
+      // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
       setMostRecentMandalartCell(cellId);
+      saveRecentMandalartCell(cellId);
     } catch (error) {
       console.error('셀 저장 중 오류 발생:', error);
       toast.error('셀 저장 중 오류가 발생했습니다');
@@ -319,18 +322,20 @@ export default function CellPage() {
   return (
     <PageTransition>
       <MobileLayout
-        header={<AppHeaderBar showBackButton backHref="/app" />}
+        header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
 
-      <div className="container mx-auto px-4 py-4 sm:py-8 h-full flex flex-col">
+      <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-8 h-full sm:h-screen flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
         
         {/* 브레드크럼 네비게이션 */}
+        <div className="flex-shrink-0">
         <MandalartBreadcrumbs 
           path={navigation.breadcrumbPath} 
           onDeleteCell={handleDeleteCell}
           isDeleting={isDeleting}
         />
+        </div>
         
         {/* 셀 편집 모달 */}
         {editingCell && (
@@ -353,7 +358,7 @@ export default function CellPage() {
         />
         
         {/* 만다라트 보드 */}
-        <div className="flex-grow w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
+        <div className="flex-1 w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
           <MandalartBoard
             centerCell={currentCell}
             cells={childCells}

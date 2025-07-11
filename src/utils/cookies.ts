@@ -4,6 +4,7 @@
 
 export const COOKIE_KEYS = {
   SLIDE_PANEL_HEIGHT: 'slideUpPanel_height',
+  RECENT_MANDALART_CELL: 'recent_mandalart_cell',
 } as const;
 
 /**
@@ -64,4 +65,18 @@ export const getPanelHeight = (defaultHeight: number = 400): number => {
     return Math.max(200, Math.min(height, maxHeight));
   }
   return defaultHeight;
+};
+
+/**
+ * 최근 만다라트 셀 ID를 쿠키에 저장합니다
+ */
+export const saveRecentMandalartCell = (cellId: string): void => {
+  setCookie(COOKIE_KEYS.RECENT_MANDALART_CELL, cellId, 7); // 7일간 저장
+};
+
+/**
+ * 최근 만다라트 셀 ID를 쿠키에서 가져옵니다
+ */
+export const getRecentMandalartCell = (): string | null => {
+  return getCookie(COOKIE_KEYS.RECENT_MANDALART_CELL);
 };

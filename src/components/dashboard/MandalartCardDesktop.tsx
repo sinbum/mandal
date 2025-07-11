@@ -23,6 +23,7 @@ import {
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface MandalartCardDesktopProps {
   cell: MandalartCell;
@@ -98,6 +99,120 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
     '높음': 'text-red-600 bg-red-50',
     '보통': 'text-yellow-600 bg-yellow-50',
     '낮음': 'text-green-600 bg-green-50'
+  };
+
+  const handleCopyMandalart = () => {
+    const mandalartData = {
+      id: cell.id,
+      topic: cell.topic,
+      memo: cell.memo,
+      progress: cell.progressInfo
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(mandalartData, null, 2))
+      .then(() => {
+        toast.success('만다라트 데이터가 클립보드에 복사되었습니다');
+      })
+      .catch(() => {
+        toast.error('복사에 실패했습니다');
+      });
+  };
+
+  const handleShareMandalart = async () => {
+    const shareData = {
+      title: `만다라트: ${cell.topic}`,
+      text: `${cell.topic} - 진행률: ${cell.progressInfo?.progressPercentage || 0}%`,
+      url: `${window.location.origin}/app/cell/${cell.id}`
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        toast.success('공유가 완료되었습니다');
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          toast.error('공유에 실패했습니다');
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url)
+        .then(() => {
+          toast.success('링크가 클립보드에 복사되었습니다');
+        })
+        .catch(() => {
+          toast.error('공유에 실패했습니다');
+        });
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    const favorites = JSON.parse(localStorage.getItem('favoriteMandalarts') || '[]');
+    const isFavorite = favorites.includes(cell.id);
+    
+    if (isFavorite) {
+      const newFavorites = favorites.filter((id: string) => id !== cell.id);
+      localStorage.setItem('favoriteMandalarts', JSON.stringify(newFavorites));
+      toast.success('즐겨찾기에서 제거되었습니다');
+    } else {
+      favorites.push(cell.id);
+      localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
+      toast.success('즐겨찾기에 추가되었습니다');
+    }
+  };
+
+  const handleViewAnalytics = () => {
+    const analyticsData = {
+      총목표: cell.progressInfo?.totalCells || 0,
+      완료된목표: cell.progressInfo?.completedCells || 0,
+      진행률: cell.progressInfo?.progressPercentage || 0
+    };
+
+    toast.info(
+      `📊 ${cell.topic} 통계\n` +
+      `진행률: ${analyticsData.진행률}%\n` +
+      `완료: ${analyticsData.완료된목표}/${analyticsData.총목표}`,
+      { duration: 4000 }
+    );
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      id: cell.id,
+      topic: cell.topic,
+      memo: cell.memo,
+      color: cell.color,
+      isCompleted: cell.isCompleted,
+      depth: cell.depth,
+      position: cell.position,
+      progressInfo: cell.progressInfo,
+      exportedAt: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mandalart-${cell.topic.replace(/[^\w\s]/gi, '')}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast.success('만다라트 데이터가 다운로드되었습니다');
+  };
+
+  const handleArchiveMandalart = () => {
+    const archived = JSON.parse(localStorage.getItem('archivedMandalarts') || '[]');
+    
+    if (!archived.includes(cell.id)) {
+      archived.push(cell.id);
+      localStorage.setItem('archivedMandalarts', JSON.stringify(archived));
+      toast.success('만다라트가 보관되었습니다');
+    } else {
+      toast.info('이미 보관된 만다라트입니다');
+    }
   };
 
   return (
@@ -233,29 +348,29 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 복사 기능 구현
+                          handleCopyMandalart();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                       >
                         <Copy size={14} />
-                        복사
+                        데이터 복사
                       </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 공유 기능 구현
+                          handleShareMandalart();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                       >
                         <Share size={14} />
-                        공유
+                        공유하기
                       </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 즐겨찾기 기능 구현
+                          handleToggleFavorite();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -266,7 +381,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 통계 기능 구현
+                          handleViewAnalytics();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -277,7 +392,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 다운로드 기능 구현
+                          handleExportData();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -285,28 +400,17 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                         <Download size={14} />
                         내보내기
                       </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // TODO: 설정 기능 구현
-                          setShowActions(false);
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                      >
-                        <Settings size={14} />
-                        설정
-                      </button>
                       <div className="border-t border-gray-100 my-1"></div>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 보관 기능 구현
+                          handleArchiveMandalart();
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
                       >
                         <Archive size={14} />
-                        보관
+                        보관하기
                       </button>
                     </motion.div>
                   )}

@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
+import AppHeaderBar from '@/components/layout/AppHeaderBar';
 
 export default function ProfilePage() {
   const [name, setName] = useState('');
@@ -124,11 +125,18 @@ export default function ProfilePage() {
   return (
     <MobileLayout
       header={
-        <HeaderBar
-          title="프로필 설정"
-          showBackButton
-          href="/app"
-        />
+        <div>
+          <div className="hidden sm:block">
+            <AppHeaderBar showBackButton backHref="/app" />
+          </div>
+          <div className="sm:hidden">
+            <HeaderBar
+              title="프로필 설정"
+              showBackButton
+              href="/app"
+            />
+          </div>
+        </div>
       }
       footer={<div className="sm:hidden"><BottomBar /></div>}
     >

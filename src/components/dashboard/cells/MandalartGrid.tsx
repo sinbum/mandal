@@ -251,7 +251,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   });
   
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative h-full", className)}>
       
       {/* 로딩 상태 */}
       {loading && (
@@ -278,69 +278,116 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         </div>
       )}
       
-      {/* 그리드 컨테이너 */}
-      <div 
-        className={cn(
-          // 기본 그리드 스타일
-          "grid grid-cols-3 w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl",
-          
-          // 간격 설정
-          "gap-2 sm:gap-3 md:gap-4",
-          
-          // 반응형 크기 조정
-          "text-sm sm:text-base",
-          
-          // 상태별 스타일
-          disabled && "opacity-50 pointer-events-none",
-          
-          // 애니메이션
-          animationEnabled && "transition-all duration-300",
-          
-          // 터치 최적화
-          touchOptimized && "touch-manipulation",
-          
-          // 다크 모드 지원
-          "dark:bg-gray-800",
-          
-          // 모션 감소 설정
-          "motion-reduce:transition-none"
-        )}
-        role="grid"
-        aria-rowcount={3}
-        aria-colcount={3}
-        {...a11yProps}
-      >
-        {renderGrid()}
-      </div>
-      
-      {/* 그리드 통계 정보 */}
-      <div className="mt-12 text-center">
-        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-success rounded-full"></div>
-            <span>완료: {cells.filter(cell => cell.isCompleted).length}</span>
+      {/* 메인 컨테이너 - 데스크탑에서는 flex row, 모바일/태블릿에서는 flex col */}
+      <div className="flex flex-col lg:flex-row h-full gap-6">
+        
+        {/* 그리드 영역 */}
+        <div className="flex-1 flex flex-col">
+          {/* 그리드 통계 정보 - 모바일/태블릿에서만 표시 */}
+          <div className="mb-4 sm:mb-6 lg:hidden text-center flex-shrink-0">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-success rounded-full"></div>
+                <span>완료: {cells.filter(cell => cell.isCompleted).length}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-gray-300 rounded-full"></div>
+                <span>진행 중: {cells.filter(cell => !cell.isCompleted && cell.topic).length}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] border-2 border-dashed border-gray-300 rounded-full"></div>
+                <span>비어있음: {8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length}</span>
+              </div>
+            </div>
+            
+            {/* 진행률 표시 */}
+            <div className="mt-2 sm:mt-[1vh] max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
+              <div className="flex items-center justify-between text-xs sm:text-[clamp(0.75rem,1.2vw,1.25rem)] text-muted-foreground mb-1 sm:mb-[0.5vh]">
+                <span>진행률</span>
+                <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-[clamp(0.5rem,1vh,1.5rem)]">
+                <div 
+                  className="bg-success h-2 sm:h-[clamp(0.5rem,1vh,1.5rem)] rounded-full transition-all duration-500"
+                  style={{ width: `${(cells.filter(cell => cell.isCompleted).length / 8) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-            <span>진행 중: {cells.filter(cell => !cell.isCompleted && cell.topic).length}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 border-2 border-dashed border-gray-300 rounded-full"></div>
-            <span>비어있음: {8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length}</span>
+
+          {/* 그리드 컨테이너 */}
+          <div className="flex-1 flex items-center justify-center">
+            <div 
+              className={cn(
+                // 기본 그리드 스타일
+                "grid grid-cols-3 w-full",
+                "max-w-[min(85vw,calc(100vh-16rem))] sm:max-w-[min(80vw,80vh,theme(maxWidth.2xl))] md:max-w-[min(80vw,80vh,theme(maxWidth.3xl))] lg:max-w-[min(60vw,60vh,theme(maxWidth.4xl))] xl:max-w-[min(60vw,60vh,theme(maxWidth.5xl))] 2xl:max-w-[min(60vw,60vh,theme(maxWidth.8xl))]",
+                "aspect-square", // 정사각형 비율 유지
+                
+                // 간격 설정
+                "gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 2xl:gap-8",
+                
+                // 반응형 크기 조정
+                "text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl",
+                
+                // 상태별 스타일
+                disabled && "opacity-50 pointer-events-none",
+                
+                // 애니메이션
+                animationEnabled && "transition-all duration-300",
+                
+                // 터치 최적화
+                touchOptimized && "touch-manipulation",
+                
+                // 다크 모드 지원
+                "dark:bg-gray-800",
+                
+                // 모션 감소 설정
+                "motion-reduce:transition-none"
+              )}
+              role="grid"
+              aria-rowcount={3}
+              aria-colcount={3}
+              {...a11yProps}
+            >
+              {renderGrid()}
+            </div>
           </div>
         </div>
-        
-        {/* 진행률 표시 */}
-        <div className="mt-2 max-w-xs mx-auto">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>진행률</span>
-            <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-success h-2 rounded-full transition-all duration-500"
-              style={{ width: `${(cells.filter(cell => cell.isCompleted).length / 8) * 100}%` }}
-            />
+
+        {/* 사이드바 영역 - 데스크탑에서만 표시 */}
+        <div className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 gap-6">
+          {/* 그리드 통계 정보 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">진행 상황</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 bg-success rounded-full"></div>
+                <span className="text-sm">완료: {cells.filter(cell => cell.isCompleted).length}개</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                <span className="text-sm">진행 중: {cells.filter(cell => !cell.isCompleted && cell.topic).length}개</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-dashed border-gray-300 rounded-full"></div>
+                <span className="text-sm">비어있음: {8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length}개</span>
+              </div>
+            </div>
+            
+            {/* 진행률 표시 */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                <span>전체 진행률</span>
+                <span className="font-medium">{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="bg-success h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${(cells.filter(cell => cell.isCompleted).length / 8) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

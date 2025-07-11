@@ -11,8 +11,16 @@ import {
   Circle,
   Calendar,
   TrendingUp,
-  Trash2
+  Trash2,
+  Edit3,
+  Copy,
+  Share,
+  Star,
+  BarChart3,
+  Archive,
+  Download
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MandalartCardProps {
   cell: MandalartCell;
@@ -53,33 +61,153 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
 
   const theme = getThemeColors(cell.color);
 
-  const handleMenuAction = (action: string, event: React.MouseEvent) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const handleMenuAction = (action: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setShowActions(false);
 
     switch (action) {
       case 'edit':
-        onEdit?.(cell.id);
+        window.location.href = `/app/cell/${cell.id}`;
+        break;
+      case 'copy':
+        handleCopyMandalart();
+        break;
+      case 'share':
+        handleShareMandalart();
+        break;
+      case 'favorite':
+        handleToggleFavorite();
+        break;
+      case 'analytics':
+        handleViewAnalytics();
+        break;
+      case 'export':
+        handleExportData();
+        break;
+      case 'archive':
+        handleArchiveMandalart();
         break;
       case 'delete':
         onDelete(cell.id, event);
         break;
-      case 'copy':
-        // TODO: 복사 기능 구현
-        break;
-      case 'share':
-        // TODO: 공유 기능 구현
-        break;
-      case 'favorite':
-        // TODO: 즐겨찾기 기능 구현
-        break;
-      case 'analytics':
-        // TODO: 통계 기능 구현
-        break;
-      case 'archive':
-        // TODO: 보관 기능 구현
-        break;
+    }
+  };
+
+  const handleCopyMandalart = () => {
+    const mandalartData = {
+      id: cell.id,
+      topic: cell.topic,
+      memo: cell.memo,
+      progress: cell.progressInfo
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(mandalartData, null, 2))
+      .then(() => {
+        toast.success('만다라트 데이터가 클립보드에 복사되었습니다');
+      })
+      .catch(() => {
+        toast.error('복사에 실패했습니다');
+      });
+  };
+
+  const handleShareMandalart = async () => {
+    const shareData = {
+      title: `만다라트: ${cell.topic}`,
+      text: `${cell.topic} - 진행률: ${cell.progressInfo?.progressPercentage || 0}%`,
+      url: `${window.location.origin}/app/cell/${cell.id}`
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        toast.success('공유가 완료되었습니다');
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          toast.error('공유에 실패했습니다');
+        }
+      }
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(shareData.url)
+        .then(() => {
+          toast.success('링크가 클립보드에 복사되었습니다');
+        })
+        .catch(() => {
+          toast.error('공유에 실패했습니다');
+        });
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    const favorites = JSON.parse(localStorage.getItem('favoriteMandalarts') || '[]');
+    const isFavorite = favorites.includes(cell.id);
+    
+    if (isFavorite) {
+      const newFavorites = favorites.filter((id: string) => id !== cell.id);
+      localStorage.setItem('favoriteMandalarts', JSON.stringify(newFavorites));
+      toast.success('즐겨찾기에서 제거되었습니다');
+    } else {
+      favorites.push(cell.id);
+      localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
+      toast.success('즐겨찾기에 추가되었습니다');
+    }
+  };
+
+  const handleViewAnalytics = () => {
+    const analyticsData = {
+      총목표: cell.progressInfo?.totalCells || 0,
+      완료된목표: cell.progressInfo?.completedCells || 0,
+      진행률: cell.progressInfo?.progressPercentage || 0,
+      생성일: '최근 생성됨',
+      마지막수정: '최근 수정됨'
+    };
+
+    toast.info(
+      `📊 ${cell.topic} 통계\n` +
+      `진행률: ${analyticsData.진행률}%\n` +
+      `완료: ${analyticsData.완료된목표}/${analyticsData.총목표}`,
+      { duration: 4000 }
+    );
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      id: cell.id,
+      topic: cell.topic,
+      memo: cell.memo,
+      color: cell.color,
+      isCompleted: cell.isCompleted,
+      depth: cell.depth,
+      position: cell.position,
+      progressInfo: cell.progressInfo,
+      exportedAt: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mandalart-${cell.topic.replace(/[^\w\s]/gi, '')}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast.success('만다라트 데이터가 다운로드되었습니다');
+  };
+
+  const handleArchiveMandalart = () => {
+    const archived = JSON.parse(localStorage.getItem('archivedMandalarts') || '[]');
+    
+    if (!archived.includes(cell.id)) {
+      archived.push(cell.id);
+      localStorage.setItem('archivedMandalarts', JSON.stringify(archived));
+      toast.success('만다라트가 보관되었습니다');
+    } else {
+      toast.info('이미 보관된 만다라트입니다');
     }
   };
 
@@ -155,28 +283,28 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-10 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20"
+                    className="absolute right-0 top-10 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20"
                   >
-                    {/* <button
+                    <button
                       onClick={(e) => handleMenuAction('edit', e)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                     >
                       <Edit3 size={14} />
-                      편집
-                    </button> */}
-                    {/* <button
+                      편집하기
+                    </button>
+                    <button
                       onClick={(e) => handleMenuAction('copy', e)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                     >
                       <Copy size={14} />
-                      복사
+                      데이터 복사
                     </button>
                     <button
                       onClick={(e) => handleMenuAction('share', e)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                     >
                       <Share size={14} />
-                      공유
+                      공유하기
                     </button>
                     <button
                       onClick={(e) => handleMenuAction('favorite', e)}
@@ -192,14 +320,21 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
                       <BarChart3 size={14} />
                       통계 보기
                     </button>
+                    <button
+                      onClick={(e) => handleMenuAction('export', e)}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                    >
+                      <Download size={14} />
+                      내보내기
+                    </button>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={(e) => handleMenuAction('archive', e)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
                     >
                       <Archive size={14} />
-                      보관
-                    </button> */}
+                      보관하기
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
