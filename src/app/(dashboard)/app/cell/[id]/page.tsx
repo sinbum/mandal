@@ -7,6 +7,7 @@ import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcru
 import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import CellPageSkeleton from '@/components/skeleton/CellPageSkeleton';
+import { cellCache } from '@/utils/cellCache';
 import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
 import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
@@ -30,8 +31,9 @@ export default function CellPage() {
   
   const [currentCell, setCurrentCell] = useState<MandalartCell | null>(null);
   const [childCells, setChildCells] = useState<MandalartCell[]>([]);
-  const [isPending, setIsPending] = useState(true);
+  const [isPending, setIsPending] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [isCacheLoaded, setIsCacheLoaded] = useState(false);
 
   // 셀 편집 상태 추가
   const [editingCell, setEditingCell] = useState<MandalartCell | null>(null);
@@ -56,14 +58,37 @@ export default function CellPage() {
   } = useCellOperations();
 
   
-  // 초기 데이터 로드
+  // 초기 데이터 로드 (캐시 우선 사용)
   useEffect(() => {
     async function loadData() {
       try {
-        setIsPending(true);
+        // cellId가 변경되면 즉시 상태 초기화
+        setCurrentCell(null);
+        setChildCells([]);
         setPageError(null);
+        setIsCacheLoaded(false);
         
-        // 셀 데이터 로드
+        // 먼저 캐시에서 데이터 확인 (동기적)
+        const cachedData = cellCache.get(cellId);
+        
+        if (cachedData) {
+          // 캐시에서 즉시 로딩 (pending 상태 설정하지 않음)
+          setCurrentCell(cachedData.cell);
+          setChildCells(cachedData.children);
+          setIsCacheLoaded(true);
+          
+          // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
+          setMostRecentMandalartCell(cellId);
+          saveRecentMandalartCell(cellId);
+          
+          console.log('캐시에서 즉시 로딩 완료:', cellId);
+          return;
+        }
+        
+        // 캐시에 없을 때만 pending 상태 설정
+        setIsPending(true);
+        
+        // 캐시에 없으면 기존 방식으로 로딩
         const cell = await loadCell(cellId);
         
         if (cell) {
@@ -73,9 +98,17 @@ export default function CellPage() {
           const children = await loadChildCells(cellId);
           setChildCells(children);
           
+          // 새로 로딩한 데이터를 캐시에 저장
+          cellCache.set(cellId, cell, children);
+          
+          // 자식들의 하위 셀들도 백그라운드에서 미리 로딩 (비동기)
+          cellCache.preloadChildrenOfChildren(children);
+          
           // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
           saveRecentMandalartCell(cellId);
+          
+          console.log('API에서 데이터 로딩 완료:', cellId);
         } else {
           setPageError('셀 정보를 찾을 수 없습니다');
         }
@@ -295,7 +328,8 @@ export default function CellPage() {
   };
 
   
-  if (isPending || isLoading) {
+  // 로딩 상태 표시 (캐시에서 로딩된 경우 제외)
+  if ((isPending || isLoading) && !isCacheLoaded) {
     return (
       <PageTransition>
         <MobileLayout
@@ -308,6 +342,7 @@ export default function CellPage() {
     );
   }
   
+  // 오류 상태 표시
   if (pageError || error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
@@ -319,7 +354,8 @@ export default function CellPage() {
     );
   }
   
-  if (!currentCell) {
+  // 셀이 없고 로딩도 완료된 경우에만 "셀을 찾을 수 없습니다" 표시
+  if (!currentCell && !isPending && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md">
@@ -327,6 +363,20 @@ export default function CellPage() {
           <p className="text-gray-700">요청하신 셀 정보를 찾을 수 없습니다.</p>
         </div>
       </div>
+    );
+  }
+  
+  // 아직 로딩 중이고 currentCell이 없는 경우 스켈레톤 표시
+  if (!currentCell) {
+    return (
+      <PageTransition>
+        <MobileLayout
+          header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
+          footer={<div className="sm:hidden"><BottomBar /></div>}
+        >
+          <CellPageSkeleton />
+        </MobileLayout>
+      </PageTransition>
     );
   }
   
@@ -383,8 +433,7 @@ export default function CellPage() {
                 onCreateCell={handleCreateCell}
                 onNavigate={(cellId) => {
                   // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
-                  navigation.navigateToCell(cellId);
-                  window.location.href = `/app/cell/${cellId}`;
+                  router.push(`/app/cell/${cellId}`);
                 }}
                 onEditCell={setEditingCell}
                 onLongPress={handleCellLongPress}

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MandalartCell } from '@/types/mandalart';
 import {
   MoreVertical,
@@ -25,6 +26,7 @@ interface MandalartCardProps {
 }
 
 const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, onEdit }) => {
+  const router = useRouter();
   const [showActions, setShowActions] = useState(false);
 
   // 진행률 계산 (실제 데이터 사용)
@@ -63,7 +65,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
 
     switch (action) {
       case 'edit':
-        window.location.href = `/app/cell/${cell.id}`;
+        router.push(`/app/cell/${cell.id}`);
         break;
       case 'delete':
         onDelete(cell.id, event);

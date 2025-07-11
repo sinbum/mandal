@@ -294,6 +294,167 @@ export class MandalartService {
       throw err;
     }
   }
+
+  /**
+   * 사용자의 루트 셀들과 첫 번째 레벨 자식들을 함께 가져오기
+   */
+  async fetchUserCellsWithChildren(): Promise<MandalartCell[]> {
+    try {
+      const { data: { user } } = await this.supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('인증된 사용자가 없습니다');
+      }
+      
+      // 사용자의 만다라트 ID 찾기
+      const { data: mandalarts, error: mandalartError } = await this.supabase
+        .from('mandalarts')
+        .select('id')
+        .eq('user_id', user.id);
+      
+      if (mandalartError) throw mandalartError;
+      
+      if (!mandalarts.length) return [];
+      
+      // 각 만다라트의 루트 셀 찾기
+      const mandalartIds = mandalarts.map(m => m.id);
+      
+      const { data: rootCells, error: cellsError } = await this.supabase
+        .from('mandalart_cells')
+        .select('*')
+        .in('mandalart_id', mandalartIds)
+        .is('parent_id', null)
+        .order('created_at', { ascending: false });
+      
+      if (cellsError) throw cellsError;
+      
+      // 각 루트 셀의 첫 번째 레벨 자식들도 함께 가져오기
+      const rootCellsWithChildrenAndProgress = await Promise.all(
+        rootCells.map(async (cell) => {
+          // 진행률 계산
+          const progressInfo = await this.calculateMandalartProgress(cell.mandalart_id);
+          const convertedCell = this.convertDbCellToModel(cell);
+          convertedCell.progressInfo = progressInfo;
+          
+          // 첫 번째 레벨 자식들 가져오기
+          const children = await this.fetchChildrenByCellId(cell.id);
+          convertedCell.children = children;
+          
+          return convertedCell;
+        })
+      );
+      
+      console.log('rootCells with children and progress', rootCellsWithChildrenAndProgress);
+      return rootCellsWithChildrenAndProgress;
+    } catch (err) {
+      console.error('사용자 셀과 자식들 조회 실패:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * 여러 셀의 자식들을 한 번의 쿼리로 효율적으로 가져오기
+   */
+  async fetchChildrenOfMultipleCells(parentIds: string[]): Promise<{ [parentId: string]: MandalartCell[] }> {
+    try {
+      if (parentIds.length === 0) return {};
+      
+      // 가상 ID 필터링
+      const realParentIds = parentIds.filter(id => !this.isVirtualId(id));
+      
+      if (realParentIds.length === 0) return {};
+      
+      const { data, error } = await this.supabase
+        .from('mandalart_cells')
+        .select('*')
+        .in('parent_id', realParentIds)
+        .order('parent_id', { ascending: true })
+        .order('position', { ascending: true });
+      
+      if (error) throw error;
+      
+      // 부모 ID별로 자식들 그룹화
+      const groupedChildren: { [parentId: string]: MandalartCell[] } = {};
+      
+      data.forEach(cell => {
+        const parentId = cell.parent_id;
+        if (!groupedChildren[parentId]) {
+          groupedChildren[parentId] = [];
+        }
+        groupedChildren[parentId].push(this.convertDbCellToModel(cell));
+      });
+      
+      return groupedChildren;
+    } catch (err) {
+      console.error('여러 셀의 자식들 로드 실패:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * 사용자의 루트 셀들과 첫 번째 레벨 자식들을 한 번의 쿼리로 효율적으로 가져오기
+   */
+  async fetchUserCellsWithChildrenOptimized(): Promise<MandalartCell[]> {
+    try {
+      const { data: { user } } = await this.supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('인증된 사용자가 없습니다');
+      }
+      
+      // 사용자의 만다라트 ID 찾기
+      const { data: mandalarts, error: mandalartError } = await this.supabase
+        .from('mandalarts')
+        .select('id')
+        .eq('user_id', user.id);
+      
+      if (mandalartError) throw mandalartError;
+      
+      if (!mandalarts.length) return [];
+      
+      const mandalartIds = mandalarts.map(m => m.id);
+      
+      // 루트 셀(depth 0)과 첫 번째 레벨 자식들(depth 1)을 한 번에 가져오기
+      const { data: allCells, error: cellsError } = await this.supabase
+        .from('mandalart_cells')
+        .select('*')
+        .in('mandalart_id', mandalartIds)
+        .in('depth', [0, 1])
+        .order('depth', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (cellsError) throw cellsError;
+      
+      // 셀들을 루트와 자식으로 분류
+      const rootCells = allCells.filter(cell => cell.depth === 0);
+      const childCells = allCells.filter(cell => cell.depth === 1);
+      
+      // 루트 셀들을 그룹화하고 자식들을 연결
+      const rootCellsWithChildrenAndProgress = await Promise.all(
+        rootCells.map(async (cell) => {
+          // 진행률 계산
+          const progressInfo = await this.calculateMandalartProgress(cell.mandalart_id);
+          const convertedCell = this.convertDbCellToModel(cell);
+          convertedCell.progressInfo = progressInfo;
+          
+          // 해당 루트 셀의 자식들 필터링
+          const cellChildren = childCells
+            .filter(child => child.parent_id === cell.id)
+            .map(child => this.convertDbCellToModel(child));
+          
+          convertedCell.children = cellChildren;
+          
+          return convertedCell;
+        })
+      );
+      
+      console.log('rootCells with children (optimized) and progress', rootCellsWithChildrenAndProgress);
+      return rootCellsWithChildrenAndProgress;
+    } catch (err) {
+      console.error('사용자 셀과 자식들 조회 실패 (최적화):', err);
+      throw err;
+    }
+  }
   
   /**
    * 만다라트의 진행률 계산
@@ -435,6 +596,14 @@ export class MandalartService {
     }
   ): Promise<MandalartCell> {
     return createNewCellAndGetEditData(mandalartId, position, parentData);
+  }
+
+  async getUserCellsWithChildren(): Promise<MandalartCell[]> {
+    return this.fetchUserCellsWithChildren();
+  }
+
+  async getUserCellsWithChildrenOptimized(): Promise<MandalartCell[]> {
+    return this.fetchUserCellsWithChildrenOptimized();
   }
 }
 
