@@ -31,8 +31,7 @@ import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
 import PageTransition from '@/components/animations/PageTransition';
-import MandalartCard from '@/components/dashboard/MandalartCard';
-import MandalartCardDesktop from '@/components/dashboard/MandalartCardDesktop';
+import PremiumMandalartCardSlider from '@/components/dashboard/PremiumMandalartCardSlider';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -189,157 +188,16 @@ export default function HomePage() {
           </motion.div>
         </div>
       ) : (
-        <div className="px-4 sm:px-6 lg:px-8 pb-24 sm:pb-8">
-          {/* 섹션 헤더 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-          </motion.div>
-
-          {/* 모바일 카드 그리드 */}
-          <div className="block sm:hidden">
-            <div className="space-y-4">
-              {rootCells.slice(0, 6).map((cell, index) => (
-                <MandalartCard
-                  key={cell.id}
-                  cell={cell}
-                  index={index}
-                  onDelete={openDeleteDialog}
-                  onEdit={() => {
-                    // TODO: 편집 기능 구현
-                  }}
-                />
-              ))}
-              {/* 새 만다라트 만들기 카드 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: (rootCells.slice(0, 6).length) * 0.1 }}
-                className="relative"
-              >
-                <div
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="w-full p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="flex flex-col items-center justify-center h-32 text-center">
-                    <div className="w-12 h-12 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-1">새 만다라트</h3>
-                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* 태블릿 카드 그리드 */}
-          <div className="hidden sm:block lg:hidden">
-            <div className="grid grid-cols-2 gap-6">
-              {rootCells.slice(0, 6).map((cell, index) => (
-                <MandalartCard
-                  key={cell.id}
-                  cell={cell}
-                  index={index}
-                  onDelete={openDeleteDialog}
-                  onEdit={() => {
-                    // TODO: 편집 기능 구현
-                  }}
-                />
-              ))}
-              {/* 새 만다라트 만들기 카드 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: (rootCells.slice(0, 6).length) * 0.1 }}
-                className="relative"
-              >
-                <div
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="w-full p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="flex flex-col items-center justify-center h-32 text-center">
-                    <div className="w-12 h-12 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-1">새 만다라트</h3>
-                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* 데스크톱 카드 그리드 */}
-          <div className="hidden lg:block">
-            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 max-w-none">
-              {rootCells.slice(0, 9).map((cell, index) => (
-                <MandalartCardDesktop
-                  key={cell.id}
-                  cell={cell}
-                  index={index}
-                  onDelete={openDeleteDialog}
-                  onEdit={() => {
-                    // TODO: 편집 기능 구현
-                  }}
-                />
-              ))}
-              {/* 새 만다라트 만들기 카드 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: (rootCells.slice(0, 9).length) * 0.1 }}
-                className="relative"
-              >
-                <div
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="w-full p-8 rounded-3xl border-2 border-dashed border-gray-300 bg-transparent hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="flex flex-col items-center justify-center h-48 text-center">
-                    <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">새 만다라트</h3>
-                    <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-          
-          {/* 더 보기 섹션 */}
-          {rootCells.length > 6 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="mt-12 text-center"
-            >
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  더 많은 만다라트가 있습니다
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  총 {rootCells.length}개 중 {Math.min(rootCells.length, 9)}개를 표시하고 있습니다
-                </p>
-                <Button
-                  variant="outline"
-                  className="border-gray-300 hover:border-gray-400"
-                >
-                  모두 보기
-                </Button>
-              </div>
-            </motion.div>
-          )}
+        <div className="absolute inset-0">
+          {/* 프리미엄 만다라트 카드 슬라이더 */}
+          <PremiumMandalartCardSlider
+            cells={rootCells}
+            onDelete={openDeleteDialog}
+            onEdit={() => {
+              // TODO: 편집 기능 구현
+            }}
+            onCreateNew={() => setCreateDialogOpen(true)}
+          />
         </div>
       )}
 
