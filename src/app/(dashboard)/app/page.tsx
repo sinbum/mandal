@@ -32,6 +32,7 @@ import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
 import PageTransition from '@/components/animations/PageTransition';
 import PremiumMandalartCardSlider from '@/components/dashboard/PremiumMandalartCardSlider';
+import HomePageSkeleton from '@/components/skeleton/HomePageSkeleton';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
@@ -134,7 +135,16 @@ export default function HomePage() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="만다라트 목록을 불러오는 중..." />;
+    return (
+      <PageTransition>
+        <MobileLayout
+          header={<div className="hidden sm:block"><AppHeaderBar /></div>}
+          footer={<div className="sm:hidden"><BottomBar /></div>}
+        >
+          <HomePageSkeleton />
+        </MobileLayout>
+      </PageTransition>
+    );
   }
 
   return (

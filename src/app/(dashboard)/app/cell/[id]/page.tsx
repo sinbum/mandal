@@ -6,6 +6,7 @@ import MandalartBoard from '@/components/dashboard/MandalartBoard';
 import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CellPageSkeleton from '@/components/skeleton/CellPageSkeleton';
 import { MandalartCell } from '@/types/mandalart';
 import { toast } from "sonner";
 import CellEditorForm from '@/components/dashboard/cells/CellEditorForm';
@@ -295,7 +296,16 @@ export default function CellPage() {
 
   
   if (isPending || isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <PageTransition>
+        <MobileLayout
+          header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
+          footer={<div className="sm:hidden"><BottomBar /></div>}
+        >
+          <CellPageSkeleton />
+        </MobileLayout>
+      </PageTransition>
+    );
   }
   
   if (pageError || error) {

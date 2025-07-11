@@ -201,7 +201,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
         </div>
 
         {/* 메인 콘텐츠 */}
-        <Link href={`/app/cell/${cell.id}`} className="block">
+        <Link href={`/app/cell/${cell.id}`} prefetch={true} className="block">
           <div className="p-6 space-y-4">
             {/* 제목 */}
             <div>

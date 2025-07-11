@@ -453,7 +453,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
         </div>
 
         {/* 메인 콘텐츠 */}
-        <Link href={`/app/cell/${cell.id}`}>
+        <Link href={`/app/cell/${cell.id}`} prefetch={true}>
           <div className="p-6 space-y-5">
             {/* 제목과 설명 */}
             <div>
