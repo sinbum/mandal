@@ -11,6 +11,7 @@ interface MandalartBoardProps {
   onNavigate: (cellId: string) => void;
   onEditCell?: (cell: MandalartCell) => void;
   onLongPress?: (cell: MandalartCell) => void;
+  showProgressStats?: boolean;
 }
 
 /**
@@ -25,7 +26,8 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   onCreateCell,
   onNavigate,
   onEditCell,
-  onLongPress
+  onLongPress,
+  showProgressStats = true
 }) => {
   const handleCellClick = (cell: MandalartCell) => {
     // 빈 셀이면 새 셀 생성
@@ -56,6 +58,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
         onToggleComplete={handleToggleComplete}
         onEditCell={onEditCell}
         onLongPress={onLongPress}
+        showProgressStats={showProgressStats}
       />
     </div>
   );

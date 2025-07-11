@@ -32,7 +32,7 @@ const HamburgerIcon: React.FC<HamburgerIconProps> = ({
 
   return (
     <motion.button
-      className={`p-2 ${className}`}
+      className={`${className}`}
       onClick={onClick}
       aria-label="메뉴"
       whileHover={{ scale: 1.05 }}

@@ -16,6 +16,7 @@ import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
 import PageTransition from '@/components/animations/PageTransition';
+import ProgressSidebar from '@/components/dashboard/cells/ProgressSidebar';
 
 /**
  * 셀 상세 페이지
@@ -326,53 +327,66 @@ export default function CellPage() {
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
 
-      <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-8 h-full sm:h-screen flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
+      {/* 메인 레이아웃 컨테이너 */}
+      <div className="flex lg:flex-row flex-col h-[100dvh] sm:h-screen overflow-hidden">
         
-        {/* 브레드크럼 네비게이션 */}
-        <div className="flex-shrink-0">
-        <MandalartBreadcrumbs 
-          path={navigation.breadcrumbPath} 
-          onDeleteCell={handleDeleteCell}
-          isDeleting={isDeleting}
-        />
-        </div>
-        
-        {/* 셀 편집 모달 */}
-        {editingCell && (
-          <CellEditorForm 
-            cell={editingCell}
-            onSave={handleEditComplete}
-            onCancel={handleEditCancel}
-            isNewCell={editingCell.id.startsWith('temp-new-')}
-          />
-        )}
+        {/* 메인 콘텐츠 영역 */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-8 h-full flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
+            
+            {/* 브레드크럼 네비게이션 */}
+            <div className="flex-shrink-0">
+            <MandalartBreadcrumbs 
+              path={navigation.breadcrumbPath} 
+              onDeleteCell={handleDeleteCell}
+              isDeleting={isDeleting}
+            />
+            </div>
+            
+            {/* 셀 편집 모달 */}
+            {editingCell && (
+              <CellEditorForm 
+                cell={editingCell}
+                onSave={handleEditComplete}
+                onCancel={handleEditCancel}
+                isNewCell={editingCell.id.startsWith('temp-new-')}
+              />
+            )}
 
-        {/* 컨텍스트 메뉴 */}
-        <CellContextMenu
-          isOpen={!!contextMenuCell}
-          onClose={() => setContextMenuCell(null)}
-          cell={contextMenuCell}
-          onEdit={handleContextMenuEdit}
-          onToggleComplete={handleContextMenuToggleComplete}
-          onDelete={handleContextMenuDelete}
-        />
-        
-        {/* 만다라트 보드 */}
-        <div className="flex-1 w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
-          <MandalartBoard
-            centerCell={currentCell}
-            cells={childCells}
-            onUpdateCell={handleCellUpdate}
-            onToggleComplete={handleToggleCompletion}
-            onCreateCell={handleCreateCell}
-            onNavigate={(cellId) => {
-              // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
-              navigation.navigateToCell(cellId);
-              window.location.href = `/app/cell/${cellId}`;
-            }}
-            onEditCell={setEditingCell}
-            onLongPress={handleCellLongPress}
-          />
+            {/* 컨텍스트 메뉴 */}
+            <CellContextMenu
+              isOpen={!!contextMenuCell}
+              onClose={() => setContextMenuCell(null)}
+              cell={contextMenuCell}
+              onEdit={handleContextMenuEdit}
+              onToggleComplete={handleContextMenuToggleComplete}
+              onDelete={handleContextMenuDelete}
+            />
+            
+            {/* 만다라트 보드 */}
+            <div className="flex-1 w-full flex items-center justify-center p-2 sm:p-4 min-h-0">
+              <MandalartBoard
+                centerCell={currentCell}
+                cells={childCells}
+                onUpdateCell={handleCellUpdate}
+                onToggleComplete={handleToggleCompletion}
+                onCreateCell={handleCreateCell}
+                onNavigate={(cellId) => {
+                  // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
+                  navigation.navigateToCell(cellId);
+                  window.location.href = `/app/cell/${cellId}`;
+                }}
+                onEditCell={setEditingCell}
+                onLongPress={handleCellLongPress}
+                showProgressStats={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 데스크탑 사이드바 - lg 이상에서만 표시 */}
+        <div className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 p-6 bg-gray-50 dark:bg-gray-900">
+          <ProgressSidebar cells={childCells} />
         </div>
       </div>
       </MobileLayout>

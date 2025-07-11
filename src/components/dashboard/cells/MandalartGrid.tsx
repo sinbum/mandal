@@ -24,6 +24,8 @@ interface MandalartGridProps {
   touchOptimized?: boolean;
   // 그리드 제목 (접근성)
   gridTitle?: string;
+  // 진행 상황 표시 제어
+  showProgressStats?: boolean;
 }
 
 /**
@@ -45,7 +47,8 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   enableKeyboardNavigation = true,
   animationEnabled = true,
   touchOptimized = true,
-  gridTitle = "만다라트 그리드"
+  gridTitle = "만다라트 그리드",
+  showProgressStats = true
 }) => {
   // 키보드 네비게이션을 위한 포커스 상태
   const [focusedCellIndex, setFocusedCellIndex] = useState<number | null>(null);
@@ -278,12 +281,13 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         </div>
       )}
       
-      {/* 메인 컨테이너 - 데스크탑에서는 flex row, 모바일/태블릿에서는 flex col */}
-      <div className="flex flex-col lg:flex-row h-full gap-6">
+      {/* 메인 컨테이너 */}
+      <div className="flex flex-col h-full gap-6">
         
         {/* 그리드 영역 */}
         <div className="flex-1 flex flex-col">
-          {/* 그리드 통계 정보 - 모바일/태블릿에서만 표시 */}
+          {/* 그리드 통계 정보 - 데스크탑 사이드바가 없을 때만 표시 */}
+          {showProgressStats && (
           <div className="mb-4 sm:mb-6 lg:hidden text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
               <div className="flex items-center gap-1">
@@ -314,6 +318,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* 그리드 컨테이너 */}
           <div className="flex-1 flex items-center justify-center">
@@ -351,42 +356,6 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               {...a11yProps}
             >
               {renderGrid()}
-            </div>
-          </div>
-        </div>
-
-        {/* 사이드바 영역 - 데스크탑에서만 표시 */}
-        <div className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 gap-6">
-          {/* 그리드 통계 정보 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">진행 상황</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-success rounded-full"></div>
-                <span className="text-sm">완료: {cells.filter(cell => cell.isCompleted).length}개</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-                <span className="text-sm">진행 중: {cells.filter(cell => !cell.isCompleted && cell.topic).length}개</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-dashed border-gray-300 rounded-full"></div>
-                <span className="text-sm">비어있음: {8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length}개</span>
-              </div>
-            </div>
-            
-            {/* 진행률 표시 */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                <span>전체 진행률</span>
-                <span className="font-medium">{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-success h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${(cells.filter(cell => cell.isCompleted).length / 8) * 100}%` }}
-                />
-              </div>
             </div>
           </div>
         </div>

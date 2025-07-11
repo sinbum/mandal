@@ -95,8 +95,8 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
         }
         rightElement={
           <div className="flex items-center gap-6">
-            {/* 네비게이션 메뉴 (태블릿 이상에서 표시) */}
-            <nav className="hidden md:flex items-center gap-6">
+            {/* 네비게이션 메뉴 (모바일 레이아웃 벗어나면서 표시) */}
+            <nav className="hidden sm:flex items-center gap-6">
               <button 
                 onClick={() => router.push('/app')}
                 className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100"
@@ -147,7 +147,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
             </nav>
 
             {/* 햄버거 메뉴 (모바일에서만 표시) */}
-            <div className="flex md:hidden items-center">
+            <div className="flex sm:hidden items-center">
               <HamburgerIcon 
                 isOpen={drawerOpen} 
                 onClick={() => setDrawerOpen(!drawerOpen)}

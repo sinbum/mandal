@@ -127,13 +127,10 @@ const BottomBar: React.FC = () => {
           <span className="text-xs mt-1">프로필</span>
         </Link>
 
-        <button 
-          className="flex flex-col items-center text-gray-600 hover:text-blue-600"
-          onClick={() => setDrawerOpen(!drawerOpen)}
-        >
-          <HamburgerIcon isOpen={drawerOpen} />
-          <span className="text-xs mt-1">메뉴</span>
-        </button>
+        <div className="flex flex-col items-center text-gray-600 hover:text-blue-600">
+          <HamburgerIcon isOpen={drawerOpen} onClick={() => setDrawerOpen(!drawerOpen)} />
+          <span className="text-xs">메뉴</span>
+        </div>
       </nav>
 
       {/* 햄버거 메뉴 드로어 */}
