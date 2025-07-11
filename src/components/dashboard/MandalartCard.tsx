@@ -13,12 +13,7 @@ import {
   TrendingUp,
   Trash2,
   Edit3,
-  Copy,
-  Share,
-  Star,
-  BarChart3,
-  Archive,
-  Download
+  Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -70,72 +65,9 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
       case 'edit':
         window.location.href = `/app/cell/${cell.id}`;
         break;
-      case 'copy':
-        handleCopyMandalart();
-        break;
-      case 'share':
-        handleShareMandalart();
-        break;
-      case 'favorite':
-        handleToggleFavorite();
-        break;
-      case 'analytics':
-        handleViewAnalytics();
-        break;
-      case 'export':
-        handleExportData();
-        break;
-      case 'archive':
-        handleArchiveMandalart();
-        break;
       case 'delete':
         onDelete(cell.id, event);
         break;
-    }
-  };
-
-  const handleCopyMandalart = () => {
-    const mandalartData = {
-      id: cell.id,
-      topic: cell.topic,
-      memo: cell.memo,
-      progress: cell.progressInfo
-    };
-    
-    navigator.clipboard.writeText(JSON.stringify(mandalartData, null, 2))
-      .then(() => {
-        toast.success('만다라트 데이터가 클립보드에 복사되었습니다');
-      })
-      .catch(() => {
-        toast.error('복사에 실패했습니다');
-      });
-  };
-
-  const handleShareMandalart = async () => {
-    const shareData = {
-      title: `만다라트: ${cell.topic}`,
-      text: `${cell.topic} - 진행률: ${cell.progressInfo?.progressPercentage || 0}%`,
-      url: `${window.location.origin}/app/cell/${cell.id}`
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        toast.success('공유가 완료되었습니다');
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          toast.error('공유에 실패했습니다');
-        }
-      }
-    } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(shareData.url)
-        .then(() => {
-          toast.success('링크가 클립보드에 복사되었습니다');
-        })
-        .catch(() => {
-          toast.error('공유에 실패했습니다');
-        });
     }
   };
 
@@ -151,63 +83,6 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
       favorites.push(cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
       toast.success('즐겨찾기에 추가되었습니다');
-    }
-  };
-
-  const handleViewAnalytics = () => {
-    const analyticsData = {
-      총목표: cell.progressInfo?.totalCells || 0,
-      완료된목표: cell.progressInfo?.completedCells || 0,
-      진행률: cell.progressInfo?.progressPercentage || 0,
-      생성일: '최근 생성됨',
-      마지막수정: '최근 수정됨'
-    };
-
-    toast.info(
-      `📊 ${cell.topic} 통계\n` +
-      `진행률: ${analyticsData.진행률}%\n` +
-      `완료: ${analyticsData.완료된목표}/${analyticsData.총목표}`,
-      { duration: 4000 }
-    );
-  };
-
-  const handleExportData = () => {
-    const exportData = {
-      id: cell.id,
-      topic: cell.topic,
-      memo: cell.memo,
-      color: cell.color,
-      isCompleted: cell.isCompleted,
-      depth: cell.depth,
-      position: cell.position,
-      progressInfo: cell.progressInfo,
-      exportedAt: new Date().toISOString()
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `mandalart-${cell.topic.replace(/[^\w\s]/gi, '')}-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast.success('만다라트 데이터가 다운로드되었습니다');
-  };
-
-  const handleArchiveMandalart = () => {
-    const archived = JSON.parse(localStorage.getItem('archivedMandalarts') || '[]');
-    
-    if (!archived.includes(cell.id)) {
-      archived.push(cell.id);
-      localStorage.setItem('archivedMandalarts', JSON.stringify(archived));
-      toast.success('만다라트가 보관되었습니다');
-    } else {
-      toast.info('이미 보관된 만다라트입니다');
     }
   };
 
@@ -251,14 +126,18 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
 
           {/* 액션 버튼들 */}
           <div className="absolute top-3 right-3 flex gap-2">
-            {/* 삭제 버튼 */}
+            {/* 즐겨찾기 버튼 */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={(e) => onDelete(cell.id, e)}
-              className="w-8 h-8 rounded-full bg-red-500/20 backdrop-blur-sm text-white hover:bg-red-500/30 transition-colors duration-200 flex items-center justify-center"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleToggleFavorite();
+              }}
+              className="w-8 h-8 rounded-full bg-yellow-500/20 backdrop-blur-sm text-white hover:bg-yellow-500/30 transition-colors duration-200 flex items-center justify-center"
             >
-              <Trash2 size={14} />
+              <Star size={14} />
             </motion.button>
 
             {/* 메뉴 드롭다운 */}
@@ -292,48 +171,13 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
                       <Edit3 size={14} />
                       편집하기
                     </button>
-                    <button
-                      onClick={(e) => handleMenuAction('copy', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                    >
-                      <Copy size={14} />
-                      데이터 복사
-                    </button>
-                    <button
-                      onClick={(e) => handleMenuAction('share', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                    >
-                      <Share size={14} />
-                      공유하기
-                    </button>
-                    <button
-                      onClick={(e) => handleMenuAction('favorite', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                    >
-                      <Star size={14} />
-                      즐겨찾기
-                    </button>
-                    <button
-                      onClick={(e) => handleMenuAction('analytics', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                    >
-                      <BarChart3 size={14} />
-                      통계 보기
-                    </button>
-                    <button
-                      onClick={(e) => handleMenuAction('export', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                    >
-                      <Download size={14} />
-                      내보내기
-                    </button>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
-                      onClick={(e) => handleMenuAction('archive', e)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
+                      onClick={(e) => handleMenuAction('delete', e)}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                     >
-                      <Archive size={14} />
-                      보관하기
+                      <Trash2 size={14} />
+                      삭제하기
                     </button>
                   </motion.div>
                 )}
