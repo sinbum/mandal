@@ -110,12 +110,13 @@ function LoginContent() {
       
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
       
-      // 즉시 앱으로 이동
-      navigation.navigateToApp();
+      // 세션이 제대로 설정되도록 짧은 지연 후 이동
+      setTimeout(() => {
+        window.location.href = '/app';
+      }, 500);
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
       toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);
-    } finally {
       formState.setLoading(false);
     }
   };

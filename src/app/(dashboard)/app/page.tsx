@@ -135,7 +135,7 @@ export default function HomePage() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner message="만다라트 목록을 불러오는 중..." />;
   }
 
   return (
@@ -208,9 +208,8 @@ export default function HomePage() {
                   cell={cell}
                   index={index}
                   onDelete={openDeleteDialog}
-                  onEdit={(cellId) => {
-                    // 편집 기능 추후 구현
-                    console.log('Edit cell:', cellId);
+                  onEdit={() => {
+                    // TODO: 편집 기능 구현
                   }}
                 />
               ))}
@@ -248,9 +247,8 @@ export default function HomePage() {
                   cell={cell}
                   index={index}
                   onDelete={openDeleteDialog}
-                  onEdit={(cellId) => {
-                    // 편집 기능 추후 구현
-                    console.log('Edit cell:', cellId);
+                  onEdit={() => {
+                    // TODO: 편집 기능 구현
                   }}
                 />
               ))}
@@ -288,9 +286,8 @@ export default function HomePage() {
                   cell={cell}
                   index={index}
                   onDelete={openDeleteDialog}
-                  onEdit={(cellId) => {
-                    // 편집 기능 추후 구현
-                    console.log('Edit cell:', cellId);
+                  onEdit={() => {
+                    // TODO: 편집 기능 구현
                   }}
                 />
               ))}

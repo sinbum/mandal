@@ -66,19 +66,19 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
         onDelete(cell.id, event);
         break;
       case 'copy':
-        console.log('복사:', cell.id);
+        // TODO: 복사 기능 구현
         break;
       case 'share':
-        console.log('공유:', cell.id);
+        // TODO: 공유 기능 구현
         break;
       case 'favorite':
-        console.log('즐겨찾기:', cell.id);
+        // TODO: 즐겨찾기 기능 구현
         break;
       case 'analytics':
-        console.log('통계:', cell.id);
+        // TODO: 통계 기능 구현
         break;
       case 'archive':
-        console.log('보관:', cell.id);
+        // TODO: 보관 기능 구현
         break;
     }
   };

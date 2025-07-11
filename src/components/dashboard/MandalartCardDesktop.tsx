@@ -44,9 +44,12 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const progress = cell.progressInfo?.progressPercentage || 0;
   const completedTasks = cell.progressInfo?.completedCells || 0;
   const totalTasks = cell.progressInfo?.totalCells || 0;
-  // 가상 데이터 (추후 실제 데이터로 대체 예정)
-  const daysLeft = Math.floor(Math.random() * 30) + 1;
-  const priority = ['높음', '보통', '낮음'][Math.floor(Math.random() * 3)];
+  
+  // 안정적인 가상 데이터 (셀 ID 기반으로 고정값 생성)
+  const cellIdHash = cell.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const daysLeft = (cellIdHash % 30) + 1;
+  const priorityIndex = cellIdHash % 3;
+  const priority = ['높음', '보통', '낮음'][priorityIndex];
 
   // 색상 테마
   const getThemeColors = (color?: string) => {
@@ -230,7 +233,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('복사:', cell.id);
+                          // TODO: 복사 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -241,7 +244,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('공유:', cell.id);
+                          // TODO: 공유 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -252,7 +255,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('즐겨찾기:', cell.id);
+                          // TODO: 즐겨찾기 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -263,7 +266,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('통계:', cell.id);
+                          // TODO: 통계 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -274,7 +277,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('다운로드:', cell.id);
+                          // TODO: 다운로드 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -285,7 +288,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('설정:', cell.id);
+                          // TODO: 설정 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
@@ -297,7 +300,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('보관:', cell.id);
+                          // TODO: 보관 기능 구현
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
@@ -379,7 +382,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
               </div>
               <div className="text-center p-3 rounded-xl bg-blue-50">
                 <TrendingUp size={16} className="mx-auto mb-1 text-blue-600" />
-                <div className="text-lg font-bold text-blue-600">+{Math.floor(progress/10)}</div>
+                <div className="text-lg font-bold text-blue-600">+{Math.max(Math.floor(progress/10), 1)}</div>
                 <div className="text-xs text-gray-500">이번 주</div>
               </div>
             </div>
@@ -406,7 +409,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Calendar size={14} />
-                <span>최근 {Math.floor(Math.random() * 7) + 1}일 전</span>
+                <span>최근 {(cellIdHash % 7) + 1}일 전</span>
               </div>
               <div className="flex items-center gap-1">
                 <Star size={14} className="text-yellow-400 fill-current" />

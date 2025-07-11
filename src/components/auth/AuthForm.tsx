@@ -35,7 +35,7 @@ export default function AuthForm({
   alternativeAction
 }: AuthFormProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-3">
       <InputField
         id="email"
         label="이메일"
@@ -68,7 +68,7 @@ export default function AuthForm({
         />
       )}
       
-      <div className="mt-6">
+      <div className="pt-4">
         <Button
           type="submit"
           disabled={isLoading}
@@ -78,12 +78,12 @@ export default function AuthForm({
       </div>
       
       {alternativeAction && (
-        <div className="text-center mt-4">
+        <div className="text-center pt-3">
           <p className="text-sm text-gray-600">{alternativeAction.label}</p>
           <button 
             type="button" 
             onClick={alternativeAction.onClick}
-            className="text-blue-600 text-sm font-medium"
+            className="text-blue-600 text-sm font-medium mt-1"
           >
             {alternativeAction.buttonText}
           </button>
