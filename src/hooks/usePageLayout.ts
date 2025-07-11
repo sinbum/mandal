@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { checkUserSession } from '@/lib/auth/utils';
+import { User } from '@supabase/supabase-js';
 
 export interface PageLayoutState {
   isLoading: boolean;
   error: string | null;
-  user: any | null;
+  user: User | null;
 }
 
 export function usePageLayout(requireAuth: boolean = true) {

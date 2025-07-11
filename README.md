@@ -216,6 +216,37 @@ Centralized API service handling all Supabase operations:
 2. Add environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
 
+#### Docker Deployment
+The application includes optimized Docker configuration for containerized deployment:
+
+1. **Build Docker image**
+   ```bash
+   docker build -t mandalart-planner .
+   ```
+
+2. **Run with Docker**
+   ```bash
+   docker run -p 3000:3000 --env-file .env.local mandalart-planner
+   ```
+
+3. **Using Docker Compose (Recommended)**
+   ```bash
+   # Start the application
+   docker-compose up -d
+   
+   # View logs
+   docker-compose logs -f
+   
+   # Stop the application
+   docker-compose down
+   ```
+
+4. **Docker Features**
+   - **Multi-stage build**: Optimized for production with minimal image size
+   - **Security**: Runs as non-root user (nextjs:nodejs)
+   - **Health checks**: Built-in health monitoring
+   - **Standalone output**: Self-contained deployment without external dependencies
+
 #### Environment Variables for Production
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_production_supabase_url

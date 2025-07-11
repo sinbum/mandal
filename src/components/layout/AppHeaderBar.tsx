@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import HeaderBar from '@/components/layout/HeaderBar';
-import { Button } from '@/components/ui/Button';
 import AnimatedButton from '@/components/animations/AnimatedButton';
 import HamburgerIcon from '@/components/animations/HamburgerIcon';
 import { createClient } from '@/utils/supabase/client';

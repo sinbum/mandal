@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, PanInfo } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { SlideUpPanelProps } from '@/types/ui';
 import { LAYOUT } from '@/lib/constants';
 import { savePanelHeight, getPanelHeight } from '@/utils/cookies';

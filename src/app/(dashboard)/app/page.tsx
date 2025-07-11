@@ -6,7 +6,6 @@ import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
 
 import { toast } from 'sonner';
 import {
@@ -51,7 +50,6 @@ export default function HomePage() {
     }
   });
 
-  const router = useRouter();
 
   // 루트 셀 로드
   useEffect(() => {
@@ -69,7 +67,7 @@ export default function HomePage() {
     }
 
     loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // 새 만다라트 생성 처리
   const handleCreateMandalart = async (data: { title: string }) => {

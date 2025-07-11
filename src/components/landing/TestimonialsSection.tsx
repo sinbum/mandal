@@ -52,7 +52,7 @@ export default function TestimonialsSection() {
             <div key={index} className="bg-gray-50 rounded-xl p-8">
               {/* Testimonial Text */}
               <blockquote className="text-gray-700 text-lg leading-relaxed mb-6">
-                "{testimonial.text}"
+                &ldquo;{testimonial.text}&rdquo;
               </blockquote>
 
               {/* Achievement */}

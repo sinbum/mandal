@@ -62,7 +62,7 @@ export const colorUtils = {
   /**
    * 색상 대비 계산 (WCAG 2.1 기준)
    */
-  getContrastRatio(color1: string, color2: string): number {
+  getContrastRatio(): number {
     // 간단한 구현 - 실제로는 더 복잡한 계산이 필요
     // 이 함수는 oklch를 RGB로 변환한 후 계산해야 함
     // 여기서는 placeholder로 제공
@@ -205,8 +205,8 @@ export const a11yUtils = {
     live?: 'polite' | 'assertive' | 'off';
     atomic?: boolean;
     relevant?: 'additions' | 'removals' | 'text' | 'all';
-  }): Record<string, any> {
-    const props: Record<string, any> = {};
+  }): Record<string, string | boolean | undefined> {
+    const props: Record<string, string | boolean | undefined> = {};
     
     if (config.label) props['aria-label'] = config.label;
     if (config.labelledBy) props['aria-labelledby'] = config.labelledBy;
@@ -363,14 +363,14 @@ export const performanceUtils = {
   /**
    * 디바운스 함수
    */
-  debounce<T extends (...args: any[]) => void>(
+  debounce<T extends (...args: unknown[]) => void>(
     func: T,
     wait: number,
     immediate?: boolean
   ): T {
     let timeout: NodeJS.Timeout | null = null;
     
-    const debounced = function (this: any, ...args: Parameters<T>) {
+    const debounced = function (this: unknown, ...args: Parameters<T>) {
       const later = () => {
         timeout = null;
         if (!immediate) func.apply(this, args);
@@ -389,13 +389,13 @@ export const performanceUtils = {
   /**
    * 스로틀 함수
    */
-  throttle<T extends (...args: any[]) => void>(
+  throttle<T extends (...args: unknown[]) => void>(
     func: T,
     limit: number
   ): T {
     let inThrottle: boolean;
     
-    const throttled = function (this: any, ...args: Parameters<T>) {
+    const throttled = function (this: unknown, ...args: Parameters<T>) {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
@@ -427,10 +427,10 @@ export const performanceUtils = {
   /**
    * 메모이제이션 유틸리티
    */
-  memoize<T extends (...args: any[]) => any>(fn: T): T {
+  memoize<T extends (...args: unknown[]) => unknown>(fn: T): T {
     const cache = new Map();
     
-    const memoized = function (this: any, ...args: Parameters<T>) {
+    const memoized = function (this: unknown, ...args: Parameters<T>) {
       const key = JSON.stringify(args);
       
       if (cache.has(key)) {

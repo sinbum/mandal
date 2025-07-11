@@ -25,8 +25,7 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
   cell,
   onEdit,
   onToggleComplete,
-  onDelete,
-  position
+  onDelete
 }) => {
   if (!cell) return null;
 

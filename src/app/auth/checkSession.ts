@@ -17,13 +17,14 @@ export const checkSession = async (setLoading: (loading: boolean) => void, setUs
     // 세션 확인
     const result = await checkUserSession();
     
-    if (!result.success || !result.data?.user) {
+    if (!result.success || !(result.data && typeof result.data === 'object' && 'user' in result.data && result.data.user)) {
       console.log('사용자 정보가 없습니다.');
       throw new Error('사용자 정보가 없습니다');
     }
     
     // 이메일에서 사용자 이름 추출
-    const email = result.data.user.email || '';
+    const userData = result.data as { user: { email?: string } };
+    const email = userData.user.email || '';
     const displayName = extractDisplayName(email);
     
     // 데이터 캐싱

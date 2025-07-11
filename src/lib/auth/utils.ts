@@ -1,10 +1,9 @@
 import { createClient } from '@/utils/supabase/client';
-import { toast } from 'sonner';
 
 export interface AuthResult {
   success: boolean;
   error?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface ToastMessage {

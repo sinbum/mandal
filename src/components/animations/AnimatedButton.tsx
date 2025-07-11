@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
-import { Button, ButtonProps } from '@/components/ui/Button';
+import { ButtonProps } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 type MotionButtonProps = Omit<HTMLMotionProps<"button">, 
@@ -17,7 +17,7 @@ interface AnimatedButtonProps extends Omit<ButtonProps, 'asChild'> {
 }
 
 const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
-  ({ children, motionProps = {}, animationEnabled = true, className, variant, size, onClick, disabled, type, ...otherProps }, ref) => {
+  ({ children, motionProps = {}, animationEnabled = true, className, variant, size, onClick, disabled, type }, ref) => {
     const defaultMotionProps: HTMLMotionProps<"button"> = {
       whileHover: animationEnabled ? {
         scale: 1.02,

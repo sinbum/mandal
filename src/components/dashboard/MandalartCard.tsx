@@ -11,15 +11,8 @@ import {
   Circle,
   Calendar,
   TrendingUp,
-  Edit3,
-  Trash2,
-  Copy,
-  Share,
-  Star,
-  BarChart3,
-  Archive
+  Trash2
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface MandalartCardProps {
   cell: MandalartCell;
@@ -60,7 +53,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
 
   const theme = getThemeColors(cell.color);
 
-  const handleMenuAction = (action: string, event: React.MouseEvent) => {
+  const handleMenuAction = (action: string, event: React.MouseEvent) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     event.preventDefault();
     event.stopPropagation();
     setShowActions(false);

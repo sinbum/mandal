@@ -15,19 +15,6 @@ const HamburgerIcon: React.FC<HamburgerIconProps> = ({
   size = 28,
   className = "text-gray-700"
 }) => {
-  const lineVariants = {
-    closed: {
-      rotate: 0,
-      y: 0,
-      opacity: 1
-    },
-    open: {
-      rotate: 0,
-      y: 0,
-      opacity: 1
-    }
-  };
-
   const topLineVariants = {
     closed: { rotate: 0, y: 0 },
     open: { rotate: 45, y: 6 }

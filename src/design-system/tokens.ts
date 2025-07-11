@@ -409,17 +409,18 @@ export type ZIndexToken = keyof typeof DESIGN_TOKENS.zIndex;
 // 토큰 사용 헬퍼 함수
 export const getColorToken = (token: string): string => {
   const keys = token.split('.');
-  let value: any = DESIGN_TOKENS.colors;
+  let value: Record<string, unknown> | string | unknown = DESIGN_TOKENS.colors;
   
   for (const key of keys) {
-    value = value[key];
-    if (value === undefined) {
+    if (typeof value === 'object' && value !== null && key in value) {
+      value = (value as Record<string, unknown>)[key];
+    } else {
       console.warn(`Color token "${token}" not found`);
       return 'transparent';
     }
   }
   
-  return value;
+  return typeof value === 'string' ? value : 'transparent';
 };
 
 export const getSpacingToken = (token: keyof typeof DESIGN_TOKENS.spacing): string => {

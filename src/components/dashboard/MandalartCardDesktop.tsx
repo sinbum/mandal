@@ -11,7 +11,6 @@ import {
   Circle, 
   Calendar, 
   TrendingUp, 
-  Eye,
   Edit3,
   Trash2,
   Star,

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
@@ -20,8 +20,7 @@ interface LoginFormData {
   password: string;
 }
 
-export default function AuthPage() {
-  const router = useRouter();
+function LoginContent() {
   const navigation = useNavigation();
   const searchParams = useSearchParams();
   
@@ -52,7 +51,7 @@ export default function AuthPage() {
             throw new Error(result.error);
           }
 
-          if (result.data.session) {
+          if (result.data && typeof result.data === 'object' && 'session' in result.data && result.data.session) {
             toast.success(AUTH_MESSAGES.EMAIL_VERIFICATION_SUCCESS);
             
             // 성공 후 앱 페이지로 이동
@@ -140,5 +139,13 @@ export default function AuthPage() {
         }}
       />
     </AuthLayout>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 } 

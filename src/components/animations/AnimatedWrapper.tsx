@@ -49,7 +49,6 @@ const AnimatedWrapper: React.FC<AnimatedWrapperProps> = ({
   animation = 'fadeIn',
   duration = 0.3,
   delay = 0,
-  stagger = 0,
   ...motionProps
 }) => {
   const animationConfig = animation === 'custom' ? {} : animations[animation];

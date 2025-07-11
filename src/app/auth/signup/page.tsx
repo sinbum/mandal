@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
@@ -17,7 +16,6 @@ interface SignupFormData {
 }
 
 export default function SignupPage() {
-  const router = useRouter();
   const navigation = useNavigation();
   
   const formState = useFormState<SignupFormData>({

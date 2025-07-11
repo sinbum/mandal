@@ -216,6 +216,37 @@ interface MandalartCell {
 2. Vercel 대시보드에 환경 변수 추가
 3. main 브랜치에 푸시할 때 자동 배포
 
+#### Docker 배포
+애플리케이션은 컨테이너화된 배포를 위한 최적화된 Docker 구성을 포함합니다:
+
+1. **Docker 이미지 빌드**
+   ```bash
+   docker build -t mandalart-planner .
+   ```
+
+2. **Docker로 실행**
+   ```bash
+   docker run -p 3000:3000 --env-file .env.local mandalart-planner
+   ```
+
+3. **Docker Compose 사용 (권장)**
+   ```bash
+   # 애플리케이션 시작
+   docker-compose up -d
+   
+   # 로그 확인
+   docker-compose logs -f
+   
+   # 애플리케이션 중지
+   docker-compose down
+   ```
+
+4. **Docker 특징**
+   - **멀티 스테이지 빌드**: 최소 이미지 크기로 프로덕션 최적화
+   - **보안**: 비루트 사용자로 실행 (nextjs:nodejs)
+   - **헬스 체크**: 내장된 상태 모니터링
+   - **독립 실행형 출력**: 외부 의존성 없는 자체 포함 배포
+
 #### 프로덕션용 환경 변수
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_production_supabase_url

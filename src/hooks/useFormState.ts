@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export interface FormState<T = any> {
+export interface FormState<T = Record<string, unknown>> {
   data: T;
   isLoading: boolean;
   error: string | null;

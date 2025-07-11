@@ -30,7 +30,6 @@ export default function AuthForm({
   onConfirmPasswordChange,
   onSubmit,
   isLoading,
-  error,
   submitLabel,
   loadingLabel,
   alternativeAction
