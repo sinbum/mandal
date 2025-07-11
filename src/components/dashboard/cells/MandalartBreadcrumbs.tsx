@@ -9,6 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
+  BreadcrumbHome,
 } from '@/components/ui/breadcrumb';
 import { MoreVertical, Trash2 } from 'lucide-react';
 
@@ -65,35 +66,49 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between mb-4 mt-4">
       <Breadcrumb>
         <BreadcrumbList>
+          {/* Home 아이콘 */}
+          <BreadcrumbItem>
+            <div>
+              <BreadcrumbHome asChild>
+                <Link href="/app" />
+              </BreadcrumbHome>
+            </div>
+          </BreadcrumbItem>
+          
+          {/* 경로 아이템들 */}
           {visibleItems.map((cell, index) => {
             const isLast = index === visibleItems.length - 1;
             const showEllipsis = showCollapsed && index === 0;
             
             return (
               <React.Fragment key={cell.id}>
-                <BreadcrumbItem>
-                  {isLast ? (
-                    <BreadcrumbPage>
-                      {cell.topic || '무제 셀'}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link href={`/app/cell/${cell.id}`}>
-                        {cell.topic || '무제 셀'}
-                      </Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
-                {showEllipsis && (
+                <BreadcrumbSeparator />
+                {showEllipsis && index === 0 && (
                   <>
-                    <BreadcrumbEllipsis />
+                    <BreadcrumbItem>
+                      <BreadcrumbEllipsis />
+                    </BreadcrumbItem>
                     <BreadcrumbSeparator />
                   </>
                 )}
+                <BreadcrumbItem>
+                  <div className="flex items-center">
+                    {isLast ? (
+                      <BreadcrumbPage className="ml-4">
+                        {cell.topic || '무제 셀'}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild className="ml-4">
+                        <Link href={`/app/cell/${cell.id}`}>
+                          {cell.topic || '무제 셀'}
+                        </Link>
+                      </BreadcrumbLink>
+                    )}
+                  </div>
+                </BreadcrumbItem>
               </React.Fragment>
             );
           })}
