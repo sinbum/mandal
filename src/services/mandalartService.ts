@@ -30,7 +30,7 @@ export class MandalartService {
   }
   
   /**
-   * 셀의 자식 셀 로드
+   * 셀의 자식 셀 로드 (자식들의 자식도 한 번에 미리 로드)
    */
   async fetchChildrenByCellId(cellId: string): Promise<MandalartCell[]> {
     try {
@@ -39,7 +39,8 @@ export class MandalartService {
         return [];
       }
       
-      const { data, error } = await this.supabase
+      // 직접 자식 셀들 로드
+      const { data: directChildren, error } = await this.supabase
         .from('mandalart_cells')
         .select('*')
         .eq('parent_id', cellId)
@@ -47,8 +48,30 @@ export class MandalartService {
       
       if (error) throw error;
       
-      // DB 결과를 프론트엔드 모델로 변환
-      return data.map(cell => this.convertDbCellToModel(cell));
+      if (!directChildren || directChildren.length === 0) {
+        return [];
+      }
+      
+      // 각 직접 자식의 자식들도 미리 로드
+      const childIds = directChildren.map(child => child.id);
+      const { data: grandchildren } = await this.supabase
+        .from('mandalart_cells')
+        .select('*')
+        .in('parent_id', childIds)
+        .order('position', { ascending: true });
+      
+      // 각 자식에 대해 손자 셀들을 매핑
+      const childrenWithGrandchildren = directChildren.map(child => {
+        const childGrandchildren = (grandchildren || [])
+          .filter(gc => gc.parent_id === child.id)
+          .map(gc => this.convertDbCellToModel(gc));
+        
+        const childModel = this.convertDbCellToModel(child);
+        childModel.children = childGrandchildren;
+        return childModel;
+      });
+      
+      return childrenWithGrandchildren;
     } catch (err) {
       console.error('자식 셀 로드 실패:', err);
       throw err;
