@@ -336,19 +336,19 @@ export default function CellPage() {
   };
 
   
-  // 로딩 상태 표시 (캐시에서 로딩된 경우 제외)
-  if ((isPending || isLoading || isInitialLoading) && !isCacheLoaded) {
-    return (
-      <PageTransition>
-        <MobileLayout
-          header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
-          footer={<div className="sm:hidden"><BottomBar /></div>}
-        >
-          <CellPageSkeleton />
-        </MobileLayout>
-      </PageTransition>
-    );
-  }
+  // 로딩 상태 표시 (캐시에서 로딩된 경우 제외) - 임시 비활성화
+  // if ((isPending || isLoading || isInitialLoading) && !isCacheLoaded) {
+  //   return (
+  //     <PageTransition>
+  //       <MobileLayout
+  //         header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
+  //         footer={<div className="sm:hidden"><BottomBar /></div>}
+  //       >
+  //         <CellPageSkeleton />
+  //       </MobileLayout>
+  //     </PageTransition>
+  //   );
+  // }
   
   // 오류 상태 표시
   if (pageError || error) {
@@ -374,19 +374,19 @@ export default function CellPage() {
     );
   }
   
-  // 아직 로딩 중이고 currentCell이 없는 경우 스켈레톤 표시
-  if (!currentCell) {
-    return (
-      <PageTransition>
-        <MobileLayout
-          header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
-          footer={<div className="sm:hidden"><BottomBar /></div>}
-        >
-          <CellPageSkeleton />
-        </MobileLayout>
-      </PageTransition>
-    );
-  }
+  // 아직 로딩 중이고 currentCell이 없는 경우 스켈레톤 표시 - 임시 비활성화
+  // if (!currentCell) {
+  //   return (
+  //     <PageTransition>
+  //       <MobileLayout
+  //         header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
+  //         footer={<div className="sm:hidden"><BottomBar /></div>}
+  //       >
+  //         <CellPageSkeleton />
+  //       </MobileLayout>
+  //     </PageTransition>
+  //   );
+  // }
   
   return (
     <PageTransition>
@@ -395,6 +395,9 @@ export default function CellPage() {
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
 
+      {/* currentCell이 없으면 아무것도 렌더링하지 않음 (캐시 로딩 대기) */}
+      {currentCell && (
+      <>
       {/* 메인 레이아웃 컨테이너 */}
       <div className="flex lg:flex-row flex-col h-[100dvh] sm:h-screen overflow-hidden">
         
@@ -456,6 +459,8 @@ export default function CellPage() {
           <ProgressSidebar cells={childCells} />
         </div>
       </div>
+      </>
+      )}
       </MobileLayout>
     </PageTransition>
   );
