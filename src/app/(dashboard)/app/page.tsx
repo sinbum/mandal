@@ -20,15 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import AppHeaderBar from '@/components/layout/AppHeaderBar';
@@ -47,13 +38,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cellToDelete, setCellToDelete] = useState<string | null>(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
-  const createForm = useForm({
-    defaultValues: {
-      title: '새 만다라트'
-    }
-  });
 
 
   // 루트 셀 및 첫 번째 레벨 자식들 로드
@@ -89,13 +73,21 @@ export default function HomePage() {
   }, [authLoading, isLoggedIn]); // 인증 상태 변경 시 재실행
 
   // 새 만다라트 생성 처리
-  const handleCreateMandalart = async (data: { title: string }) => {
+  const handleCreateMandalart = async (title: string) => {
     try {
+      // 추가 인증 체크
+      if (!user || !isLoggedIn) {
+        toast.error('로그인이 필요합니다');
+        router.push('/auth/login');
+        return;
+      }
+
       setIsLoading(true);
-      setCreateDialogOpen(false);
       
-      const title = data.title || '새 만다라트';
+      console.log('만다라트 생성 시작:', { title, userId: user.id });
+      
       const rootCellId = await mandalartAPI.createMandalart(title);
+      console.log('만다라트 생성 완료:', rootCellId);
 
       toast.success('만다라트가 성공적으로 생성되었습니다');
       
@@ -103,7 +95,19 @@ export default function HomePage() {
       router.push(`/app/cell/${rootCellId}`);
     } catch (err) {
       console.error('만다라트 생성 오류:', err);
-      toast.error('만다라트 생성에 실패했습니다');
+      
+      // 더 구체적인 에러 메시지 제공
+      if (err instanceof Error) {
+        if (err.message.includes('인증')) {
+          toast.error('로그인이 만료되었습니다. 다시 로그인해주세요');
+          router.push('/auth/login');
+        } else {
+          toast.error(`만다라트 생성 실패: ${err.message}`);
+        }
+      } else {
+        toast.error('만다라트 생성에 실패했습니다');
+      }
+      
       setIsLoading(false);
     }
   };
@@ -208,7 +212,7 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
             >
               <Button
-                onClick={() => setCreateDialogOpen(true)}
+                onClick={() => handleCreateMandalart('첫 만다라트')}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
@@ -226,7 +230,7 @@ export default function HomePage() {
             onEdit={() => {
               // TODO: 편집 기능 구현
             }}
-            onCreateNew={() => setCreateDialogOpen(true)}
+            onCreateNew={handleCreateMandalart}
           />
         </div>
       )}
@@ -246,38 +250,6 @@ export default function HomePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>새 만다라트 만들기</AlertDialogTitle>
-            <AlertDialogDescription>
-              새 만다라트의 제목을 입력해주세요.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <Form {...createForm}>
-            <form onSubmit={createForm.handleSubmit(handleCreateMandalart)} className="space-y-4">
-              <FormField
-                control={createForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>제목</FormLabel>
-                    <FormControl>
-                      <Input placeholder="새 만다라트" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <AlertDialogFooter>
-                <AlertDialogCancel>취소</AlertDialogCancel>
-                <AlertDialogAction type="submit">생성</AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
-          </Form>
-        </AlertDialogContent>
-      </AlertDialog>
       </MobileLayout>
     </PageTransition>
   );

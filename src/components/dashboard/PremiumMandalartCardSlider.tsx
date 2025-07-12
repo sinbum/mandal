@@ -12,7 +12,7 @@ interface PremiumMandalartCardSliderProps {
   cells: MandalartCell[];
   onDelete: (cellId: string, event: React.MouseEvent) => void;
   onEdit?: (cellId: string) => void;
-  onCreateNew: () => void;
+  onCreateNew: (title: string) => Promise<void>;
 }
 
 const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({ 
@@ -24,6 +24,9 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [title, setTitle] = useState('새 만다라트');
+  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // 전체 아이템 수 (카드 + 새 만다라트 카드)
@@ -177,26 +180,106 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToNext, goToPrevious]);
 
-  // 새 만다라트 카드 렌더링 (단순화)
-  const renderCreateCard = () => (
-    <div className="w-full">
-      <div
-        onClick={onCreateNew}
-        className="relative group w-full p-8 rounded-3xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-all duration-300 cursor-pointer min-h-[400px] flex flex-col items-center justify-center text-center"
-      >
-        <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-200">
-          <Plus className="w-10 h-10 text-white" />
+  // 새 만다라트 폼 이벤트 핸들러
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      await onCreateNew(title.trim());
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsFormOpen(false);
+    setTitle('새 만다라트');
+  };
+
+  // 새 만다라트 카드 렌더링 (폼 통합)
+  const renderCreateCard = () => {
+
+    if (isFormOpen) {
+      return (
+        <div className="w-full">
+          <div className="relative group w-full p-8 rounded-3xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 transition-all duration-300 min-h-[400px] flex flex-col items-center justify-center">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mb-4 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                  <Plus className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  새 만다라트 만들기
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  만다라트의 제목을 입력해주세요
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                    제목
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="새 만다라트"
+                    maxLength={50}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                    disabled={isLoading}
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!title.trim() || isLoading}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    {isLoading ? '생성 중...' : '생성'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-        
-        <h3 className="text-2xl font-bold text-gray-800 mb-3">
-          새 만다라트 생성
-        </h3>
-        <p className="text-gray-600 leading-relaxed">
-          새로운 목표를 설정하고<br />꿈을 현실로 만들어보세요
-        </p>
+      );
+    }
+
+    return (
+      <div className="w-full">
+        <div
+          onClick={() => setIsFormOpen(true)}
+          className="relative group w-full p-8 rounded-3xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-all duration-300 cursor-pointer min-h-[400px] flex flex-col items-center justify-center text-center"
+        >
+          <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-200">
+            <Plus className="w-10 h-10 text-white" />
+          </div>
+          
+          <h3 className="text-2xl font-bold text-gray-800 mb-3">
+            새 만다라트 생성
+          </h3>
+          <p className="text-gray-600 leading-relaxed">
+            새로운 목표를 설정하고<br />꿈을 현실로 만들어보세요
+          </p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // 현재 카드 렌더링
   const renderCurrentCard = () => {

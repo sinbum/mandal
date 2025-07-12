@@ -20,7 +20,14 @@
       "Bash(grep:*)",
       "Bash(npm run start:*)",
       "Bash(curl:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__list_tables",
+      "Bash(ls:*)",
+      "mcp__supabase__execute_sql",
+      "Bash(node:*)",
+      "mcp__supabase__get_anon_key",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }
