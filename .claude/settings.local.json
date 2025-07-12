@@ -27,7 +27,8 @@
       "mcp__supabase__execute_sql",
       "Bash(node:*)",
       "mcp__supabase__get_anon_key",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__supabase__apply_migration"
     ],
     "deny": []
   }

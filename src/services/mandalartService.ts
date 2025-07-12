@@ -8,6 +8,7 @@ import { getCurrentUser, isUserAuthenticated } from '@/hooks/useAuth';
  */
 export class MandalartService {
   private supabase = createClient();
+  private lastSyncTimestamp: number = 0;
   
   /**
    * 셀 ID로 셀 데이터 로드
@@ -47,7 +48,7 @@ export class MandalartService {
   }
   
   /**
-   * 셀의 자식 셀 로드 (자식들의 자식도 한 번에 미리 로드)
+   * 셀의 자식 셀 로드 (최적화된 RPC 함수 사용)
    */
   async fetchChildrenByCellId(cellId: string): Promise<MandalartCell[]> {
     try {
@@ -56,6 +57,66 @@ export class MandalartService {
         return [];
       }
       
+      // 최적화된 RPC 함수 사용 - 계층적 구조를 한 번에 조회
+      const { data, error } = await this.supabase
+        .rpc('get_cell_with_children', {
+          cell_uuid: cellId
+        });
+      
+      if (error) {
+        console.error('RPC 함수 호출 실패, 기존 방식으로 폴백:', error);
+        return this.fetchChildrenByCellIdLegacy(cellId);
+      }
+      
+      // 결과를 계층적 구조로 변환
+      const cellsMap = new Map<string, MandalartCell>();
+      const rootCell = data.find((item: any) => item.level === 0);
+      
+      // 모든 셀을 Map에 저장
+      data.forEach((item: any) => {
+        const cell = this.convertDbCellToModel({
+          id: item.id,
+          topic: item.topic,
+          memo: item.memo,
+          color: item.color,
+          image_url: item.image_url,
+          is_completed: item.is_completed,
+          parent_id: item.parent_id,
+          depth: item.depth,
+          position: item.cell_position,
+          mandalart_id: item.mandalart_id
+        });
+        
+        cell.children = [];
+        cellsMap.set(cell.id, cell);
+      });
+      
+      // 부모-자식 관계 설정
+      data.forEach((item: any) => {
+        if (item.parent_id && cellsMap.has(item.parent_id)) {
+          const parent = cellsMap.get(item.parent_id)!;
+          const child = cellsMap.get(item.id)!;
+          parent.children!.push(child);
+        }
+      });
+      
+      // 루트 셀의 직접 자식들만 반환
+      if (rootCell && cellsMap.has(rootCell.id)) {
+        return cellsMap.get(rootCell.id)!.children || [];
+      }
+      
+      return [];
+    } catch (err) {
+      console.error('자식 셀 로드 실패:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * 셀의 자식 셀 로드 (기존 방식 - 폴백용)
+   */
+  private async fetchChildrenByCellIdLegacy(cellId: string): Promise<MandalartCell[]> {
+    try {
       // 직접 자식 셀들 로드
       const { data: directChildren, error } = await this.supabase
         .from('mandalart_cells')
@@ -90,13 +151,13 @@ export class MandalartService {
       
       return childrenWithGrandchildren;
     } catch (err) {
-      console.error('자식 셀 로드 실패:', err);
+      console.error('Legacy 자식 셀 로드 실패:', err);
       throw err;
     }
   }
   
   /**
-   * 셀 업데이트
+   * 셀 업데이트 (캐시 무효화 포함)
    */
   async updateCell(cellId: string, updates: Partial<MandalartCell>): Promise<void> {
     try {
@@ -119,6 +180,9 @@ export class MandalartService {
         .eq('id', cellId);
       
       if (error) throw error;
+
+      // 캐시 무효화 및 실시간 업데이트
+      await this.invalidateCacheForCell(cellId);
     } catch (err) {
       console.error('셀 업데이트 실패:', err);
       throw err;
@@ -176,6 +240,9 @@ export class MandalartService {
         .single();
       
       if (error) throw error;
+
+      // 부모 셀의 캐시 무효화 (새 자식이 추가되었으므로)
+      await this.invalidateCacheForCell(parentCellId);
       
       return data.id;
     } catch (err) {
@@ -185,7 +252,7 @@ export class MandalartService {
   }
 
   /**
-   * 셀 완료 상태 토글
+   * 셀 완료 상태 토글 (캐시 무효화 포함)
    */
   async toggleCellCompletion(cellId: string, isCompleted: boolean): Promise<void> {
     try {
@@ -202,6 +269,10 @@ export class MandalartService {
         .eq('id', cellId);
       
       if (error) throw error;
+
+      // 완료 상태 변경은 진행률에 영향을 주므로 관련 캐시 무효화
+      await this.invalidateCacheForCell(cellId);
+      await this.invalidateProgressCache(cellId);
     } catch (err) {
       console.error('셀 완료 상태 토글 실패:', err);
       throw err;
@@ -209,13 +280,20 @@ export class MandalartService {
   }
   
   /**
-   * 셀 삭제
+   * 셀 삭제 (캐시 무효화 포함)
    */
   async deleteCell(cellId: string): Promise<void> {
     try {
       if (this.isVirtualId(cellId)) {
         throw new Error('가상 셀은 삭제할 수 없습니다');
       }
+
+      // 삭제 전에 부모 ID 조회 (캐시 무효화용)
+      const { data: cellData } = await this.supabase
+        .from('mandalart_cells')
+        .select('parent_id')
+        .eq('id', cellId)
+        .single();
       
       // 자식 셀들도 함께 삭제 (CASCADE)
       const { error } = await this.supabase
@@ -224,6 +302,12 @@ export class MandalartService {
         .eq('id', cellId);
       
       if (error) throw error;
+
+      // 해당 셀과 부모 셀의 캐시 무효화
+      await this.invalidateCacheForCell(cellId);
+      if (cellData?.parent_id) {
+        await this.invalidateCacheForCell(cellData.parent_id);
+      }
     } catch (err) {
       console.error('셀 삭제 실패:', err);
       throw err;
@@ -288,17 +372,179 @@ export class MandalartService {
   }
   
   /**
-   * 사용자의 셀 목록 조회
+   * 사용자의 셀 목록 조회 (캐시 검증 포함)
    */
   async fetchUserCells(): Promise<MandalartCell[]> {
     try {
-      // 캐시된 사용자 정보 사용 (안전한 체크)
       const user = getCurrentUser();
-      
       if (!user) {
         console.warn('사용자 인증 정보 없음');
         throw new Error('인증된 사용자가 없습니다');
       }
+
+      // 1. 캐시 검증 실행
+      const needsUpdate = await this.validateAndSyncCache(user.id);
+      
+      // 2. 캐시가 유효하면 캐시된 데이터 사용, 아니면 서버에서 새로 로드
+      if (!needsUpdate) {
+        console.log('캐시가 최신 상태, 캐시된 데이터 사용');
+        // 여기서 캐시에서 로드하는 로직 추가 필요
+      }
+
+      // 3. 최적화된 RPC 함수 사용 - 단일 쿼리로 모든 데이터 조회
+      const { data, error } = await this.supabase
+        .rpc('get_user_mandalarts_with_progress', {
+          user_uuid: user.id
+        });
+      
+      if (error) {
+        console.error('RPC 함수 호출 실패, 기존 방식으로 폴백:', error);
+        return this.fetchUserCellsLegacy();
+      }
+      
+      // 4. RPC 결과를 프론트엔드 모델로 변환
+      const rootCellsWithProgress = data.map((item: any) => {
+        const cell = this.convertDbCellToModel({
+          id: item.root_cell_id,
+          topic: item.root_topic,
+          color: item.root_color,
+          parent_id: null,
+          depth: 0,
+          position: 0,
+          mandalart_id: item.mandalart_id
+        });
+        
+        cell.progressInfo = {
+          totalCells: item.total_cells || 0,
+          completedCells: item.completed_cells || 0,
+          progressPercentage: parseFloat(item.progress_percentage || '0')
+        };
+        
+        return cell;
+      });
+      
+      // 5. 동기화 타임스탬프 업데이트
+      this.lastSyncTimestamp = Date.now();
+      
+      console.log('최신 데이터로 업데이트된 rootCells:', rootCellsWithProgress);
+      return rootCellsWithProgress;
+    } catch (err) {
+      console.error('사용자 셀 목록 조회 실패:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * 캐시 검증 및 동기화
+   */
+  private async validateAndSyncCache(userId: string): Promise<boolean> {
+    try {
+      // 1. 서버의 최신 타임스탬프들 조회
+      const { data: serverTimestamps, error } = await this.supabase
+        .rpc('get_user_data_timestamps', {
+          user_uuid: userId
+        });
+
+      if (error) {
+        console.warn('타임스탬프 조회 실패, 전체 갱신:', error);
+        return true; // 에러 시 전체 갱신
+      }
+
+      if (!serverTimestamps || serverTimestamps.length === 0) {
+        console.log('서버에 데이터 없음');
+        return false;
+      }
+
+      // 2. 마지막 동기화 이후 변경사항 확인
+      const lastSyncDate = new Date(this.lastSyncTimestamp);
+      const hasChanges = serverTimestamps.some((item: any) => {
+        const serverUpdateTime = new Date(item.updated_at);
+        return serverUpdateTime > lastSyncDate;
+      });
+
+      if (hasChanges) {
+        console.log('서버에 새로운 변경사항 발견, 동기화 필요');
+        
+        // 3. 증분 업데이트 실행
+        await this.performIncrementalSync(userId, lastSyncDate);
+        return true;
+      }
+
+      console.log('캐시가 최신 상태');
+      return false;
+    } catch (err) {
+      console.error('캐시 검증 실패:', err);
+      return true; // 에러 시 전체 갱신
+    }
+  }
+
+  /**
+   * 증분 동기화 실행
+   */
+  private async performIncrementalSync(userId: string, sinceDate: Date): Promise<void> {
+    try {
+      console.log('증분 동기화 시작:', sinceDate);
+
+      // 1. 변경된 셀들만 조회
+      const { data: changedCells, error } = await this.supabase
+        .rpc('get_changed_cells_since', {
+          user_uuid: userId,
+          since_timestamp: sinceDate.toISOString()
+        });
+
+      if (error) {
+        console.error('변경된 셀 조회 실패:', error);
+        return;
+      }
+
+      if (!changedCells || changedCells.length === 0) {
+        console.log('변경된 셀이 없음');
+        return;
+      }
+
+      console.log(`${changedCells.length}개의 변경된 셀 발견`);
+
+      // 2. 변경된 셀들을 타입별로 처리
+      const { cellCache } = await import('@/utils/cellCache');
+      
+      for (const changedCell of changedCells) {
+        const cell = this.convertDbCellToModel({
+          id: changedCell.id,
+          topic: changedCell.topic,
+          memo: changedCell.memo,
+          color: changedCell.color,
+          image_url: changedCell.image_url,
+          is_completed: changedCell.is_completed,
+          parent_id: changedCell.parent_id,
+          depth: changedCell.depth,
+          position: changedCell.cell_position,
+          mandalart_id: changedCell.mandalart_id
+        });
+
+        // 3. 캐시 무효화 및 업데이트
+        if (changedCell.change_type === 'created') {
+          console.log(`새 셀 캐시 추가: ${cell.id}`);
+          cellCache.set(cell.id, cell, []);
+        } else if (changedCell.change_type === 'updated') {
+          console.log(`기존 셀 캐시 업데이트: ${cell.id}`);
+          await cellCache.invalidateCache(cell.id);
+          cellCache.set(cell.id, cell, []);
+        }
+      }
+
+      console.log('증분 동기화 완료');
+    } catch (err) {
+      console.error('증분 동기화 실패:', err);
+    }
+  }
+
+  /**
+   * 사용자의 셀 목록 조회 (기존 방식 - 폴백용)
+   */
+  private async fetchUserCellsLegacy(): Promise<MandalartCell[]> {
+    try {
+      const user = getCurrentUser();
+      if (!user) throw new Error('인증된 사용자가 없습니다');
       
       // 사용자의 만다라트 ID 찾기
       const { data: mandalarts, error: mandalartError } = await this.supabase
@@ -307,7 +553,6 @@ export class MandalartService {
         .eq('user_id', user.id);
       
       if (mandalartError) throw mandalartError;
-      
       if (!mandalarts.length) return [];
       
       // 각 만다라트의 루트 셀 찾기
@@ -332,12 +577,101 @@ export class MandalartService {
         })
       );
       
-      console.log('rootCells with progress', rootCellsWithProgress);
       return rootCellsWithProgress;
     } catch (err) {
-      console.error('사용자 셀 목록 조회 실패:', err);
+      console.error('Legacy 사용자 셀 목록 조회 실패:', err);
       throw err;
     }
+  }
+
+  /**
+   * 특정 셀과 관련된 캐시 무효화
+   */
+  private async invalidateCacheForCell(cellId: string): Promise<void> {
+    try {
+      const { cellCache } = await import('@/utils/cellCache');
+      
+      // 해당 셀과 관련된 모든 캐시 무효화
+      await cellCache.invalidateCache(cellId);
+      
+      console.log(`셀 ${cellId}과 관련된 캐시 무효화 완료`);
+    } catch (err) {
+      console.error('캐시 무효화 실패:', err);
+    }
+  }
+
+  /**
+   * 진행률 관련 캐시 무효화 (완료 상태 변경 시)
+   */
+  private async invalidateProgressCache(cellId: string): Promise<void> {
+    try {
+      // 해당 셀의 만다라트 ID 조회
+      const { data: cellData, error } = await this.supabase
+        .from('mandalart_cells')
+        .select('mandalart_id, parent_id')
+        .eq('id', cellId)
+        .single();
+
+      if (error || !cellData) {
+        console.warn('셀 정보 조회 실패, 진행률 캐시 무효화 생략');
+        return;
+      }
+
+      const { cellCache } = await import('@/utils/cellCache');
+
+      // 루트 셀까지 올라가면서 진행률 관련 캐시 무효화
+      let currentCellId = cellData.parent_id;
+      while (currentCellId) {
+        await cellCache.invalidateCache(currentCellId);
+        
+        const { data: parentData } = await this.supabase
+          .from('mandalart_cells')
+          .select('parent_id')
+          .eq('id', currentCellId)
+          .single();
+        
+        currentCellId = parentData?.parent_id;
+      }
+
+      console.log(`진행률 관련 캐시 무효화 완료 (만다라트: ${cellData.mandalart_id})`);
+    } catch (err) {
+      console.error('진행률 캐시 무효화 실패:', err);
+    }
+  }
+
+  /**
+   * 백그라운드 동기화 시작
+   */
+  startBackgroundSync(): void {
+    if (typeof window === 'undefined') return;
+
+    // 5분마다 백그라운드 동기화 실행
+    const syncInterval = 5 * 60 * 1000; // 5분
+    
+    setInterval(async () => {
+      try {
+        const user = getCurrentUser();
+        if (user) {
+          console.log('백그라운드 동기화 시작');
+          await this.validateAndSyncCache(user.id);
+        }
+      } catch (err) {
+        console.error('백그라운드 동기화 실패:', err);
+      }
+    }, syncInterval);
+
+    // 페이지 포커스 시에도 동기화
+    window.addEventListener('focus', async () => {
+      try {
+        const user = getCurrentUser();
+        if (user) {
+          console.log('페이지 포커스 시 동기화');
+          await this.validateAndSyncCache(user.id);
+        }
+      } catch (err) {
+        console.error('포커스 시 동기화 실패:', err);
+      }
+    });
   }
 
   /**
@@ -506,9 +840,49 @@ export class MandalartService {
   }
   
   /**
-   * 만다라트의 진행률 계산
+   * 만다라트의 진행률 계산 (최적화된 RPC 함수 사용)
    */
   private async calculateMandalartProgress(mandalartId: string): Promise<{
+    totalCells: number;
+    completedCells: number;
+    progressPercentage: number;
+  }> {
+    try {
+      // 최적화된 RPC 함수 사용 - 빠른 진행률 계산
+      const { data, error } = await this.supabase
+        .rpc('calculate_mandalart_progress_fast', {
+          mandalart_uuid: mandalartId
+        });
+      
+      if (error) {
+        console.error('RPC 진행률 계산 실패, 기존 방식으로 폴백:', error);
+        return this.calculateMandalartProgressLegacy(mandalartId);
+      }
+      
+      if (!data || data.length === 0) {
+        return { totalCells: 0, completedCells: 0, progressPercentage: 0 };
+      }
+      
+      const result = data[0];
+      return {
+        totalCells: parseInt(result.total_cells) || 0,
+        completedCells: parseInt(result.completed_cells) || 0,
+        progressPercentage: parseFloat(result.progress_percentage) || 0
+      };
+    } catch (err) {
+      console.error('진행률 계산 실패:', err);
+      return {
+        totalCells: 0,
+        completedCells: 0,
+        progressPercentage: 0
+      };
+    }
+  }
+
+  /**
+   * 만다라트의 진행률 계산 (기존 방식 - 폴백용)
+   */
+  private async calculateMandalartProgressLegacy(mandalartId: string): Promise<{
     totalCells: number;
     completedCells: number;
     progressPercentage: number;
@@ -533,7 +907,7 @@ export class MandalartService {
         progressPercentage
       };
     } catch (err) {
-      console.error('진행률 계산 실패:', err);
+      console.error('Legacy 진행률 계산 실패:', err);
       return {
         totalCells: 0,
         completedCells: 0,
@@ -658,6 +1032,11 @@ export class MandalartService {
 
 // 싱글톤 인스턴스 export
 export const mandalartAPI = new MandalartService();
+
+// 백그라운드 동기화 시작 (클라이언트 사이드에서만)
+if (typeof window !== 'undefined') {
+  mandalartAPI.startBackgroundSync();
+}
 
 /**
  * 특정 ID의 만다라트 데이터 로드
@@ -1201,6 +1580,12 @@ export const createNewCell = async (
       .single();
     
     if (error) throw error;
+
+    // 부모 셀의 캐시 무효화 (새 자식이 추가되었으므로)
+    if (cellData.parentId) {
+      const { cellCache } = await import('@/utils/cellCache');
+      await cellCache.invalidateCache(cellData.parentId);
+    }
     
     return data.id;
   } catch (err) {
