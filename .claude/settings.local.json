@@ -16,7 +16,9 @@
       "Bash(docker-compose up:*)",
       "Bash(docker compose:*)",
       "Bash(npm run lint:*)",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(grep:*)",
+      "Bash(npm run start:*)"
     ],
     "deny": []
   }

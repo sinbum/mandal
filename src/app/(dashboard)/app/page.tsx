@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -33,13 +34,15 @@ import AppHeaderBar from '@/components/layout/AppHeaderBar';
 import PageTransition from '@/components/animations/PageTransition';
 import PremiumMandalartCardSlider from '@/components/dashboard/PremiumMandalartCardSlider';
 import HomePageSkeleton from '@/components/skeleton/HomePageSkeleton';
+import { cellCache } from '@/utils/cellCache';
 /**
  * 홈 페이지 컴포넌트
  * 사용자가 가진 만다라트 루트 셀 목록 표시
  */
 export default function HomePage() {
+  const router = useRouter();
   const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cellToDelete, setCellToDelete] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -51,13 +54,21 @@ export default function HomePage() {
   });
 
 
-  // 루트 셀 로드
+  // 루트 셀 및 첫 번째 레벨 자식들 로드
   useEffect(() => {
     async function loadData() {
       try {
+        // 로딩 상태는 실제 API 호출 전에만 설정
         setIsLoading(true);
-        const cells = await mandalartAPI.fetchUserCells();
+        
+        // 최적화된 메서드로 루트 셀과 첫 번째 레벨 자식들을 함께 로딩
+        const cells = await mandalartAPI.fetchUserCellsWithChildrenOptimized();
         setRootCells(cells);
+        
+        // 로딩한 데이터를 캐시에 저장하여 셀 페이지에서 빠르게 접근 가능
+        cellCache.populateFromRootCells(cells);
+        
+        console.log('홈페이지 데이터 로딩 및 캐시 완료, 셀 개수:', cells.length);
       } catch (err) {
         console.error('데이터 로드 오류:', err);
         toast.error('만다라트 목록을 불러오는데 실패했습니다');
@@ -81,7 +92,7 @@ export default function HomePage() {
       toast.success('만다라트가 성공적으로 생성되었습니다');
       
       // 생성 후 해당 셀 페이지로 이동
-      window.location.href = `/app/cell/${rootCellId}`;
+      router.push(`/app/cell/${rootCellId}`);
     } catch (err) {
       console.error('만다라트 생성 오류:', err);
       toast.error('만다라트 생성에 실패했습니다');

@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  ...(process.env.NODE_ENV === 'production' && { output: "standalone" }),
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.

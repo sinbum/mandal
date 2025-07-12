@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
@@ -21,6 +21,7 @@ interface LoginFormData {
 }
 
 function LoginContent() {
+  const router = useRouter();
   const navigation = useNavigation();
   const searchParams = useSearchParams();
   
@@ -112,7 +113,7 @@ function LoginContent() {
       
       // 세션이 제대로 설정되도록 짧은 지연 후 이동
       setTimeout(() => {
-        window.location.href = '/app';
+        router.push('/app');
       }, 500);
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
