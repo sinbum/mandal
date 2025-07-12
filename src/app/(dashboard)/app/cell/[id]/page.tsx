@@ -34,6 +34,7 @@ export default function CellPage() {
   const [isPending, setIsPending] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
   const [isCacheLoaded, setIsCacheLoaded] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // 셀 편집 상태 추가
   const [editingCell, setEditingCell] = useState<MandalartCell | null>(null);
@@ -67,6 +68,7 @@ export default function CellPage() {
         setChildCells([]);
         setPageError(null);
         setIsCacheLoaded(false);
+        setIsInitialLoading(true);
         
         // 먼저 캐시에서 데이터 확인 (동기적)
         const cachedData = cellCache.get(cellId);
@@ -76,6 +78,7 @@ export default function CellPage() {
           setCurrentCell(cachedData.cell);
           setChildCells(cachedData.children);
           setIsCacheLoaded(true);
+          setIsInitialLoading(false);
           
           // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
@@ -117,6 +120,7 @@ export default function CellPage() {
         setPageError('데이터 로드에 실패했습니다');
       } finally {
         setIsPending(false);
+        setIsInitialLoading(false);
       }
     }
     
@@ -329,7 +333,7 @@ export default function CellPage() {
 
   
   // 로딩 상태 표시 (캐시에서 로딩된 경우 제외)
-  if ((isPending || isLoading) && !isCacheLoaded) {
+  if ((isPending || isLoading || isInitialLoading) && !isCacheLoaded) {
     return (
       <PageTransition>
         <MobileLayout
@@ -354,8 +358,8 @@ export default function CellPage() {
     );
   }
   
-  // 셀이 없고 로딩도 완료된 경우에만 "셀을 찾을 수 없습니다" 표시
-  if (!currentCell && !isPending && !isLoading) {
+  // 셀이 없고 모든 로딩이 완료된 경우에만 "셀을 찾을 수 없습니다" 표시
+  if (!currentCell && !isPending && !isLoading && !isInitialLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md">
