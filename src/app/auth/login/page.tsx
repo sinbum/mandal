@@ -111,10 +111,15 @@ function LoginContent() {
       
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
       
-      // 세션이 제대로 설정되도록 짧은 지연 후 이동
+      // 즉시 이동 (Next.js 라우팅은 비동기적으로 처리됨)
+      navigation.navigateToApp();
+      
+      // 백업으로 직접 이동도 시도
       setTimeout(() => {
-        router.push('/app');
-      }, 500);
+        if (typeof window !== 'undefined' && window.location.pathname !== '/app') {
+          window.location.href = '/app';
+        }
+      }, 1000);
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
       toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);

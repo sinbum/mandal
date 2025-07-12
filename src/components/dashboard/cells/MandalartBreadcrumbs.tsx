@@ -80,11 +80,17 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
           {/* 루트 셀만 있을 때만 Home 아이콘 표시 */}
           {path.length === 1 && (
             <BreadcrumbItem>
-              <div>
-                <BreadcrumbHome asChild>
-                  <Link href="/app" />
-                </BreadcrumbHome>
-              </div>
+              <BreadcrumbLink asChild>
+                <Link href="/app" className="flex items-center">
+                  <svg 
+                    className="w-4 h-4" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                  </svg>
+                </Link>
+              </BreadcrumbLink>
             </BreadcrumbItem>
           )}
           

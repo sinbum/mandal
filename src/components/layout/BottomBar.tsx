@@ -50,18 +50,12 @@ const BottomBar: React.FC = () => {
     
     try {
       setIsLoggingOut(true);
-      
-      // 즉시 UI 상태 초기화 (사용자 경험 개선)
-      setUser(null);
       setDrawerOpen(false);
       
       // 기존 auth utils의 signOut 함수 사용 (에러 처리 포함)
       const result = await signOut();
       
       if (!result.success) {
-        // 실패 시 사용자 상태 복원
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
         toast.error(result.error || '로그아웃 중 오류가 발생했습니다');
         return;
       }
@@ -71,9 +65,6 @@ const BottomBar: React.FC = () => {
       
     } catch (error) {
       console.error('로그아웃 오류:', error);
-      // 실패 시 사용자 상태 복원
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
       toast.error('로그아웃 중 예상치 못한 오류가 발생했습니다');
     } finally {
       setIsLoggingOut(false);
