@@ -46,7 +46,8 @@ interface SettingItem {
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 초기값을 false로 변경
+  const [isInitialized, setIsInitialized] = useState(false); // hydration 체크용
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [deleteAccountModal, setDeleteAccountModal] = useState(false);
@@ -58,6 +59,7 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadUserData() {
       try {
+        setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
         
@@ -66,16 +68,19 @@ export default function SettingsPage() {
           setNewDisplayName(user.user_metadata?.display_name || user.email?.split('@')[0] || '사용자');
         }
         
-        // Load settings from localStorage
-        const savedDarkMode = localStorage.getItem('darkMode');
-        const savedNotifications = localStorage.getItem('notifications');
-        
-        setDarkMode(savedDarkMode === 'true');
-        setNotifications(savedNotifications !== 'false'); // default to true
+        // Load settings from localStorage only on client side
+        if (typeof window !== 'undefined') {
+          const savedDarkMode = localStorage.getItem('darkMode');
+          const savedNotifications = localStorage.getItem('notifications');
+          
+          setDarkMode(savedDarkMode === 'true');
+          setNotifications(savedNotifications !== 'false'); // default to true
+        }
       } catch (error) {
         console.error('사용자 데이터 로드 오류:', error);
       } finally {
         setLoading(false);
+        setIsInitialized(true);
       }
     }
 
@@ -85,13 +90,16 @@ export default function SettingsPage() {
   const handleDarkModeToggle = () => {
     const newValue = !darkMode;
     setDarkMode(newValue);
-    localStorage.setItem('darkMode', newValue.toString());
     
-    // Apply dark mode to document
-    if (newValue) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('darkMode', newValue.toString());
+      
+      // Apply dark mode to document
+      if (newValue) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
     
     toast.success(`다크 모드가 ${newValue ? '활성화' : '비활성화'}되었습니다`);
@@ -100,7 +108,11 @@ export default function SettingsPage() {
   const handleNotificationsToggle = () => {
     const newValue = !notifications;
     setNotifications(newValue);
-    localStorage.setItem('notifications', newValue.toString());
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('notifications', newValue.toString());
+    }
+    
     toast.success(`알림이 ${newValue ? '활성화' : '비활성화'}되었습니다`);
   };
 
@@ -202,16 +214,19 @@ export default function SettingsPage() {
     }
   ];
 
-  if (loading) {
+  // Hydration 이슈 방지를 위해 초기화가 완료되지 않았으면 기본 레이아웃만 렌더링
+  if (!isInitialized) {
     return (
       <PageTransition>
         <MobileLayout
           footer={<div className="sm:hidden"><BottomBar /></div>}
         >
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">설정을 불러오는 중...</p>
+          <div className="container mx-auto py-6 sm:py-10 px-4 max-w-2xl pb-20">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">설정을 불러오는 중...</p>
+              </div>
             </div>
           </div>
         </MobileLayout>
@@ -224,56 +239,42 @@ export default function SettingsPage() {
       <MobileLayout
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
-        <div className="container mx-auto py-6 sm:py-10 px-4 max-w-2xl pb-20">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 sm:mb-8"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                aria-label="뒤로가기"
-              >
-                <ChevronRight size={20} className="rotate-180" />
-              </button>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">설정</h1>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 ml-11 text-sm sm:text-base">앱 설정과 계정 정보를 관리하세요</p>
-          </motion.div>
+        <div className="container mx-auto py-6 sm:py-10 px-4 max-w-2xl">
+          {/* Header - 프로필 페이지와 동일한 구조 */}
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              aria-label="뒤로가기"
+            >
+              <ChevronRight size={20} className="rotate-180" />
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">설정</h1>
+          </div>
 
           {/* Settings Sections */}
           {settingSections.map((section, sectionIndex) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: sectionIndex * 0.1 }}
-              className="mb-6"
-            >
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 px-2">
+            <div key={section.title} className="mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 {section.title}
               </h2>
               
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 {section.items.map((item, itemIndex) => (
-                  <motion.button
+                  <button
                     key={item.id}
                     onClick={item.action}
-                    className={`w-full p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                    className={`w-full p-4 sm:p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                       itemIndex !== section.items.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
                     }`}
-                    whileTap={{ scale: 0.98 }}
                   >
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="p-2 sm:p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
                         {item.icon}
                       </div>
                       <div className="text-left">
                         <h3 className="font-medium text-gray-900 dark:text-gray-100 text-base sm:text-lg">{item.title}</h3>
-                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">{item.description}</p>
+                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
                       </div>
                     </div>
                     
@@ -288,10 +289,10 @@ export default function SettingsPage() {
                     ) : (
                       <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
                     )}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
 
           {/* User Info */}

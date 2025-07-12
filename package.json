@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3002",
     "build": "cross-env NODE_OPTIONS=\"--no-warnings\" next build",
     "start": "next start",
     "lint": "next lint",
