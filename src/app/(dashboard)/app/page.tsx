@@ -72,6 +72,32 @@ export default function HomePage() {
     loadData();
   }, [authLoading, isLoggedIn]); // 인증 상태 변경 시 재실행
 
+  // 페이지가 포커스를 받을 때 최신 데이터 로드 (뒤로가기 대응)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (!document.hidden && isLoggedIn && !authLoading) {
+        try {
+          const cells = await mandalartAPI.fetchUserCellsWithChildrenOptimized();
+          
+          // 생성 시간 기준으로 정렬 (최신순)
+          const sortedCells = [...cells].sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA; // 내림차순 (최신이 먼저)
+          });
+          
+          setRootCells(sortedCells);
+          cellCache.populateFromRootCells(sortedCells);
+        } catch (err) {
+          console.error('포커스 시 데이터 새로고침 실패:', err);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isLoggedIn, authLoading]);
+
   // 새 만다라트 생성 처리
   const handleCreateMandalart = async (title: string) => {
     try {
@@ -88,6 +114,23 @@ export default function HomePage() {
       
       const rootCellId = await mandalartAPI.createMandalart(title);
       console.log('만다라트 생성 완료:', rootCellId);
+
+      // 새로운 셀을 포함한 최신 목록 조회
+      const updatedCells = await mandalartAPI.fetchUserCellsWithChildrenOptimized();
+      
+      // 새로 생성된 셀을 맨 앞으로 정렬
+      const newCell = updatedCells.find(cell => cell.id === rootCellId);
+      if (newCell) {
+        const otherCells = updatedCells.filter(cell => cell.id !== rootCellId);
+        const reorderedCells = [newCell, ...otherCells];
+        setRootCells(reorderedCells);
+        
+        // 캐시도 업데이트
+        cellCache.populateFromRootCells(reorderedCells);
+      } else {
+        setRootCells(updatedCells);
+        cellCache.populateFromRootCells(updatedCells);
+      }
 
       toast.success('만다라트가 성공적으로 생성되었습니다');
       

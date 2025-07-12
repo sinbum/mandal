@@ -145,10 +145,9 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
     threshold: 5,
   });
 
-  // 마우스 휠 이벤트 (데스크탑)
+  // 마우스 휠 이벤트 (데스크탑 및 모바일 레이아웃)
   useEffect(() => {
-    if (isMobile) return;
-
+    // 모바일 레이아웃이거나 실제 모바일일 때 휠 이벤트 활성화
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
@@ -164,7 +163,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
       container.addEventListener('wheel', handleWheel, { passive: false });
       return () => container.removeEventListener('wheel', handleWheel);
     }
-  }, [isMobile, goToNext, goToPrevious]);
+  }, [goToNext, goToPrevious]);
 
   // 키보드 이벤트
   useEffect(() => {

@@ -204,12 +204,18 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-gray-600">설정을 불러오는 중...</p>
-        </div>
-      </div>
+      <PageTransition>
+        <MobileLayout
+          footer={<div className="sm:hidden"><BottomBar /></div>}
+        >
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">설정을 불러오는 중...</p>
+            </div>
+          </div>
+        </MobileLayout>
+      </PageTransition>
     );
   }
 
@@ -218,23 +224,24 @@ export default function SettingsPage() {
       <MobileLayout
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
-        <div className="p-4 pb-20 max-w-2xl mx-auto">
+        <div className="container mx-auto py-6 sm:py-10 px-4 max-w-2xl pb-20">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-6 sm:mb-8"
           >
             <div className="flex items-center gap-3 mb-2">
               <button
                 onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                aria-label="뒤로가기"
               >
                 <ChevronRight size={20} className="rotate-180" />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">설정</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">설정</h1>
             </div>
-            <p className="text-gray-600 ml-11">앱 설정과 계정 정보를 관리하세요</p>
+            <p className="text-gray-600 dark:text-gray-400 ml-11 text-sm sm:text-base">앱 설정과 계정 정보를 관리하세요</p>
           </motion.div>
 
           {/* Settings Sections */}
@@ -246,40 +253,40 @@ export default function SettingsPage() {
               transition={{ delay: sectionIndex * 0.1 }}
               className="mb-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-3 px-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 px-2">
                 {section.title}
               </h2>
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 {section.items.map((item, itemIndex) => (
                   <motion.button
                     key={item.id}
                     onClick={item.action}
-                    className={`w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                      itemIndex !== section.items.length - 1 ? 'border-b border-gray-100' : ''
+                    className={`w-full p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                      itemIndex !== section.items.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
                     }`}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gray-100 rounded-lg">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="p-2 sm:p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
                         {item.icon}
                       </div>
                       <div className="text-left">
-                        <h3 className="font-medium text-gray-900">{item.title}</h3>
-                        <p className="text-sm text-gray-500">{item.description}</p>
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 text-base sm:text-lg">{item.title}</h3>
+                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">{item.description}</p>
                       </div>
                     </div>
                     
                     {item.type === 'toggle' ? (
-                      <div className={`w-12 h-6 rounded-full transition-colors ${
-                        item.value ? 'bg-blue-500' : 'bg-gray-300'
+                      <div className={`w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors ${
+                        item.value ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                       }`}>
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
-                          item.value ? 'translate-x-6' : 'translate-x-0.5'
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow transform transition-transform ${
+                          item.value ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0.5'
                         } mt-0.5`} />
                       </div>
                     ) : (
-                      <ChevronRight size={20} className="text-gray-400" />
+                      <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
                     )}
                   </motion.button>
                 ))}
@@ -293,13 +300,13 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-blue-50 rounded-xl p-4 border border-blue-100"
+              className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 sm:p-5 border border-blue-100 dark:border-blue-800"
             >
-              <h3 className="font-medium text-blue-900 mb-2">계정 정보</h3>
-              <p className="text-sm text-blue-700">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2 text-base sm:text-lg">계정 정보</h3>
+              <p className="text-sm sm:text-base text-blue-700 dark:text-blue-200">
                 <strong>이메일:</strong> {user.email}
               </p>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm sm:text-base text-blue-700 dark:text-blue-200 mt-1">
                 <strong>가입일:</strong> {new Date(user.created_at).toLocaleDateString('ko-KR')}
               </p>
             </motion.div>
