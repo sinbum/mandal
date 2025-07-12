@@ -18,7 +18,9 @@
       "Bash(npm run lint:*)",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(grep:*)",
-      "Bash(npm run start:*)"
+      "Bash(npm run start:*)",
+      "Bash(curl:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

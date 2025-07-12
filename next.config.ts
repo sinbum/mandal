@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // 삼성 인터넷 브라우저 호환성을 위해 임시 비활성화
   ...(process.env.NODE_ENV === 'production' && { output: "standalone" }),
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -28,7 +28,16 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Type',
-            value: 'application/manifest+json',
+            value: 'application/json',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/chunks/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

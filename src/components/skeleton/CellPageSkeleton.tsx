@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const CellPageSkeleton = () => {
   return (
@@ -58,48 +59,68 @@ const CellPageSkeleton = () => {
                   {/* 그리드 컨테이너 */}
                   <div className="flex-1 flex items-center justify-center pt-4 mt-4 sm:pt-0 sm:mt-0">
                     <div className="grid grid-cols-3 w-full gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 2xl:gap-8 max-w-[min(90vw,calc(100vh-8rem))] sm:max-w-[min(85vw,calc(100vh-10rem))] md:max-w-[min(80vw,calc(100vh-8rem))] lg:max-w-[min(60vw,calc(100vh-10rem))] xl:max-w-[min(55vw,calc(100vh-10rem))] 2xl:max-w-[min(50vw,calc(100vh-10rem))] max-h-[min(90vw,calc(100vh-8rem))] sm:max-h-[min(85vw,calc(100vh-10rem))] md:max-h-[min(80vw,calc(100vh-8rem))] lg:max-h-[min(60vw,calc(100vh-10rem))] xl:max-h-[min(55vw,calc(100vh-10rem))] 2xl:max-h-[min(50vw,calc(100vh-10rem))] aspect-square">
-                {Array.from({ length: 9 }, (_, index) => (
-                  <div
-                    key={index}
-                    className={`
-                      relative rounded-xl overflow-hidden
-                      ${index === 4 
-                        ? 'bg-blue-50 border border-blue-100' 
-                        : 'bg-gray-50 border border-gray-100'
-                      }
-                    `}
-                  >
-                    {/* 셀 내용 스켈레톤 */}
-                    <div className="p-2 sm:p-4 h-full flex flex-col justify-between">
-                      {/* 상단 - 제목 */}
-                      <div className="space-y-2">
-                        <div className={`h-3 sm:h-4 rounded animate-pulse ${
-                          index === 4 ? 'bg-blue-200' : 'bg-gray-200'
-                        }`}></div>
-                        <div className={`h-2 sm:h-3 w-3/4 rounded animate-pulse ${
-                          index === 4 ? 'bg-blue-200' : 'bg-gray-200'
-                        }`}></div>
+                {Array.from({ length: 9 }, (_, index) => {
+                  const isCenterCell = index === 4;
+                  // 고정된 패턴으로 빈 셀 표시 (위치 1, 6, 8을 빈 셀로)
+                  const isEmpty = [1, 6, 8].includes(index);
+                  
+                  if (isEmpty && !isCenterCell) {
+                    // 빈 셀 스켈레톤 (실제 MandalartCell의 빈 셀과 동일한 스타일)
+                    return (
+                      <div
+                        key={index}
+                        className="aspect-square border-2 border-dashed border-gray-300 rounded p-1 sm:p-2 bg-gray-50 flex items-center justify-center"
+                      >
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 bg-gray-300 rounded mb-1 animate-pulse"></div>
+                          <div className="w-8 h-3 sm:w-10 sm:h-4 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
                       </div>
-                      
-                      {/* 중앙 - 아이콘 영역 */}
-                      <div className="flex justify-center">
-                        <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full animate-pulse ${
-                          index === 4 ? 'bg-blue-200' : 'bg-gray-200'
-                        }`}></div>
-                      </div>
-                      
-                      {/* 하단 - 상태 */}
-                      <div className="flex justify-between items-center">
-                        <div className={`h-2 w-8 rounded animate-pulse ${
-                          index === 4 ? 'bg-blue-200' : 'bg-gray-200'
-                        }`}></div>
-                        <div className={`w-4 h-4 rounded-full animate-pulse ${
-                          index === 4 ? 'bg-blue-200' : 'bg-gray-200'
-                        }`}></div>
+                    );
+                  }
+                  
+                  // 일반 셀 스켈레톤 (실제 MandalartCell과 동일한 스타일)
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        // 기본 스타일 (실제 MandalartCell과 동일)
+                        "aspect-square border border-gray-200 rounded-lg p-2 sm:p-3 relative shadow-sm overflow-hidden",
+                        
+                        // 중앙 셀 스타일
+                        isCenterCell && [
+                          "bg-primary-50 border-primary-300 shadow-lg"
+                        ],
+                        
+                        // 일반 셀 배경
+                        !isCenterCell && "bg-white"
+                      )}
+                    >
+                      {/* 셀 내용 스켈레톤 */}
+                      <div className="h-full flex flex-col">
+                        {/* 상단 - 제목 영역 */}
+                        <div className="flex-1 flex flex-col justify-center">
+                          <div className={`h-3 sm:h-4 rounded animate-pulse mb-1 ${
+                            isCenterCell ? 'bg-primary-200' : 'bg-gray-200'
+                          }`}></div>
+                          <div className={`h-2 sm:h-3 w-3/4 rounded animate-pulse ${
+                            isCenterCell ? 'bg-primary-200' : 'bg-gray-200'
+                          }`}></div>
+                        </div>
+                        
+                        {/* 하단 - 상태 및 액션 */}
+                        <div className="flex justify-between items-center mt-2">
+                          <div className={`h-2 w-8 rounded animate-pulse ${
+                            isCenterCell ? 'bg-primary-200' : 'bg-gray-200'
+                          }`}></div>
+                          <div className={`w-4 h-4 rounded-full animate-pulse ${
+                            isCenterCell ? 'bg-primary-200' : 'bg-gray-200'
+                          }`}></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                     </div>
                   </div>
                 </div>

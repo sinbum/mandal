@@ -62,46 +62,92 @@ export default function CellPage() {
   // 초기 데이터 로드 (캐시 우선 사용)
   useEffect(() => {
     async function loadData() {
+      console.log('🔄 [CellPage] useEffect 시작 - cellId:', cellId);
+      console.log('🔄 [CellPage] 현재 상태 - currentCell:', currentCell?.id, 'childCells:', childCells.length);
+      console.log('🔄 [CellPage] 브라우저 정보:', {
+        userAgent: navigator.userAgent,
+        vendor: navigator.vendor,
+        isSamsungInternet: /SamsungBrowser/i.test(navigator.userAgent)
+      });
+      
       try {
-        // cellId가 변경되면 즉시 상태 초기화
+        // cellId가 변경되면 상태 초기화
+        console.log('🔄 [CellPage] 상태 초기화 시작');
         setCurrentCell(null);
         setChildCells([]);
         setPageError(null);
         setIsCacheLoaded(false);
         setIsInitialLoading(true);
+        console.log('🔄 [CellPage] 상태 초기화 완료');
+        
+        // 삼성 인터넷 브라우저 대응: 약간의 지연 추가
+        const isSamsungInternet = /SamsungBrowser/i.test(navigator.userAgent);
+        if (isSamsungInternet) {
+          console.log('🔍 [CellPage] 삼성 인터넷 브라우저 감지됨, 지연 추가');
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
         
         // 먼저 캐시에서 데이터 확인 (동기적)
         const cachedData = cellCache.get(cellId);
+        console.log('🔄 [CellPage] 캐시 확인 결과:', cachedData ? '있음' : '없음');
         
         if (cachedData) {
-          // 캐시에서 즉시 로딩 (pending 상태 설정하지 않음)
-          setCurrentCell(cachedData.cell);
-          setChildCells(cachedData.children);
-          setIsCacheLoaded(true);
-          setIsInitialLoading(false);
+          console.log('📦 [CellPage] 캐시에서 로딩 - cell:', cachedData.cell.id, 'children:', cachedData.children.length);
           
-          // 브레드크럼 경로는 별도 useEffect에서 처리
+          // 삼성 인터넷 브라우저에서는 상태 업데이트를 따로 처리
+          if (isSamsungInternet) {
+            // 순차적으로 상태 업데이트
+            setCurrentCell(cachedData.cell);
+            await new Promise(resolve => setTimeout(resolve, 0)); // 다음 틱으로 이동
+            setChildCells(cachedData.children);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            setIsCacheLoaded(true);
+            setIsInitialLoading(false);
+          } else {
+            // 일반 브라우저는 기존 방식
+            setCurrentCell(cachedData.cell);
+            setChildCells(cachedData.children);
+            setIsCacheLoaded(true);
+            setIsInitialLoading(false);
+          }
           
           // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
           saveRecentMandalartCell(cellId);
           
-          console.log('캐시에서 즉시 로딩 완료:', cellId);
+          console.log('✅ [CellPage] 캐시에서 즉시 로딩 완료:', cellId);
           return;
         }
         
-        // 캐시에 없을 때만 pending 상태 설정
+        // 캐시에 없을 때는 API에서 로딩
+        console.log('🌐 [CellPage] API에서 로딩 시작');
         setIsPending(true);
         
         // 캐시에 없으면 기존 방식으로 로딩
         const cell = await loadCell(cellId);
+        console.log('🌐 [CellPage] loadCell 결과:', cell ? cell.id : 'null');
         
         if (cell) {
-          setCurrentCell(cell);
+          if (isSamsungInternet) {
+            // 순차적으로 상태 업데이트
+            setCurrentCell(cell);
+            await new Promise(resolve => setTimeout(resolve, 0));
+          } else {
+            setCurrentCell(cell);
+          }
+          console.log('🌐 [CellPage] currentCell 설정 완료:', cell.id);
           
           // 자식 셀 로드
           const children = await loadChildCells(cellId);
-          setChildCells(children);
+          console.log('🌐 [CellPage] loadChildCells 결과:', children.length, '개');
+          
+          if (isSamsungInternet) {
+            setChildCells(children);
+            await new Promise(resolve => setTimeout(resolve, 0));
+          } else {
+            setChildCells(children);
+          }
+          console.log('🌐 [CellPage] childCells 설정 완료:', children.length, '개');
           
           // 새로 로딩한 데이터를 캐시에 저장
           cellCache.set(cellId, cell, children);
@@ -117,20 +163,27 @@ export default function CellPage() {
           setMostRecentMandalartCell(cellId);
           saveRecentMandalartCell(cellId);
           
-          console.log('API에서 데이터 로딩 완료:', cellId);
+          console.log('✅ [CellPage] API에서 데이터 로딩 완료:', cellId);
         } else {
+          console.log('❌ [CellPage] 셀을 찾을 수 없음:', cellId);
+          setCurrentCell(null);
+          setChildCells([]);
           setPageError('셀 정보를 찾을 수 없습니다');
         }
       } catch (err) {
-        console.error('셀 페이지 데이터 로드 오류:', err);
+        console.error('❌ [CellPage] 셀 페이지 데이터 로드 오류:', err);
+        setCurrentCell(null);
+        setChildCells([]);
         setPageError('데이터 로드에 실패했습니다');
       } finally {
+        console.log('🔄 [CellPage] useEffect 종료 처리');
         setIsPending(false);
         setIsInitialLoading(false);
       }
     }
     
     if (cellId) {
+      console.log('🚀 [CellPage] loadData 실행 시작 - cellId:', cellId);
       loadData();
     }
   }, [cellId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -407,8 +460,30 @@ export default function CellPage() {
         footer={<div className="sm:hidden"><BottomBar /></div>}
       >
 
-      {/* currentCell이 없으면 아무것도 렌더링하지 않음 (캐시 로딩 대기) */}
-      {currentCell && (
+      {/* 렌더링 조건 로깅 추가 */}
+      {(() => {
+        console.log('🎨 [CellPage] 렌더링 조건 체크:');
+        console.log('  - isPending:', isPending);
+        console.log('  - isLoading:', isLoading);
+        console.log('  - isInitialLoading:', isInitialLoading);
+        console.log('  - currentCell:', currentCell?.id || 'null');
+        console.log('  - childCells.length:', childCells.length);
+        console.log('  - isCacheLoaded:', isCacheLoaded);
+        console.log('  - pageError:', pageError);
+        
+        const shouldShowSkeleton = (isPending || isLoading || isInitialLoading) && !currentCell;
+        const shouldShowContent = !!currentCell;
+        
+        console.log('  - shouldShowSkeleton:', shouldShowSkeleton);
+        console.log('  - shouldShowContent:', shouldShowContent);
+        
+        return null;
+      })()}
+
+      {/* 로딩 중이거나 currentCell이 없으면 스켈레톤 표시 */}
+      {(isPending || isLoading || isInitialLoading) && !currentCell ? (
+        <CellPageSkeleton />
+      ) : currentCell && childCells !== undefined ? (
       <>
       {/* 메인 레이아웃 컨테이너 */}
       <div className="flex lg:flex-row flex-col h-[100dvh] sm:h-screen overflow-hidden">
@@ -423,6 +498,7 @@ export default function CellPage() {
               path={navigation.breadcrumbPath} 
               onDeleteCell={handleDeleteCell}
               isDeleting={isDeleting}
+              isLoading={isPending || isLoading || isInitialLoading}
             />
             </div>
             
@@ -472,7 +548,7 @@ export default function CellPage() {
         </div>
       </div>
       </>
-      )}
+      ) : null}
       </MobileLayout>
     </PageTransition>
   );

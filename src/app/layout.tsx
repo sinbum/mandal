@@ -74,6 +74,37 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        {/* 삼성 인터넷 브라우저 호환성 스크립트 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // 삼성 인터넷 브라우저 감지 및 폴리필
+              if (/SamsungBrowser/i.test(navigator.userAgent)) {
+                console.log('Samsung Internet detected, applying compatibility fixes');
+                
+                // Promise 폴리필 (필요시)
+                if (!window.Promise.allSettled) {
+                  Promise.allSettled = function(promises) {
+                    return Promise.all(promises.map(p => 
+                      Promise.resolve(p).then(
+                        value => ({ status: 'fulfilled', value }),
+                        reason => ({ status: 'rejected', reason })
+                      )
+                    ));
+                  };
+                }
+                
+                // setTimeout 0 폴리필 개선
+                const originalSetTimeout = window.setTimeout;
+                window.setTimeout = function(fn, delay, ...args) {
+                  return originalSetTimeout(fn, Math.max(delay || 0, 4), ...args);
+                };
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <Toaster />
         <div className="min-h-screen bg-white">

@@ -18,11 +18,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import BreadcrumbSkeleton from '@/components/skeleton/BreadcrumbSkeleton';
 
 interface MandalartBreadcrumbsProps {
   path: MandalartCell[];
   onDeleteCell?: () => void;
   isDeleting?: boolean;
+  isLoading?: boolean;
 }
 
 /**
@@ -33,7 +35,8 @@ interface MandalartBreadcrumbsProps {
 const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({ 
   path, 
   onDeleteCell, 
-  isDeleting = false 
+  isDeleting = false,
+  isLoading = false
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPathModalOpen, setIsPathModalOpen] = useState(false);
@@ -53,8 +56,9 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
     };
   }, []);
 
-  if (path.length === 0) {
-    return null;
+  // 로딩 중일 때 스켈레톤 표시
+  if (isLoading || path.length === 0) {
+    return <BreadcrumbSkeleton />;
   }
 
   // 최대 3개까지만 표시: 루트 > ... > 현재
