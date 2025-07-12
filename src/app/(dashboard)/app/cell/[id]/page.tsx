@@ -87,26 +87,48 @@ export default function CellPage() {
           await new Promise(resolve => setTimeout(resolve, 50));
         }
         
-        // 먼저 캐시에서 데이터 확인 (동기적)
-        const cachedData = cellCache.get(cellId);
+        // 먼저 메모리 캐시에서 데이터 확인 (동기적)
+        const cachedData = cellCache.getSync(cellId);
         console.log('🔄 [CellPage] 캐시 확인 결과:', cachedData ? '있음' : '없음');
         
         if (cachedData) {
           console.log('📦 [CellPage] 캐시에서 로딩 - cell:', cachedData.cell.id, 'children:', cachedData.children.length);
+          
+          // 캐시에 자식이 없는 경우 강제로 API에서 로딩
+          if (cachedData.children.length === 0) {
+            console.log('⚠️ [CellPage] 캐시에 자식이 없음 - API에서 강제 로딩');
+            
+            try {
+              const freshChildren = await loadChildCells(cellId);
+              console.log('🔄 [CellPage] API에서 자식 로딩 완료:', freshChildren.length);
+              
+              if (freshChildren.length > 0) {
+                // 새로운 자식 데이터가 있으면 캐시 업데이트
+                cellCache.set(cellId, cachedData.cell, freshChildren);
+                setChildCells(freshChildren);
+                console.log('✅ [CellPage] 캐시 업데이트 완료 - 새 자식:', freshChildren.length);
+              } else {
+                setChildCells(cachedData.children);
+              }
+            } catch (err) {
+              console.error('❌ [CellPage] 자식 로딩 실패:', err);
+              setChildCells(cachedData.children);
+            }
+          } else {
+            setChildCells(cachedData.children);
+          }
           
           // 삼성 인터넷 브라우저에서는 상태 업데이트를 따로 처리
           if (isSamsungInternet) {
             // 순차적으로 상태 업데이트
             setCurrentCell(cachedData.cell);
             await new Promise(resolve => setTimeout(resolve, 0)); // 다음 틱으로 이동
-            setChildCells(cachedData.children);
             await new Promise(resolve => setTimeout(resolve, 0));
             setIsCacheLoaded(true);
             setIsInitialLoading(false);
           } else {
             // 일반 브라우저는 기존 방식
             setCurrentCell(cachedData.cell);
-            setChildCells(cachedData.children);
             setIsCacheLoaded(true);
             setIsInitialLoading(false);
           }
@@ -187,6 +209,66 @@ export default function CellPage() {
       loadData();
     }
   }, [cellId]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // 페이지 포커스 시 캐시 동기화 (뒤로가기 대응)
+  useEffect(() => {
+    console.log('🎯 [CellPage] 포커스 이벤트 리스너 등록 시작:', { cellId, hasCurrentCell: !!currentCell });
+    
+    const handleVisibilityChange = async () => {
+      console.log('🔄 [CellPage] visibilitychange 이벤트 발생:', { 
+        hidden: document.hidden, 
+        cellId, 
+        hasCurrentCell: !!currentCell 
+      });
+      
+      if (!document.hidden && cellId && currentCell) {
+        console.log('🔄 [CellPage] 페이지 포커스 감지 - 캐시 동기화 실행');
+        
+        try {
+          // 캐시 무효화
+          await cellCache.invalidateCache(cellId);
+          
+          // 최신 데이터 로딩
+          const refreshedCell = await loadCell(cellId);
+          if (refreshedCell) {
+            setCurrentCell(refreshedCell);
+            const refreshedChildren = await loadChildCells(cellId);
+            setChildCells(refreshedChildren);
+            
+            // 캐시 업데이트
+            cellCache.set(cellId, refreshedCell, refreshedChildren);
+            console.log('✅ [CellPage] 포커스 시 캐시 동기화 완료');
+          }
+        } catch (err) {
+          console.error('❌ [CellPage] 포커스 시 캐시 동기화 실패:', err);
+        }
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🔄 [CellPage] focus 이벤트 발생');
+      handleVisibilityChange();
+    };
+
+    // 뒤로가기 감지를 위한 popstate 이벤트도 추가
+    const handlePopState = () => {
+      console.log('🔄 [CellPage] popstate 감지 - 뒤로가기 동기화');
+      handleVisibilityChange();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('popstate', handlePopState);
+    
+    console.log('🎯 [CellPage] 포커스 이벤트 리스너 등록 완료');
+    
+    return () => {
+      console.log('🎯 [CellPage] 포커스 이벤트 리스너 제거');
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [cellId, currentCell]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // 브레드크럼 경로 구성을 위한 별도 useEffect
   useEffect(() => {
@@ -291,12 +373,23 @@ export default function CellPage() {
       // 편집 모드 종료
       setEditingCell(null);
       
-      // 현재 셀과 자식 셀들을 새로 조회
+      // 캐시 무효화 후 현재 셀과 자식 셀들을 새로 조회
+      try {
+        // 현재 셀의 캐시를 무효화
+        await cellCache.invalidateCache(cellId);
+        console.log('캐시 무효화 완료:', cellId);
+      } catch (cacheError) {
+        console.warn('캐시 무효화 실패:', cacheError);
+      }
+      
       const refreshedCell = await loadCell(cellId);
       if (refreshedCell) {
         setCurrentCell(refreshedCell);
         const refreshedChildren = await loadChildCells(cellId);
         setChildCells(refreshedChildren);
+        
+        // 새로 로딩한 데이터를 캐시에 저장
+        cellCache.set(cellId, refreshedCell, refreshedChildren);
       }
       
       // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
@@ -354,9 +447,21 @@ export default function CellPage() {
             router.push('/app');
           }
         } else {
-          // 자식 셀이 삭제된 경우 목록 새로고침
+          // 자식 셀이 삭제된 경우 캐시 무효화 후 목록 새로고침
+          try {
+            await cellCache.invalidateCache(cellId);
+            console.log('삭제 후 캐시 무효화 완료:', cellId);
+          } catch (cacheError) {
+            console.warn('삭제 후 캐시 무효화 실패:', cacheError);
+          }
+          
           const refreshedChildren = await loadChildCells(cellId);
           setChildCells(refreshedChildren);
+          
+          // 새로 로딩한 데이터를 캐시에 저장
+          if (currentCell) {
+            cellCache.set(cellId, currentCell, refreshedChildren);
+          }
         }
       } else {
         toast.error('셀 삭제에 실패했습니다');

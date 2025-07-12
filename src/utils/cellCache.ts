@@ -138,10 +138,11 @@ class CellCache {
   private async invalidateChildChain(cellId: string): Promise<void> {
     const cached = this.cache.get(cellId);
     if (cached?.children) {
-      cached.children.forEach(child => {
+      const invalidatePromises = cached.children.map(async (child) => {
         this.remove(child.id);
-        this.invalidateChildChain(child.id);
+        await this.invalidateChildChain(child.id); // await 추가
       });
+      await Promise.all(invalidatePromises);
     }
   }
 
