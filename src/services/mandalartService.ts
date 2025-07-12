@@ -1232,7 +1232,7 @@ export const createNewCellAndGetEditData = async (
 ): Promise<MandalartCell> => {
   // 기본 셀 데이터 구성
   const cellData: Partial<MandalartCell> = {
-    topic: '새 셀',
+    topic: '',
     parentId: parentData.parentId,
     depth: parentData.parentId ? (parentData.parentDepth !== undefined ? parentData.parentDepth + 1 : 1) : 0, // 부모가 없는 경우 루트셀로 depth=0
     position

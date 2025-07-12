@@ -324,7 +324,7 @@ export default function CellPage() {
     // 임시 셀 객체 생성 (DB에는 저장하지 않음)
     const tempCell: MandalartCell = {
       id: `temp-new-${Date.now()}`, // 임시 ID
-      topic: '새 셀',
+      topic: '',
       memo: '',
       color: '',
       imageUrl: '',

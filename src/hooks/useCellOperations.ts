@@ -126,7 +126,7 @@ const useCellOperations = () => {
       
       // 기본 셀 데이터
       const defaultCellData: Partial<MandalartCell> = {
-        topic: '새 셀',
+        topic: '',
         position,
         ...cellData
       };
