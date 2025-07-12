@@ -80,6 +80,8 @@ export default function CellPage() {
           setIsCacheLoaded(true);
           setIsInitialLoading(false);
           
+          // 브레드크럼 경로는 별도 useEffect에서 처리
+          
           // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
           saveRecentMandalartCell(cellId);
@@ -132,6 +134,16 @@ export default function CellPage() {
       loadData();
     }
   }, [cellId]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // 브레드크럼 경로 구성을 위한 별도 useEffect
+  useEffect(() => {
+    if (cellId && currentCell) {
+      // 현재 셀이 로드된 후 브레드크럼 경로 구성
+      navigation.buildPathForCell(cellId).catch(err => {
+        console.error('브레드크럼 경로 구성 실패:', err);
+      });
+    }
+  }, [cellId, currentCell]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // 셀 업데이트 처리
   const handleCellUpdate = async (cellId: string, updates: Partial<MandalartCell>) => {

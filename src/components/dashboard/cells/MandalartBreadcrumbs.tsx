@@ -11,7 +11,13 @@ import {
   BreadcrumbEllipsis,
   BreadcrumbHome,
 } from '@/components/ui/breadcrumb';
-import { MoreVertical, Trash2 } from 'lucide-react';
+import { MoreVertical, Trash2, X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface MandalartBreadcrumbsProps {
   path: MandalartCell[];
@@ -30,6 +36,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
   isDeleting = false 
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPathModalOpen, setIsPathModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 드롭다운 외부 클릭 시 닫기
@@ -50,11 +57,12 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
     return null;
   }
 
-  const showCollapsed = path.length >= 4;
+  // 최대 3개까지만 표시: 루트 > ... > 현재
+  const showCollapsed = path.length > 3;
   const visibleItems = showCollapsed
     ? [
-        path[0],
-        ...path.slice(-2)
+        path[0], // 루트 셀
+        path[path.length - 1] // 현재 셀
       ]
     : path;
 
@@ -69,39 +77,34 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
     <div className="flex items-center justify-between mb-4 mt-4">
       <Breadcrumb>
         <BreadcrumbList>
-          {/* Home 아이콘 */}
-          <BreadcrumbItem>
-            <div>
-              <BreadcrumbHome asChild>
-                <Link href="/app" />
-              </BreadcrumbHome>
-            </div>
-          </BreadcrumbItem>
+          {/* 루트 셀만 있을 때만 Home 아이콘 표시 */}
+          {path.length === 1 && (
+            <BreadcrumbItem>
+              <div>
+                <BreadcrumbHome asChild>
+                  <Link href="/app" />
+                </BreadcrumbHome>
+              </div>
+            </BreadcrumbItem>
+          )}
           
           {/* 경로 아이템들 */}
           {visibleItems.map((cell, index) => {
             const isLast = index === visibleItems.length - 1;
-            const showEllipsis = showCollapsed && index === 0;
+            const isFirst = index === 0;
+            const showHomeSeparator = path.length === 1; // 홈 아이콘이 있을 때만 separator 표시
             
             return (
               <React.Fragment key={cell.id}>
-                <BreadcrumbSeparator />
-                {showEllipsis && index === 0 && (
-                  <>
-                    <BreadcrumbItem>
-                      <BreadcrumbEllipsis />
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                  </>
-                )}
+                {(showHomeSeparator || !isFirst) && <BreadcrumbSeparator />}
                 <BreadcrumbItem>
                   <div className="flex items-center">
                     {isLast ? (
-                      <BreadcrumbPage className="ml-4">
+                      <BreadcrumbPage>
                         {cell.topic || '무제 셀'}
                       </BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink asChild className="ml-4">
+                      <BreadcrumbLink asChild>
                         <Link href={`/app/cell/${cell.id}`}>
                           {cell.topic || '무제 셀'}
                         </Link>
@@ -109,6 +112,21 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                     )}
                   </div>
                 </BreadcrumbItem>
+                
+                {/* 루트 셀 다음에 ... 표시 (축약된 경우만) */}
+                {showCollapsed && isFirst && !isLast && (
+                  <>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <button 
+                        onClick={() => setIsPathModalOpen(true)}
+                        className="hover:text-blue-600 transition-colors"
+                      >
+                        <BreadcrumbEllipsis />
+                      </button>
+                    </BreadcrumbItem>
+                  </>
+                )}
               </React.Fragment>
             );
           })}
@@ -142,6 +160,45 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
           )}
         </div>
       )}
+      
+      {/* 전체 경로 모달 */}
+      <AlertDialog open={isPathModalOpen} onOpenChange={setIsPathModalOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-between">
+              <AlertDialogTitle>전체 경로</AlertDialogTitle>
+              <button
+                onClick={() => setIsPathModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </AlertDialogHeader>
+          
+          <div className="py-4">
+            <div className="space-y-2">
+              {path.map((cell, index) => (
+                <div key={cell.id} className="flex items-center">
+                  <div 
+                    className="text-sm text-gray-500 mr-3"
+                    style={{ marginLeft: `${index * 12}px` }}
+                  >
+                    {index + 1}.
+                  </div>
+                  <Link 
+                    href={`/app/cell/${cell.id}`}
+                    onClick={() => setIsPathModalOpen(false)}
+                    className="text-blue-600 hover:text-blue-800 text-sm hover:underline flex-1"
+                  >
+                    {cell.topic || '무제 셀'}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
