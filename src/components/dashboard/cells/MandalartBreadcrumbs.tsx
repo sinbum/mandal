@@ -56,8 +56,13 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
     };
   }, []);
 
-  // 로딩 중일 때 스켈레톤 표시
-  if (isLoading || path.length === 0) {
+  // 로딩 중이거나 경로가 없을 때 스켈레톤 표시
+  if (isLoading || (path.length === 0 && isLoading)) {
+    return <BreadcrumbSkeleton />;
+  }
+
+  // 경로가 아직 로딩되지 않았을 때도 스켈레톤 표시
+  if (path.length === 0) {
     return <BreadcrumbSkeleton />;
   }
 
@@ -78,8 +83,9 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between mb-4 mt-4">
-      <Breadcrumb>
+    <div className="flex items-center justify-between mb-4 mt-4 animate-in fade-in-50 duration-300">
+      <div className="flex-1 min-w-0 mr-4">
+        <Breadcrumb>
         <BreadcrumbList>
           {/* 루트 셀만 있을 때만 Home 아이콘 표시 */}
           {path.length === 1 && (
@@ -141,11 +147,12 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
             );
           })}
         </BreadcrumbList>
-      </Breadcrumb>
+        </Breadcrumb>
+      </div>
 
       {/* 드롭다운 메뉴 */}
       {onDeleteCell && (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative flex-shrink-0" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md"

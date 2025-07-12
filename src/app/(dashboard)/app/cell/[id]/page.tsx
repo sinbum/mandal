@@ -603,7 +603,7 @@ export default function CellPage() {
               path={navigation.breadcrumbPath} 
               onDeleteCell={handleDeleteCell}
               isDeleting={isDeleting}
-              isLoading={isPending || isLoading || isInitialLoading}
+              isLoading={isPending || isLoading || isInitialLoading || navigation.isLoading || navigation.breadcrumbPath.length === 0}
             />
             </div>
             
