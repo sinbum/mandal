@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import PageTransition from '@/components/animations/PageTransition';
-import { Button } from '@/components/ui/Button';
 import InputField from '@/components/ui/InputField';
 import {
   AlertDialog,
@@ -24,8 +23,6 @@ import {
 import {
   User as UserIcon,
   Bell,
-  Shield,
-  Palette,
   Download,
   Trash2,
   ChevronRight,
@@ -33,20 +30,11 @@ import {
   Sun
 } from 'lucide-react';
 
-interface SettingItem {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  action: () => void;
-  type: 'navigate' | 'toggle' | 'action';
-  value?: boolean | string;
-}
 
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false); // 초기값을 false로 변경
+  // const [loading, setLoading] = useState(false); // 초기값을 false로 변경
   const [isInitialized, setIsInitialized] = useState(false); // hydration 체크용
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -253,7 +241,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Settings Sections */}
-          {settingSections.map((section, sectionIndex) => (
+          {settingSections.map((section) => (
             <div key={section.title} className="mb-6 sm:mb-8">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 {section.title}

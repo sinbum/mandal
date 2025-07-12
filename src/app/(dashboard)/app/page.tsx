@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 

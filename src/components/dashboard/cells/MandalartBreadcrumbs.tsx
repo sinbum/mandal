@@ -9,7 +9,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
-  BreadcrumbHome,
 } from '@/components/ui/breadcrumb';
 import { MoreVertical, Trash2, X } from 'lucide-react';
 import {

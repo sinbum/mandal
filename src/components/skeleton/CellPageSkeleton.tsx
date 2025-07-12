@@ -1,14 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import BreadcrumbSkeleton from './BreadcrumbSkeleton';
 import CellPageLayout from '@/components/layout/CellPageLayout';
-import ProgressSidebar from '@/components/dashboard/cells/ProgressSidebar';
 
 const CellPageSkeleton = () => {
-  // 더미 셀 데이터 (사이드바 스켈레톤용)
-  const dummyCells = [];
 
   return (
     <CellPageLayout

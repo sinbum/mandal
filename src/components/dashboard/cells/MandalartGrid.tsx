@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { MandalartCell } from '@/types/mandalart';
 import MandalartCellComponent from './MandalartCell';
 import { cn } from '@/lib/utils';
@@ -57,7 +57,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
   
   // 그리드 위치와 position 매핑
-  const gridToPosition: Record<number, number | null> = {
+  const gridToPosition = useMemo(() => ({
     0: 1, // 좌상
     1: 2, // 상
     2: 3, // 우상
@@ -67,7 +67,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     6: 6, // 좌하
     7: 7, // 하
     8: 8  // 우하
-  };
+  }), []);
   
   // 셀 배열이 8개 미만이면 빈 셀로 채움
   const allCells = Array.from({ length: 8 }, (_, index) => {

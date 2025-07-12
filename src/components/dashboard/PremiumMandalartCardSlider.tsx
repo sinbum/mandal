@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSpring, animated, config } from '@react-spring/web';
+import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { MandalartCell } from '@/types/mandalart';
 import MandalartCard from './MandalartCard';

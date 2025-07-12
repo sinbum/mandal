@@ -1,6 +1,5 @@
 import React from 'react';
 import { MobileLayoutProps } from '@/types/ui';
-import { LAYOUT } from '@/lib/constants';
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
   children,

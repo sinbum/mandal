@@ -59,7 +59,7 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
     if (isValidIndex(index)) {
       setCurrentIndex(index);
     }
-  }, [totalItems]);
+  }, [totalItems, isValidIndex]);
 
   // 마우스 휠 이벤트 (데스크탑 및 모바일 레이아웃)
   useEffect(() => {

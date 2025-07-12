@@ -25,7 +25,7 @@ interface MandalartCardProps {
   onEdit?: (cellId: string) => void;
 }
 
-const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, onEdit }) => {
+const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) => {
   const router = useRouter();
   const [showActions, setShowActions] = useState(false);
 

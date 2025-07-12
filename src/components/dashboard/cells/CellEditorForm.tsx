@@ -96,7 +96,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
     };
 
     focusInput();
-  }, []); // 의존성 배열에서 topic 제거
+  }, [isNewCell]); // isNewCell 의존성 추가
 
   // 색상 선택기 외부 클릭 감지
   useEffect(() => {

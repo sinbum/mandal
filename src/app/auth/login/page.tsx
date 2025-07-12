@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
@@ -21,7 +21,7 @@ interface LoginFormData {
 }
 
 function LoginContent() {
-  const router = useRouter();
+  // const router = useRouter();
   const navigation = useNavigation();
   const searchParams = useSearchParams();
   

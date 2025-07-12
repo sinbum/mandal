@@ -1,6 +1,35 @@
 import { Mandalart, MandalartCell } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
-import { getCurrentUser, isUserAuthenticated } from '@/hooks/useAuth';
+import { getCurrentUser } from '@/hooks/useAuth';
+
+// RPC 함수 결과 타입 정의
+interface DbRpcResult {
+  id: string;
+  topic: string;
+  memo?: string;
+  color?: string;
+  image_url?: string;
+  is_completed: boolean;
+  parent_id?: string;
+  depth: number;
+  cell_position: number;
+  mandalart_id: string;
+  level: number;
+}
+
+interface UserMandalartResult {
+  root_cell_id: string;
+  root_topic: string;
+  root_color?: string;
+  mandalart_id: string;
+  total_cells: number;
+  completed_cells: number;
+  progress_percentage: string;
+}
+
+interface TimestampResult {
+  updated_at: string;
+}
 
 /**
  * 만다라트 API 클래스
@@ -70,10 +99,10 @@ export class MandalartService {
       
       // 결과를 계층적 구조로 변환
       const cellsMap = new Map<string, MandalartCell>();
-      const rootCell = data.find((item: any) => item.level === 0);
+      const rootCell = data.find((item: DbRpcResult) => item.level === 0);
       
       // 모든 셀을 Map에 저장
-      data.forEach((item: any) => {
+      data.forEach((item: DbRpcResult) => {
         const cell = this.convertDbCellToModel({
           id: item.id,
           topic: item.topic,
@@ -92,7 +121,7 @@ export class MandalartService {
       });
       
       // 부모-자식 관계 설정
-      data.forEach((item: any) => {
+      data.forEach((item: DbRpcResult) => {
         if (item.parent_id && cellsMap.has(item.parent_id)) {
           const parent = cellsMap.get(item.parent_id)!;
           const child = cellsMap.get(item.id)!;
@@ -403,7 +432,7 @@ export class MandalartService {
       }
       
       // 4. RPC 결과를 프론트엔드 모델로 변환
-      const rootCellsWithProgress = data.map((item: any) => {
+      const rootCellsWithProgress = data.map((item: UserMandalartResult) => {
         const cell = this.convertDbCellToModel({
           id: item.root_cell_id,
           topic: item.root_topic,
@@ -457,7 +486,7 @@ export class MandalartService {
 
       // 2. 마지막 동기화 이후 변경사항 확인
       const lastSyncDate = new Date(this.lastSyncTimestamp);
-      const hasChanges = serverTimestamps.some((item: any) => {
+      const hasChanges = serverTimestamps.some((item: TimestampResult) => {
         const serverUpdateTime = new Date(item.updated_at);
         return serverUpdateTime > lastSyncDate;
       });
