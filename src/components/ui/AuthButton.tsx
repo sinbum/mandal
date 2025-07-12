@@ -1,36 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useIsLoggedIn } from '@/hooks/useAuth';
 
 export default function AuthButton() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const isLoggedIn = useIsLoggedIn(); // 전역 인증 상태 사용
   const router = useRouter();
-  useEffect(() => {
-    const supabase = createClient();
-    
-    // 현재 세션 확인
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
-    };
 
-    checkSession();
-
-    // 인증 상태 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // 초기 로딩 상태
-  if (isLoggedIn === null) {
+  // 로그인 상태에 따른 렌더링
+  if (!isLoggedIn) {
     return (
       <div className="w-[73px] h-[36px] bg-gray-200 animate-pulse rounded"></div>
     );

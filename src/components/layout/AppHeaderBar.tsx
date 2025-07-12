@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeaderBar from '@/components/layout/HeaderBar';
 import AnimatedButton from '@/components/animations/AnimatedButton';
 import HamburgerIcon from '@/components/animations/HamburgerIcon';
-import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
 import { signOut } from '@/lib/auth/utils';
 import { toast } from "sonner";
 import { getRecentMandalartCell } from '@/utils/cookies';
+import { useUser } from '@/hooks/useAuth';
 
 interface AppHeaderBarProps {
   showBackButton?: boolean;
@@ -21,28 +20,10 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
   showBackButton = false,
   backHref = "/app"
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const user = useUser(); // 전역 인증 상태 사용
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
-
-  useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    }
-    getUser();
-
-    // 인증 상태 변경 구독으로 실시간 동기화
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
 
   const handleLogout = async () => {
     if (isLoggingOut) return; // 중복 클릭 방지

@@ -1,6 +1,7 @@
 import React from 'react';
 import { MandalartCell } from '@/types/mandalart';
 import MandalartGrid from './cells/MandalartGrid';
+import { cellCache } from '@/utils/cellCache';
 
 interface MandalartBoardProps {
   centerCell: MandalartCell;
@@ -11,6 +12,7 @@ interface MandalartBoardProps {
   onNavigate: (cellId: string) => void;
   onEditCell?: (cell: MandalartCell) => void;
   onLongPress?: (cell: MandalartCell) => void;
+  onCellHover?: (cellId: string) => void;
   showProgressStats?: boolean;
 }
 
@@ -27,6 +29,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   onNavigate,
   onEditCell,
   onLongPress,
+  onCellHover,
   showProgressStats = true
 }) => {
   const handleCellClick = (cell: MandalartCell) => {
@@ -37,6 +40,17 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
     } else {
       // 일반 셀이면 네비게이션
       onNavigate(cell.id);
+    }
+  };
+
+  const handleCellHover = (cell: MandalartCell) => {
+    // 빈 셀이 아닌 경우에만 프리로딩 실행
+    if (!cell.id.startsWith('empty-')) {
+      // 백그라운드에서 해당 셀의 자식 데이터를 미리 로딩
+      cellCache.preloadCellChildren(cell.id);
+      
+      // 부모 컴포넌트의 hover 핸들러도 호출
+      onCellHover?.(cell.id);
     }
   };
 
@@ -54,6 +68,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
         centerCell={centerCell}
         cells={cells}
         onCellClick={handleCellClick}
+        onCellHover={handleCellHover}
         onCellUpdate={handleCellUpdate}
         onToggleComplete={handleToggleComplete}
         onEditCell={onEditCell}

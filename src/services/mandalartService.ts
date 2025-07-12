@@ -1,5 +1,6 @@
 import { Mandalart, MandalartCell } from '@/types/mandalart';
 import { createClient } from '@/utils/supabase/client';
+import { getCurrentUser, isUserAuthenticated } from '@/hooks/useAuth';
 
 /**
  * 만다라트 API 클래스
@@ -13,19 +14,35 @@ export class MandalartService {
    */
   async fetchCellById(cellId: string): Promise<MandalartCell | null> {
     try {
+      console.log('셀 데이터 조회 시작:', cellId);
+      
       const { data, error } = await this.supabase
         .from('mandalart_cells')
         .select('*')
         .eq('id', cellId)
         .single();
       
-      if (error) throw error;
-      if (!data) return null;
+      if (error) {
+        console.error('Supabase 에러:', error);
+        // PGRST116 에러 (데이터 없음)는 null 반환
+        if (error.code === 'PGRST116') {
+          console.log('셀을 찾을 수 없음:', cellId);
+          return null;
+        }
+        throw error;
+      }
       
+      if (!data) {
+        console.log('데이터가 없음:', cellId);
+        return null;
+      }
+      
+      console.log('셀 데이터 조회 성공:', cellId);
       return this.convertDbCellToModel(data);
     } catch (err) {
-      console.error('셀 데이터 조회 실패:', err);
-      throw err;
+      console.error('셀 데이터 조회 실패:', cellId, err);
+      // 프리로딩에서는 에러를 던지지 않고 null 반환
+      return null;
     }
   }
   
@@ -218,9 +235,12 @@ export class MandalartService {
    */
   async createMandalart(title: string): Promise<string> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
+      // 캐시된 사용자 정보 사용 (미들웨어에서 이미 인증 확인됨)
+      // 캐시된 사용자 정보 사용 (안전한 체크)
+      const user = getCurrentUser();
       
       if (!user) {
+        console.warn('사용자 인증 정보 없음');
         throw new Error('인증된 사용자가 없습니다');
       }
       
@@ -272,9 +292,11 @@ export class MandalartService {
    */
   async fetchUserCells(): Promise<MandalartCell[]> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
+      // 캐시된 사용자 정보 사용 (안전한 체크)
+      const user = getCurrentUser();
       
       if (!user) {
+        console.warn('사용자 인증 정보 없음');
         throw new Error('인증된 사용자가 없습니다');
       }
       
@@ -323,9 +345,11 @@ export class MandalartService {
    */
   async fetchUserCellsWithChildren(): Promise<MandalartCell[]> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
+      // 캐시된 사용자 정보 사용 (안전한 체크)
+      const user = getCurrentUser();
       
       if (!user) {
+        console.warn('사용자 인증 정보 없음');
         throw new Error('인증된 사용자가 없습니다');
       }
       
@@ -419,9 +443,11 @@ export class MandalartService {
    */
   async fetchUserCellsWithChildrenOptimized(): Promise<MandalartCell[]> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
+      // 캐시된 사용자 정보 사용 (안전한 체크)
+      const user = getCurrentUser();
       
       if (!user) {
+        console.warn('사용자 인증 정보 없음');
         throw new Error('인증된 사용자가 없습니다');
       }
       
@@ -783,9 +809,11 @@ export const fetchMandalartListForUser = async (): Promise<Array<{id: string, ti
   try {
     const supabase = createClient();
     
-    const { data: { user } } = await supabase.auth.getUser();
+    // 캐시된 사용자 정보 사용 (안전한 체크)
+    const user = getCurrentUser();
     
     if (!user) {
+      console.warn('사용자 인증 정보 없음');
       throw new Error('인증된 사용자가 없습니다. 로그인이 필요합니다.');
     }
     
@@ -868,9 +896,11 @@ export const deleteMandalartById = async (id: string): Promise<void> => {
     const supabase = createClient();
     
     // 현재 로그인한 사용자 정보 가져오기
-    const { data: { user } } = await supabase.auth.getUser();
+    // 캐시된 사용자 정보 사용 (안전한 체크)
+    const user = getCurrentUser();
     
     if (!user) {
+      console.warn('사용자 인증 정보 없음');
       throw new Error('인증된 사용자가 없습니다. 로그인이 필요합니다.');
     }
     

@@ -7,10 +7,9 @@ import { getMostRecentMandalartCell } from '@/lib/utils';
 import HamburgerIcon from '@/components/animations/HamburgerIcon';
 import SlideUpPanel from '@/components/ui/SlideUpPanel';
 import AnimatedButton from '@/components/animations/AnimatedButton';
-import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
 import { signOut } from '@/lib/auth/utils';
 import { toast } from "sonner";
+import { useUser } from '@/hooks/useAuth';
 
 
 // 최근 만다라트 데이터 가져오기 (쿠키에서)
@@ -20,10 +19,9 @@ import { toast } from "sonner";
 const BottomBar: React.FC = () => {
   const router = useRouter();
   const [recentCellId, setRecentCellId] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const user = useUser(); // 전역 인증 상태 사용
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const supabase = createClient();
 
   // 브라우저 환경에서만 실행되도록 useEffect 사용
   useEffect(() => {
@@ -37,23 +35,6 @@ const BottomBar: React.FC = () => {
       console.error('로컬스토리지 접근 오류:', error);
     }
   }, []);
-
-  useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    }
-    getUser();
-
-    // 인증 상태 변경 구독으로 실시간 동기화
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
 
   // 만다라트 버튼 클릭 핸들러
   const handleMandalartClick = (e: React.MouseEvent) => {

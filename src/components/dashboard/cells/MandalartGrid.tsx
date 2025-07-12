@@ -8,6 +8,7 @@ interface MandalartGridProps {
   centerCell: MandalartCell;
   cells: MandalartCell[];
   onCellClick: (cell: MandalartCell) => void;
+  onCellHover?: (cell: MandalartCell) => void;
   onCellUpdate: (cellId: string, updates: Partial<MandalartCell>) => void;
   onToggleComplete: (cellId: string) => void;
   onEditCell?: (cell: MandalartCell) => void;
@@ -37,6 +38,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   centerCell,
   cells,
   onCellClick,
+  onCellHover,
   onCellUpdate,
   onToggleComplete,
   onEditCell,
@@ -160,6 +162,24 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       onCellClick(displayCell);
     }
   }, [disabled, loading, sortedCells, gridToPosition, onCellClick]);
+
+  // 셀 호버 핸들러
+  const handleCellHover = useCallback((cellIndex: number) => {
+    if (disabled || loading || !onCellHover) return;
+    
+    // 중앙 셀은 호버 처리하지 않음
+    if (cellIndex === 4) return;
+    
+    const targetPosition = gridToPosition[cellIndex];
+    if (targetPosition === null) return;
+    
+    const displayCell = sortedCells.find(cell => cell.position === targetPosition) || 
+      sortedCells[cellIndex > 4 ? cellIndex - 1 : cellIndex];
+    
+    if (displayCell) {
+      onCellHover(displayCell);
+    }
+  }, [disabled, loading, sortedCells, gridToPosition, onCellHover]);
   
   // 그리드 렌더링
   const renderGrid = () => {
@@ -217,7 +237,11 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       const isEmpty = displayCell?.id?.startsWith('empty-');
       
       return (
-        <div key={gridKey} className="relative">
+        <div 
+          key={gridKey} 
+          className="relative"
+          onMouseEnter={() => handleCellHover(index)}
+        >
           <MandalartCellComponent
             cell={displayCell}
             onClick={() => handleCellClick(index)}

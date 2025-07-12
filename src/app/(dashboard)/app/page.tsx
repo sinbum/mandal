@@ -7,6 +7,7 @@ import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 import { toast } from 'sonner';
 import {
@@ -41,6 +42,7 @@ import { cellCache } from '@/utils/cellCache';
  */
 export default function HomePage() {
   const router = useRouter();
+  const { user, loading: authLoading, isLoggedIn } = useAuth(); // 전역 인증 상태 사용
   const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -58,6 +60,12 @@ export default function HomePage() {
   useEffect(() => {
     async function loadData() {
       try {
+        // 인증 상태가 로딩 중이거나 로그인되지 않은 경우 대기
+        if (authLoading || !isLoggedIn) {
+          console.log('인증 상태 대기 중...', { authLoading, isLoggedIn });
+          return;
+        }
+
         // 로딩 상태는 실제 API 호출 전에만 설정
         setIsLoading(true);
         
@@ -78,7 +86,7 @@ export default function HomePage() {
     }
 
     loadData();
-  }, []);
+  }, [authLoading, isLoggedIn]); // 인증 상태 변경 시 재실행
 
   // 새 만다라트 생성 처리
   const handleCreateMandalart = async (data: { title: string }) => {
@@ -145,7 +153,8 @@ export default function HomePage() {
     }
   };
 
-  if (isLoading) {
+  // 인증 로딩 중이거나 데이터 로딩 중일 때 스켈레톤 표시
+  if (authLoading || isLoading) {
     return (
       <PageTransition>
         <MobileLayout

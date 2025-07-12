@@ -146,6 +146,82 @@ class CellCache {
       // 에러가 발생해도 메인 기능에 영향을 주지 않도록 조용히 실패
     }
   }
+
+  /**
+   * 특정 셀을 클릭했을 때 그 자식 데이터를 미리 로딩
+   * 사용자가 클릭하기 전에 미리 준비하여 즉시 렌더링 가능하게 함
+   */
+  async preloadCellChildren(cellId: string): Promise<void> {
+    try {
+      // 빈 셀이나 잘못된 ID 체크
+      if (!cellId || cellId.startsWith('empty-') || cellId.startsWith('temp-')) {
+        return;
+      }
+
+      // 이미 캐시에 있는지 확인
+      const cached = this.get(cellId);
+      if (cached && cached.children.length > 0) {
+        console.log(`셀 ${cellId}의 자식들이 이미 캐시되어 있음`);
+        return;
+      }
+
+      console.log(`셀 ${cellId}의 자식들 미리 로딩 시작`);
+
+      // 셀 정보와 자식들을 로딩
+      const [cell, children] = await Promise.all([
+        cached?.cell || mandalartAPI.fetchCellById(cellId),
+        mandalartAPI.fetchChildrenByCellId(cellId)
+      ]);
+
+      if (cell) {
+        // 캐시에 저장
+        this.set(cellId, cell, children);
+        console.log(`셀 ${cellId} 프리로딩 완료: ${children.length}개의 자식 셀`);
+
+        // 손자 셀들도 백그라운드에서 미리 로딩 (비동기)
+        if (children.length > 0) {
+          this.preloadChildrenOfChildren(children);
+        }
+      } else {
+        console.log(`셀 ${cellId}을 찾을 수 없어 프리로딩 건너뜀`);
+      }
+    } catch (err) {
+      console.error(`셀 ${cellId} 프리로딩 실패:`, err);
+      // 에러가 발생해도 메인 기능에 영향을 주지 않도록 조용히 실패
+    }
+  }
+
+  /**
+   * 여러 셀들의 자식 데이터를 병렬로 미리 로딩
+   */
+  async preloadMultipleCellChildren(cellIds: string[]): Promise<void> {
+    if (cellIds.length === 0) return;
+
+    console.log(`${cellIds.length}개 셀들의 자식 데이터 병렬 프리로딩 시작`);
+
+    // 아직 캐시되지 않은 셀들만 필터링
+    const uncachedCellIds = cellIds.filter(cellId => {
+      const cached = this.get(cellId);
+      return !cached || cached.children.length === 0;
+    });
+
+    if (uncachedCellIds.length === 0) {
+      console.log('모든 셀이 이미 캐시되어 있음');
+      return;
+    }
+
+    // 병렬로 프리로딩 실행
+    const preloadPromises = uncachedCellIds.map(cellId => 
+      this.preloadCellChildren(cellId)
+    );
+
+    try {
+      await Promise.allSettled(preloadPromises);
+      console.log(`${uncachedCellIds.length}개 셀들의 병렬 프리로딩 완료`);
+    } catch (err) {
+      console.error('병렬 프리로딩 중 오류 발생:', err);
+    }
+  }
 }
 
 // 싱글톤 인스턴스

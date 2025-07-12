@@ -107,6 +107,10 @@ export default function CellPage() {
           // 자식들의 하위 셀들도 백그라운드에서 미리 로딩 (비동기)
           cellCache.preloadChildrenOfChildren(children);
           
+          // 현재 표시된 자식 셀들의 데이터를 미리 로딩 (사용자가 클릭할 가능성이 높음)
+          const childIds = children.map(child => child.id);
+          cellCache.preloadMultipleCellChildren(childIds);
+          
           // 최근 사용 셀 ID를 localStorage와 쿠키에 저장
           setMostRecentMandalartCell(cellId);
           saveRecentMandalartCell(cellId);
