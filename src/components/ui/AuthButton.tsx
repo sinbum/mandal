@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 export default function AuthButton() {
   const isLoggedIn = useIsLoggedIn(); // 전역 인증 상태 사용
   const router = useRouter();
+  const t = useTranslations('navigation');
 
   // 로그인 상태에 따른 렌더링
   if (!isLoggedIn) {
@@ -30,7 +31,7 @@ export default function AuthButton() {
           }}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium"
         >
-          로그아웃
+          {t('logout')}
         </button>
       ) : (
         <Link href="/auth/login">

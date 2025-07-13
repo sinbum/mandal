@@ -12,6 +12,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
   // 서버에서 번역 텍스트 미리 로드
   const t = await getTranslations({ locale, namespace: 'navigation' });
   const tAuth = await getTranslations({ locale, namespace: 'auth' });
+  const tApp = await getTranslations({ locale, namespace: 'app' });
   
   // 번역된 텍스트를 클라이언트 컴포넌트에 전달
   const translations = {
@@ -19,6 +20,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
     logout: t('logout'),
     loginTitle: tAuth('login.title'),
     signupTitle: tAuth('signup.title'),
+    appName: tApp('shortName'),
   };
 
   return <LandingPageClient locale={locale} translations={translations} />;

@@ -16,6 +16,41 @@ common:
   add: "추가"
   remove: "제거"
   update: "업데이트"
+  saving: "저장 중..."
+  create: "생성"
+  enterMemo: "메모를 입력하세요"
+  high: "높음"
+  medium: "보통"
+  low: "낮음"
+  share: "공유"
+  copyData: "데이터 복사"
+  viewStats: "통계 보기"
+  archive: "보관"
+  thisWeek: "이번 주"
+  overallProgress: "전체 진행률"
+  daysLeft: "남은 일"
+  lastUpdated: "마지막 업데이트"
+  completed: "완료"
+  favorites: "즐겨찾기"
+  export: "내보내기"
+  menu: "메뉴"
+  swipeHint: "좌우로 스와이프하여 탐색"
+  mouseWheelHint: "마우스 휠로 탐색"
+
+board:
+  copySuccess: "데이터가 복사되었습니다"
+  copyFailed: "데이터 복사에 실패했습니다"
+  shareSuccess: "공유가 완료되었습니다"
+  shareFailed: "공유에 실패했습니다"
+  linkCopied: "링크가 복사되었습니다"
+  analyticsTitle: "{topic} 분석"
+  progressRate: "진행률"
+  downloadSuccess: "다운로드가 완료되었습니다"
+  archiveSuccess: "보관함에 추가되었습니다"
+  alreadyArchived: "이미 보관된 항목입니다"
+  newMandalart: "새 만다라트"
+  totalGoals: "총 목표"
+  createNewMandalartDescription: "새로운 목표를 설정하고 꿈을 현실로 만들어보세요"
 
 slideUpPanel:
   releaseToClose: "↓ 놓으면 닫힘"
@@ -53,6 +88,7 @@ dashboard:
   createNew: "새 만다라트 만들기"
   recentBoards: "최근 보드"
   allBoards: "모든 보드"
+  deleteConfirmation: "정말로 이 만다라트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
   empty:
     title: "아직 만다라트가 없습니다"
     description: "첫 번째 만다라트를 만들어 목표를 체계적으로 관리해보세요"
@@ -116,6 +152,15 @@ mandalart:
     memoPlaceholder: "메모를 입력하세요 (선택사항)"
     colorSelect: "색상 선택"
     imageUpload: "이미지 업로드"
+    addMemo: "메모 추가"
+    hideMemo: "메모 숨기기"
+    selectBackgroundColor: "배경 색상 선택"
+    enterCellTopic: "셀 주제 입력"
+    enterCellMemo: "셀 메모 입력"
+    toggleCompletionStatus: "완료 상태 체크"
+    cancelEdit: "셀 편집 취소"
+    createCell: "셀 생성"
+    saveCell: "셀 저장"
   navigation:
     goUp: "상위로 이동"
     goBack: "뒤로 가기"
@@ -144,6 +189,11 @@ settings:
     displayNamePlaceholder: "표시 이름을 입력하세요"
     updateSuccess: "프로필이 업데이트되었습니다"
     updateError: "프로필 업데이트에 실패했습니다"
+    loading: "프로필 정보를 불러오는 중..."
+    bio: "소개"
+    bioPlaceholder: "자기소개를 입력하세요"
+    themeColor: "테마 색상"
+    themeColorDescription: "선택한 색상은 프로필 카드에 즉시 반영됩니다"
     editDialog:
       title: "프로필 편집"
       description: "표시 이름을 변경할 수 있습니다"
@@ -217,6 +267,14 @@ loading:
   uploading: "업로드 중..."
   settings: "설정을 불러오는 중..."
 
+metadata:
+  title: "만다라트 플래너"
+  description: "만다라트 플래너는 목표 달성을 위한 체계적인 계획을 돕는 도구입니다."
+
+app:
+  shortName: "만다라트"
+  name: "만월"
+
 dashboardLayout:
   title: "대시보드"
   description: "나의 만다라트 목표들을 관리하고 진행상황을 확인하세요"
@@ -224,13 +282,6 @@ dashboardLayout:
 AppHeaderBar:
   title: "앱 헤더"
   description: "앱 상단 헤더 영역"
-
-metadata:
-  title: "만다라트 플래너"
-  description: "만다라트 플래너는 목표 달성을 위한 체계적인 계획을 돕는 도구입니다."
-
-app:
-  shortName: "만다라트"
 
 landing:
   hero:
@@ -249,14 +300,15 @@ landing:
       title: "만다라트 목표 설정"
       subtitle: "하나의 목표를 8개 영역으로 세분화"
       examples:
-        - "기술 역량"
-        - "네트워킹"
-        - "포트폴리오"
-        - "면접 준비"
-        - "취업 성공"
-        - "경력 개발"
-        - "자기계발"
-        - "업무 능력"
+        0: "기술 역량"
+        1: "네트워킹"
+        2: "포트폴리오"
+        3: "면접 준비"
+        4: "취업 성공"
+        5: "자격증"
+        6: "프로젝트"
+        7: "창의력"
+        8: "어학 능력"
   
   features:
     title: "체계적인 목표 달성"
@@ -264,16 +316,16 @@ landing:
     items:
       goal_breakdown:
         title: "목표 분해"
-        description: "큰 목표를 실행 가능한 작은 단위로 체계적으로 분해합니다"
+        description: "큰 목표를 작고 실행 가능한 단계로 나누어 체계적으로 접근할 수 있습니다"
       progress_tracking:
         title: "진행 추적"
-        description: "각 단계별 진행상황을 시각적으로 확인하고 관리할 수 있습니다"
+        description: "직관적인 인터페이스로 현재 진행상황을 한눈에 파악하고 관리할 수 있습니다"
       collaboration:
         title: "협업 기능"
-        description: "팀원들과 목표를 공유하고 함께 달성해 나갈 수 있습니다"
+        description: "팀원들과 목표를 공유하고 함께 달성해 나가며 동기를 유지할 수 있습니다"
       analytics:
         title: "성과 분석"
-        description: "목표 달성률과 패턴을 분석하여 개선점을 찾을 수 있습니다"
+        description: "목표 달성 패턴을 분석하여 더 효과적인 계획을 세울 수 있도록 도와줍니다"
     cta:
       start: "지금 시작해보세요"
       free: "무료로 시작하기"
@@ -285,19 +337,19 @@ landing:
     items:
       - name: "김민수"
         role: "프론트엔드 개발자"
-        text: "만다라트를 사용한 후 목표가 명확해지고 실행력이 크게 향상되었습니다. 체계적인 접근 방식이 정말 도움이 됩니다."
+        text: "만다라트를 사용한 후 목표가 명확해지고 실행력이 크게 향상되었습니다. 체계적인 접근법이 정말 도움이 됩니다."
         achievement: "6개월 만에 시니어 개발자로 승진"
       - name: "박지영"
         role: "프로덕트 매니저"
-        text: "복잡한 프로젝트도 단계별로 나누어 관리하니 훨씬 효율적이에요. 팀 전체가 같은 방향을 바라보게 되었습니다."
+        text: "복잡한 프로젝트도 단계별로 나누어 관리하니 훨씬 효율적입니다. 팀 전체가 같은 방향을 보게 되었어요."
         achievement: "프로젝트 성공률 40% 향상"
       - name: "이준호"
-        role: "창업자"
+        role: "창업가"
         text: "스타트업 운영에 만다라트를 적용하니 목표가 구체화되고 실행 가능한 계획이 세워졌습니다."
         achievement: "사업 목표 90% 달성"
       - name: "최수민"
         role: "마케팅 전문가"
-        text: "개인 목표부터 업무 목표까지 모든 것을 체계적으로 관리할 수 있어서 만족스럽습니다."
+        text: "개인 목표부터 업무 목표까지 모든 것을 체계적으로 관리할 수 있어서 만족합니다."
         achievement: "마케팅 성과 2배 증가"
     stats:
       title: "만다라트 사용 통계"
@@ -318,27 +370,50 @@ landing:
       start: "무료로 시작하기"
       login: "로그인"
     features:
-      - "무료로 모든 기능을 사용하세요"
-      - "무료 계정"
-      - "모든 기능"
-      - "언제든 해지"
+      0: "무료로 모든 기능을 사용하세요"
+      1: "무료 계정"
+      2: "모든 기능"
+      3: "언제든 해지"
+      creditCard: "신용카드 없이"
+      fullFeatures: "모든 기능 사용"
+      cancelAnytime: "언제든 해지"
     social_proof: "1,000명 이상의 사용자가 목표를 달성하고 있습니다"
     satisfaction: "만족도"
+    stats:
+      goalAchievementRate:
+        label: "목표 달성률"
+        value: "92%"
+      activeUsers:
+        label: "활성 사용자"
+        value: "1,000+"
   
   footer:
     brand_description: "체계적인 만다라트 기법으로 목표를 달성하세요"
+    contact:
+      email: "문의: contact@mandalart.com"
     nav:
       service: "서비스"
       resources: "리소스"
       start_free: "무료 시작하기"
       features: "기능 소개"
       success_stories: "성공 사례"
+      login: "로그인"
     links:
       guide: "사용 가이드"
       faq: "자주 묻는 질문"
       privacy: "개인정보처리방침"
       terms: "서비스 이용약관"
     copyright: "만다라트. 모든 권리 보유"
+    stats:
+      goalAchievementRate:
+        label: "목표 달성률"
+        value: "92%"
+      activeUsers:
+        label: "활성 사용자"
+        value: "1,000+"
+      satisfaction:
+        label: "만족도"
+        value: "98%"
 
 # PremiumMandalartCardSlider 번역
 slider:
@@ -349,13 +424,14 @@ slider:
       title_label: "제목"
       title_placeholder: "새 만다라트"
       cancel: "취소"
-      create: "생성"
-      creating: "생성 중..."
+      create: "만들기"
+      creating: "만드는 중..."
     card:
-      title: "새 만다라트 생성"
+      title: "새 만다라트 만들기"
       description: "새로운 목표를 설정하고\n꿈을 현실로 만들어보세요"
   navigation:
     previous: "이전"
     next: "다음"
     swipeUpHint: "위로 스와이프"
     swipeDownHint: "아래로 스와이프"
+

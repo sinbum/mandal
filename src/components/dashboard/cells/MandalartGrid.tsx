@@ -82,7 +82,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     return {
       id: `empty-${position}`,
       topic: '',
-      memo: '클릭하여 새 셀을 추가하세요',
+      memo: t('cell.addCellHint'),
       isCompleted: false,
       parentId: centerCell.id,
       depth: (centerCell.depth || 0) + 1,
@@ -215,12 +215,12 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               gridIndex={index}
               touchOptimized={touchOptimized}
               animationEnabled={animationEnabled}
-              aria-label={`중앙 셀: ${centerCell.topic || '비어있음'}`}
+              aria-label={t('cell.centerCellLabel', { topic: centerCell.topic || t('common.empty') })}
               aria-describedby={`center-cell-description`}
             />
             {/* 중앙 셀 설명 (스크린 리더용) */}
             <div id="center-cell-description" className="sr-only">
-              중앙 셀입니다. 이 셀은 편집할 수 없습니다.
+              {t('cell.centerCellDescription')}
             </div>
           </div>
         );
@@ -257,14 +257,14 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             gridIndex={index}
             touchOptimized={touchOptimized}
             animationEnabled={animationEnabled}
-            aria-label={`그리드 위치 ${index + 1}: ${displayCell.topic || '비어있음'}`}
+            aria-label={t('cell.gridPositionLabel', { index: index + 1, topic: displayCell.topic || t('common.empty') })}
             aria-describedby={`cell-${index}-description`}
           />
           {/* 셀 설명 (스크린 리더용) */}
           <div id={`cell-${index}-description`} className="sr-only">
             {isEmpty 
-              ? "빈 셀입니다. 클릭하여 새 내용을 추가하세요."
-              : `셀 내용: ${displayCell.topic}. ${displayCell.isCompleted ? '완료됨' : '진행 중'}`
+              ? t('cell.emptyCellDescription')
+              : t('cell.filledCellDescription', { topic: displayCell.topic, status: displayCell.isCompleted ? t('cell.completed') : t('cell.inProgress') })
             }
           </div>
         </div>
@@ -301,7 +301,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
                 strokeDashoffset="32"
               />
             </svg>
-            <span className="text-sm text-muted-foreground">로딩 중...</span>
+            <span className="text-sm text-muted-foreground">{t('common.loading')}</span>
           </div>
         </div>
       )}
@@ -317,15 +317,15 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-success rounded-full"></div>
-                <span>완료: {cells.filter(cell => cell.isCompleted).length}</span>
+                <span>{t('progress.completed', { count: cells.filter(cell => cell.isCompleted).length })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-gray-300 rounded-full"></div>
-                <span>진행 중: {cells.filter(cell => !cell.isCompleted && cell.topic).length}</span>
+                <span>{t('progress.inProgress', { count: cells.filter(cell => !cell.isCompleted && cell.topic).length })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] border-2 border-dashed border-gray-300 rounded-full"></div>
-                <span>비어있음: {8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length}</span>
+                <span>{t('progress.empty', { count: 8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length })}</span>
               </div>
             </div>
             

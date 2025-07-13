@@ -243,7 +243,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                       backgroundColor: color || '#f3f4f6',
                       borderColor: color ? 'transparent' : '#d1d5db'
                     }}
-                    aria-label="배경 색상 선택"
+                    aria-label={t('form.selectBackgroundColor')}
                     aria-expanded={showColorPicker}
                     aria-haspopup="true"
                   >
@@ -261,7 +261,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                         width: '180px',
                       }}
                     >
-                      <div className="text-sm text-gray-600 mb-3">배경 색상</div>
+                      <div className="text-sm text-gray-600 mb-3">{t('form.colorSelect')}</div>
                       <ColorPalette
                         selectedColor={color}
                         onColorSelect={handleColorSelect}
@@ -273,14 +273,14 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
               </div>
               {isMobile && isNewCell && (
                 <p className="text-sm text-gray-500 mt-2">
-                  주제를 입력하고 엔터를 누르면 바로 생성됩니다
+                  {t('cell.topicEnterHint')}
                 </p>
               )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* 주제 입력 */}
               <div className="space-y-2">
-                <Label htmlFor="topic">주제</Label>
+                <Label htmlFor="topic">{t('common.topic')}</Label>
                 <Input
                   ref={topicInputRef}
                   id="topic"
@@ -288,18 +288,18 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setTopic(e.target.value)}
                   onKeyDown={handleTopicKeyDown}
                   maxLength={LIMITS.TOPIC_MAX_LENGTH}
-                  placeholder="텍스트 입력"
+                  placeholder={t('common.enterText')}
                   required
                   className={`${isMobile ? 'text-16px min-h-[44px]' : 'min-h-[40px]'} transition-all duration-200 focus:scale-[1.02] focus:shadow-md`}
                   autoComplete="off"
                   inputMode="text"
-                  aria-label="셀 주제 입력"
+                  aria-label={t('form.enterCellTopic')}
                 />
               </div>
               
               {/* 메모 토글 버튼 */}
               <div className="flex items-center justify-between">
-                <Label>메모</Label>
+                <Label>{t('common.memo')}</Label>
                 <button
                   type="button"
                   onClick={handleMemoToggle}
@@ -310,10 +310,10 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                       ? 'bg-indigo-100 text-gray-800 hover:bg-indigo-200 focus:bg-indigo-200' 
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200 focus:bg-gray-200'
                   } hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                  aria-label={showMemoInput ? '메모 입력 숨기기' : '메모 입력 추가'}
+                  aria-label={showMemoInput ? t('form.hideMemo') : t('form.addMemo')}
                   aria-expanded={showMemoInput}
                 >
-                  <span>{showMemoInput ? '메모 숨기기' : '메모 추가'}</span>
+                  <span>{showMemoInput ? t('form.hideMemo') : t('form.addMemo')}</span>
                   <svg 
                     className={`w-4 h-4 transition-transform duration-200 ${showMemoInput ? 'rotate-180' : ''}`}
                     fill="none" 
@@ -334,10 +334,10 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                     id="memo"
                     value={memo}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMemo(e.target.value)}
-                    placeholder="메모를 입력하세요"
+                    placeholder={t('common.enterMemo')}
                     rows={isMobile ? 3 : 4}
                     className={`${isMobile ? 'text-16px min-h-[44px]' : 'min-h-[40px]'} transition-all duration-200 focus:scale-[1.01] focus:shadow-md`}
-                    aria-label="셀 메모 입력"
+                    aria-label={t('form.enterCellMemo')}
                   />
                 </div>
               )}
@@ -349,13 +349,13 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                   checked={isCompleted}
                   onCheckedChange={(checked: boolean) => setIsCompleted(checked)}
                   className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} transition-all duration-200 hover:scale-110 focus:scale-110`}
-                  aria-label="완료 상태 체크"
+                  aria-label={t('form.toggleCompletionStatus')}
                 />
                 <Label 
                   htmlFor="completed"
                   className={`${isMobile ? 'text-base' : 'text-sm'} cursor-pointer select-none`}
                 >
-                  완료 표시
+                  {t('cell.markAsCompleted')}
                 </Label>
               </div>
             </CardContent>
@@ -366,17 +366,17 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
                 variant="outline"
                 onClick={onCancel}
                 className={`${isMobile ? 'min-h-[48px] min-w-[48px] px-6' : 'min-h-[44px] px-4'} transition-all duration-200 hover:scale-105 active:scale-95 focus:scale-105`}
-                aria-label="셀 편집 취소"
+                aria-label={t('form.cancelEdit')}
               >
-                취소
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={!topic.trim()}
                 className={`${isMobile ? 'min-h-[48px] min-w-[48px] px-6' : 'min-h-[44px] px-4'} transition-all duration-200 hover:scale-105 active:scale-95 focus:scale-105 disabled:hover:scale-100`}
-                aria-label={`셀 ${isNewCell ? '생성' : '저장'}`}
+                aria-label={isNewCell ? t('form.createCell') : t('form.saveCell')}
               >
-                {isNewCell ? '생성' : '저장'}
+                {isNewCell ? t('common.create') : t('common.save')}
               </Button>
             </CardFooter>
           </form>

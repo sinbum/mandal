@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface HamburgerIconProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ const HamburgerIcon: React.FC<HamburgerIconProps> = ({
   size = 28,
   className = "text-gray-700"
 }) => {
+  const t = useTranslations('common');
+
   const topLineVariants = {
     closed: { rotate: 0, y: 0 },
     open: { rotate: 45, y: 6 }
@@ -34,7 +37,7 @@ const HamburgerIcon: React.FC<HamburgerIconProps> = ({
     <motion.button
       className={`${className}`}
       onClick={onClick}
-      aria-label="메뉴"
+      aria-label={t('menu')}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >

@@ -12,7 +12,9 @@ interface LoadingSpinnerProps {
  */
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   size = 'md', 
-  message = '로딩 중...', 
+  message = '로딩 중...',
+}) => {
+  const t = useTranslations('common'); 
   fullScreen = true 
 }) => {
   const sizeClasses = {
@@ -84,7 +86,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         transition={{ delay: 0.3 }}
         className="text-center"
       >
-        <p className="text-gray-600 font-medium mb-1">{message}</p>
+        <p className="text-gray-600 font-medium mb-1">{message || t('loading')}</p>
         
         {/* 로딩 도트 애니메이션 */}
         <div className="flex justify-center gap-1">

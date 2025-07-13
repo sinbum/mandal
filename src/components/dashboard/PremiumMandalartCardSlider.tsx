@@ -26,12 +26,22 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [title, setTitle] = useState('새 만다라트');
+  const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // 번역 훅
+  const t = useTranslations('slider');
+  const tBoard = useTranslations('board');
+  const tCommon = useTranslations('common');
+  
   // 전체 아이템 수 (카드 + 새 만다라트 카드)
   const totalItems = cells.length + 1;
+
+  // 번역 초기화
+  useEffect(() => {
+    setTitle(t('create.form.title_placeholder'));
+  }, [t]);
 
   // 디바이스 감지
   useEffect(() => {
@@ -195,7 +205,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
 
   const handleCancel = () => {
     setIsFormOpen(false);
-    setTitle('새 만다라트');
+    setTitle(t('create.form.title_placeholder'));
   };
 
   // 새 만다라트 카드 렌더링 (폼 통합)
@@ -211,17 +221,17 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
                   <Plus className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  새 만다라트 만들기
+                  {t('board.createNewMandalart')}
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  만다라트의 제목을 입력해주세요
+                  {t('board.enterMandalartTitle')}
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                    제목
+                    {t('common.title')}
                   </label>
                   <input
                     id="title"
@@ -229,7 +239,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="새 만다라트"
+                    placeholder={t('board.newMandalart')}
                     maxLength={50}
                     required
                     autoFocus
@@ -241,16 +251,15 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
                     type="button"
                     onClick={handleCancel}
                     className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
-                    disabled={isLoading}
                   >
-                    취소
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={!title.trim() || isLoading}
                     className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
-                    {isLoading ? '생성 중...' : '생성'}
+                    {isLoading ? t('common.creating') : t('common.create')}
                   </button>
                 </div>
               </div>
@@ -271,10 +280,10 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
           </div>
           
           <h3 className="text-2xl font-bold text-gray-800 mb-3">
-            새 만다라트 생성
+            {t('board.createNewMandalart')}
           </h3>
           <p className="text-gray-600 leading-relaxed">
-            새로운 목표를 설정하고<br />꿈을 현실로 만들어보세요
+            {t('board.createNewMandalartDescription')}
           </p>
         </div>
       </div>
@@ -339,7 +348,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
         >
           <div className="px-4">
             <div className="bg-white/60 rounded-3xl p-4 text-center">
-              <div className="text-sm text-gray-600">이전</div>
+              <div className="text-sm text-gray-600">{t('common.previous')}</div>
             </div>
           </div>
         </div>
@@ -356,7 +365,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
         >
           <div className="px-4">
             <div className="bg-white/60 rounded-3xl p-4 text-center">
-              <div className="text-sm text-gray-600">다음</div>
+              <div className="text-sm text-gray-600">{t('common.next')}</div>
             </div>
           </div>
         </div>

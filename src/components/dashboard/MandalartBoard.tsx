@@ -32,11 +32,7 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   onCellHover,
   showProgressStats = true
 }) => {
-  console.log('🎯 [MandalartBoard] 렌더링:');
-  console.log('  - centerCell:', centerCell?.id || 'null');
-  console.log('  - cells.length:', cells.length);
-  console.log('  - cells:', cells.map(c => `${c.id}(${c.topic})`).join(', '));
-  console.log('  - showProgressStats:', showProgressStats);
+  
   const handleCellClick = (cell: MandalartCell) => {
     // 빈 셀이면 새 셀 생성
     if (cell.id.startsWith('empty-')) {

@@ -19,13 +19,13 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
               bg-blue-50 text-blue-700
             `}
           >
-            {cell.topic || '무제 셀'}
+            {cell.topic || t('common.untitledCell')}
           </button>
         </React.Fragment>
       ));
     }
     
-    // 2뎁스 이상인 경우, 상위 셀과 현재 셀만 표시
+    // 최대 3개까지만 표시: 루트 > ... > 현재
     const parentCell = path[path.length - 2];
     const currentCell = path[path.length - 1];
     
@@ -35,7 +35,7 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
           onClick={() => onNavigate(parentCell.id)}
           className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100 transition-colors text-gray-700"
         >
-          ../{parentCell.topic || '무제 셀'}
+          ../{parentCell.topic || t('common.untitledCell')}
         </button>
         <span className="text-gray-400">/</span>
         <button

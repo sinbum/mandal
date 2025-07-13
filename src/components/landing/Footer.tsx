@@ -30,7 +30,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-2 text-gray-500">
               <Mail className="w-4 h-4" />
-              <span className="text-sm">support@mandalart.app</span>
+              <span className="text-sm">{t('contact.email')}</span>
             </div>
           </div>
 
@@ -45,7 +45,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  Login
+                  {t('nav.login')}
                 </Link>
               </li>
               <li>
@@ -97,9 +97,21 @@ export default function Footer() {
             </div>
             
             <div className="flex items-center gap-6 text-sm text-gray-600">
-              <span>Goal Achievement Rate 92%</span>
-              <span>1,000+ Users</span>
-              <span>Satisfaction 4.9/5</span>
+              <div className="text-sm">
+                <span className="font-medium">{t('stats.goalAchievementRate.label')}</span>
+                <br />
+                <span className="text-gray-400">{t('stats.goalAchievementRate.value')}</span>
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">{t('stats.activeUsers.label')}</span>
+                <br />
+                <span className="text-gray-400">{t('stats.activeUsers.value')}</span>
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">{t('stats.satisfaction.label')}</span>
+                <br />
+                <span className="text-gray-400">{t('stats.satisfaction.value')}</span>
+              </div>
             </div>
           </div>
         </div>

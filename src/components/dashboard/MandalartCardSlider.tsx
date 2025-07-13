@@ -26,6 +26,10 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  
+  // 번역 훅
+  const t = useTranslations('board');
+  const tCommon = useTranslations('common');
 
   // 디바이스 감지
   useEffect(() => {
@@ -133,8 +137,8 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
         <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
           <Plus className="w-8 h-8 text-gray-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">새 만다라트</h3>
-        <p className="text-sm text-gray-500">새로운 목표를 설정해보세요</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('newMandalart')}</h3>
+        <p className="text-sm text-gray-500">{t('createNewMandalartDescription')}</p>
       </div>
     </motion.div>
   );
@@ -197,7 +201,7 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
           {/* 스와이프 힌트 */}
           {totalItems > 1 && (
             <div className="text-center mt-4 text-sm text-gray-500">
-              {t('swipeHint')}
+              {tCommon('swipeHint')}
             </div>
           )}
         </div>
@@ -294,7 +298,7 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
           {/* 마우스 휠 힌트 */}
           {Math.ceil(totalItems / 3) > 1 && (
             <div className="text-center mt-4 text-sm text-gray-500">
-              {t('mouseWheelHint')}
+              {tCommon('mouseWheelHint')}
             </div>
           )}
         </div>

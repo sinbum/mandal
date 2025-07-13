@@ -19,8 +19,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
-
-  
+  // 로케일 별칭 처리 (jp → ja)
+  const pathname = request.nextUrl.pathname
+  if (pathname === '/jp' || pathname.startsWith('/jp/')) {
+    const newUrl = request.nextUrl.clone()
+    newUrl.pathname = pathname.replace(/^\/jp/, '/ja')
+    return NextResponse.redirect(newUrl)
+  }
 
   // 1. 먼저 i18n 미들웨어 실행 (로케일 감지 및 리다이렉트)
   const intlResponse = intlMiddleware(request);

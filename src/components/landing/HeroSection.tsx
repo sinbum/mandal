@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, CheckCircle } from 'lucide-react';
@@ -88,7 +87,7 @@ export default function HeroSection() {
                     { text: t('demoSection.examples.5'), color: 'bg-white border-gray-200' },
                     { text: t('demoSection.examples.6'), color: 'bg-white border-gray-200' },
                     { text: t('demoSection.examples.7'), color: 'bg-white border-gray-200' },
-                    { text: 'Resume', color: 'bg-white border-gray-200' }
+                    { text: t('demoSection.examples.8'), color: 'bg-white border-gray-200' }
                   ].map((item, i) => (
                     <div
                       key={i}

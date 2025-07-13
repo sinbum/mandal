@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { designUtils } from '@/design-system/utils';
+import { useTranslations } from 'next-intl';
 
 interface InputFieldProps {
   id: string;
@@ -65,6 +66,7 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const params = useParams();
   const locale = params?.locale as string || 'ko';
+  const t = useTranslations('common');
   // 오류 상태 결정
   const hasError = Boolean(error) || invalid;
   
@@ -111,7 +113,7 @@ const InputField: React.FC<InputFieldProps> = ({
       >
         {label}
         {required && !showRequired && (
-          <span className="sr-only">(필수)</span>
+          <span className="sr-only">{t('required')}</span>
         )}
       </label>
       

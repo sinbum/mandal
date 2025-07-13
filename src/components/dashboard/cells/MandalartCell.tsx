@@ -146,8 +146,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           <span className="text-gray-400 text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg leading-tight">
-            클릭하여<br/>추가
-          </span>
+            {t('cell.clickToAdd')}
+        </span>
         </div>
       </motion.div>
     );
@@ -307,8 +307,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
         )}
       >
         <span className="flex-grow flex items-center justify-center text-center p-1">
-          <span className="truncate max-w-full" title={topic || '클릭하여 입력하세요'}>
-            {topic || '클릭하여 입력하세요'}
+          <span className="truncate max-w-full" title={topic || t('cell.clickToEnter')}>
+            {topic || t('cell.clickToEnter')}
           </span>
         </span>
         
@@ -320,7 +320,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
               "bg-primary/20 text-primary",
               "dark:bg-primary/30 dark:text-primary-300"
             )}>
-              하위 셀 있음
+              {t('cell.hasSubCells')}
             </span>
           </div>
         )}
@@ -366,8 +366,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
                 onEdit(cell);
               }
             }}
-            aria-label="셀 편집"
-            title="셀 편집"
+            aria-label={t('cell.editCell')}
+            title={t('cell.editCell')}
           >
             <svg 
               className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 text-gray-600 dark:text-gray-400" 

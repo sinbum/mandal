@@ -52,17 +52,17 @@ export default function CTASection() {
               <div className="text-center">
                 <CheckCircle className="w-6 h-6 text-gray-400 mx-auto mb-3" />
                 <h4 className="font-medium text-white mb-2">{t('features.1')}</h4>
-                <p className="text-sm text-gray-400">Credit card required for instant start</p>
+                <p className="text-sm text-gray-400">{t('features.creditCard')}</p>
               </div>
               <div className="text-center">
                 <CheckCircle className="w-6 h-6 text-gray-400 mx-auto mb-3" />
                 <h4 className="font-medium text-white mb-2">{t('features.2')}</h4>
-                <p className="text-sm text-gray-400">Use all features without limitations</p>
+                <p className="text-sm text-gray-400">{t('features.fullFeatures')}</p>
               </div>
               <div className="text-center">
                 <CheckCircle className="w-6 h-6 text-gray-400 mx-auto mb-3" />
                 <h4 className="font-medium text-white mb-2">{t('features.3')}</h4>
-                <p className="text-sm text-gray-400">Stop anytime without burden</p>
+                <p className="text-sm text-gray-400">{t('features.cancelAnytime')}</p>
               </div>
             </div>
           </div>
@@ -72,14 +72,14 @@ export default function CTASection() {
             <p className="text-gray-400 text-sm mb-4">{t('social_proof')}</p>
             <div className="flex justify-center items-center gap-6 text-gray-300">
               <div className="text-sm">
-                <span className="font-medium">Goal Achievement Rate</span>
+                <span className="font-medium">{t('stats.goalAchievementRate.label')}</span>
                 <br />
-                <span className="text-gray-400">92%</span>
+                <span className="text-gray-400">{t('stats.goalAchievementRate.value')}</span>
               </div>
               <div className="text-sm">
-                <span className="font-medium">Active Users</span>
+                <span className="font-medium">{t('stats.activeUsers.label')}</span>
                 <br />
-                <span className="text-gray-400">1,000+</span>
+                <span className="text-gray-400">{t('stats.activeUsers.value')}</span>
               </div>
               <div className="text-sm">
                 <span className="font-medium">{t('satisfaction')}</span>

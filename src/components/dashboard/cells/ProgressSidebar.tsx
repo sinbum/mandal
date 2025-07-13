@@ -18,19 +18,19 @@ const ProgressSidebar: React.FC<ProgressSidebarProps> = ({ cells, className = ""
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
-      <h3 className="text-lg font-semibold mb-4">진행 상황</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('progress.title')}</h3>
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-4 h-4 bg-success rounded-full"></div>
-          <span className="text-sm">완료: {completedCount}개</span>
+          <span className="text-sm">{t('progress.completed', { count: completedCount })}</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-          <span className="text-sm">진행 중: {inProgressCount}개</span>
+          <span className="text-sm">{t('progress.inProgress', { count: inProgressCount })}</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-4 h-4 border-2 border-dashed border-gray-300 rounded-full"></div>
-          <span className="text-sm">비어있음: {emptyCount}개</span>
+          <span className="text-sm">{t('progress.empty', { count: emptyCount })}</span>
         </div>
       </div>
       

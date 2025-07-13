@@ -88,7 +88,7 @@ export async function generateMetadata({
       languages: {
         ko: '/ko',
         en: '/en',
-        jp: '/jp',
+        ja: '/ja',
       },
     },
   };

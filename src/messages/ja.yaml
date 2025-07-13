@@ -1,4 +1,4 @@
-# Japanese translation file
+# 일본어 번역 파일
 common:
   save: "保存"
   cancel: "キャンセル"
@@ -16,6 +16,41 @@ common:
   add: "追加"
   remove: "削除"
   update: "更新"
+  saving: "保存中..."
+  create: "作成"
+  enterMemo: "メモを入力"
+  high: "高"
+  medium: "中"
+  low: "低"
+  share: "共有"
+  copyData: "データをコピー"
+  viewStats: "統計を表示"
+  archive: "アーカイブ"
+  thisWeek: "今週"
+  overallProgress: "全体の進捗"
+  daysLeft: "残り日数"
+  lastUpdated: "最終更新"
+  completed: "完了"
+  favorites: "お気に入り"
+  export: "エクスポート"
+  menu: "メニュー"
+  swipeHint: "左右にスワイプしてナビゲート"
+  mouseWheelHint: "マウスホイールでナビゲート"
+
+board:
+  copySuccess: "データがコピーされました"
+  copyFailed: "データのコピーに失敗しました"
+  shareSuccess: "共有が完了しました"
+  shareFailed: "共有に失敗しました"
+  linkCopied: "リンクがコピーされました"
+  analyticsTitle: "{topic} 分析"
+  progressRate: "進捗率"
+  downloadSuccess: "ダウンロードが完了しました"
+  archiveSuccess: "アーカイブに追加されました"
+  alreadyArchived: "既にアーカイブされています"
+  newMandalart: "新しいマンダラート"
+  totalGoals: "総目標数"
+  createNewMandalartDescription: "新しい目標を設定し、夢を現実にしてみてください"
 
 slideUpPanel:
   releaseToClose: "↓ 離して閉じる"
@@ -116,6 +151,15 @@ mandalart:
     memoPlaceholder: "メモを入力（任意）"
     colorSelect: "色を選択"
     imageUpload: "画像をアップロード"
+    addMemo: "メモを追加"
+    hideMemo: "メモを隠す"
+    selectBackgroundColor: "背景色を選択"
+    enterCellTopic: "セルトピックを入力"
+    enterCellMemo: "セルメモを入力"
+    toggleCompletionStatus: "完了状態を切り替え"
+    cancelEdit: "セル編集をキャンセル"
+    createCell: "セルを作成"
+    saveCell: "セルを保存"
   navigation:
     goUp: "上に移動"
     goBack: "戻る"
@@ -144,6 +188,11 @@ settings:
     displayNamePlaceholder: "表示名を入力"
     updateSuccess: "プロフィールが更新されました"
     updateError: "プロフィールの更新に失敗しました"
+    loading: "プロフィール情報を読み込み中..."
+    bio: "自己紹介"
+    bioPlaceholder: "自己紹介を入力してください"
+    themeColor: "テーマカラー"
+    themeColorDescription: "選択した色がプロフィールカードにすぐに反映されます"
     editDialog:
       title: "プロフィール編集"
       description: "表示名を変更できます"
@@ -223,6 +272,7 @@ metadata:
 
 app:
   shortName: "マンダラート"
+  name: "マンウォル"
 
 dashboardLayout:
   title: "ダッシュボード"
@@ -244,19 +294,20 @@ landing:
     trustSignals:
       - "無料利用"
       - "簡単登録"
-      - "全機能利用可能"
+      - "全機能提供"
     demoSection:
       title: "マンダラート目標設定"
-      subtitle: "一つの目標を8つの領域に細分化"
+      subtitle: "1つの目標を8つの領域に細分化"
       examples:
-        - "技術力"
-        - "ネットワーキング"
-        - "ポートフォリオ"
-        - "面接準備"
-        - "就職成功"
-        - "キャリア開発"
-        - "自己啓発"
-        - "業務能力"
+        0: "技術力"
+        1: "ネットワーキング"
+        2: "ポートフォリオ"
+        3: "面接準備"
+        4: "就職成功"
+        5: "資格"
+        6: "プロジェクト"
+        7: "語学力"
+        8: "創造力"
   
   features:
     title: "体系的な目標達成"
@@ -264,18 +315,18 @@ landing:
     items:
       goal_breakdown:
         title: "目標分解"
-        description: "大きな目標を実行可能な小さな単位に体系的に分解します"
+        description: "大きな目標を小さく実行可能なステップに分けて体系的にアプローチできます"
       progress_tracking:
         title: "進捗追跡"
-        description: "各段階の進捗状況を視覚的に確認・管理できます"
+        description: "直感的なインターフェースで現在の進行状況を一目で把握し、管理できます"
       collaboration:
-        title: "コラボレーション機能"
-        description: "チームメンバーと目標を共有し、一緒に達成していけます"
+        title: "協働機能"
+        description: "チームメンバーと目標を共有し、一緒に達成していきながらモチベーションを維持できます"
       analytics:
         title: "成果分析"
-        description: "目標達成率とパターンを分析して改善点を見つけられます"
+        description: "目標達成パターンを分析して、より効果的な計画を立てられるようサポートします"
     cta:
-      start: "今すぐ始める"
+      start: "今すぐ始めてみてください"
       free: "無料で始める"
       cases: "成功事例を見る"
   
@@ -285,15 +336,15 @@ landing:
     items:
       - name: "金民秀"
         role: "フロントエンド開発者"
-        text: "マンダラートを使用してから目標が明確になり、実行力が大幅に向上しました。体系的なアプローチが本当に役立ちます。"
+        text: "マンダラートを使用した後、目標が明確になり実行力が大幅に向上しました。体系的なアプローチが本当に役立ちます。"
         achievement: "6ヶ月でシニア開発者に昇進"
       - name: "朴智英"
         role: "プロダクトマネージャー"
-        text: "複雑なプロジェクトも段階的に分けて管理するとずっと効率的です。チーム全体が同じ方向を向くようになりました。"
+        text: "複雑なプロジェクトも段階的に分けて管理するとはるかに効率的です。チーム全体が同じ方向を向くようになりました。"
         achievement: "プロジェクト成功率40%向上"
-      - name: "李俊浩"
+      - name: "李準浩"
         role: "起業家"
-        text: "スタートアップ運営にマンダラートを適用すると目標が具体化され、実行可能な計画が立てられました。"
+        text: "スタートアップ運営にマンダラートを適用したところ、目標が具体化され実行可能な計画が立てられました。"
         achievement: "事業目標90%達成"
       - name: "崔秀民"
         role: "マーケティング専門家"
@@ -313,32 +364,55 @@ landing:
   
   cta:
     title: "今すぐ始めましょう"
-    subtitle: "体系的な目標管理で夢を現実にしてみませんか"
+    subtitle: "体系的な目標管理で夢を現実にしてみてください"
     buttons:
       start: "無料で始める"
       login: "ログイン"
     features:
-      - "すべての機能を無料でご利用ください"
-      - "無料アカウント"
-      - "全機能"
-      - "いつでも解約可能"
-    social_proof: "1,000名以上のユーザーが目標を達成しています"
+      0: "無料ですべての機能をご利用ください"
+      1: "無料アカウント"
+      2: "すべての機能"
+      3: "いつでも解約"
+      creditCard: "クレジットカード不要"
+      fullFeatures: "全機能利用"
+      cancelAnytime: "いつでも解約"
+    social_proof: "1,000人以上のユーザーが目標を達成しています"
     satisfaction: "満足度"
+    stats:
+      goalAchievementRate:
+        label: "目標達成率"
+        value: "92%"
+      activeUsers:
+        label: "アクティブユーザー"
+        value: "1,000+"
   
   footer:
     brand_description: "体系的なマンダラート手法で目標を達成しましょう"
+    contact:
+      email: "お問い合わせ: contact@mandalart.com"
     nav:
       service: "サービス"
       resources: "リソース"
-      start_free: "無料で始める"
+      start_free: "無料開始"
       features: "機能紹介"
       success_stories: "成功事例"
+      login: "ログイン"
     links:
-      guide: "使用ガイド"
+      guide: "利用ガイド"
       faq: "よくある質問"
       privacy: "プライバシーポリシー"
-      terms: "利用規約"
-    copyright: "マンダラート. 全著作権保有"
+      terms: "サービス利用規約"
+    copyright: "マンダラート. 全ての権利保有"
+    stats:
+      goalAchievementRate:
+        label: "目標達成率"
+        value: "92%"
+      activeUsers:
+        label: "アクティブユーザー"
+        value: "1,000+"
+      satisfaction:
+        label: "満足度"
+        value: "98%"
 
 # PremiumMandalartCardSlider 翻訳
 slider:
@@ -352,8 +426,8 @@ slider:
       create: "作成"
       creating: "作成中..."
     card:
-      title: "新しいマンダラート作成"
-      description: "新しい目標を設定して\n夢を現実にしてみましょう"
+      title: "新しいマンダラートを作成"
+      description: "新しい目標を設定し\n夢を現実にしてみてください"
   navigation:
     previous: "前へ"
     next: "次へ"

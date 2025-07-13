@@ -5,7 +5,7 @@ common:
   delete: "Delete"
   edit: "Edit"
   loading: "Loading..."
-  error: "An error occurred"
+  error: "An error has occurred"
   success: "Success"
   confirm: "Confirm"
   close: "Close"
@@ -16,6 +16,41 @@ common:
   add: "Add"
   remove: "Remove"
   update: "Update"
+  saving: "Saving..."
+  create: "Create"
+  enterMemo: "Enter memo"
+  high: "High"
+  medium: "Medium"
+  low: "Low"
+  share: "Share"
+  copyData: "Copy Data"
+  viewStats: "View Stats"
+  archive: "Archive"
+  thisWeek: "This Week"
+  overallProgress: "Overall Progress"
+  daysLeft: "Days Left"
+  lastUpdated: "Last Updated"
+  completed: "Completed"
+  favorites: "Favorites"
+  export: "Export"
+  menu: "Menu"
+  swipeHint: "Swipe left or right to navigate"
+  mouseWheelHint: "Use mouse wheel to navigate"
+
+board:
+  copySuccess: "Data copied successfully"
+  copyFailed: "Failed to copy data"
+  shareSuccess: "Shared successfully"
+  shareFailed: "Failed to share"
+  linkCopied: "Link copied"
+  analyticsTitle: "{topic} Analytics"
+  progressRate: "Progress Rate"
+  downloadSuccess: "Download completed"
+  archiveSuccess: "Added to archive"
+  alreadyArchived: "Already archived"
+  newMandalart: "New Mandalart"
+  totalGoals: "Total Goals"
+  createNewMandalartDescription: "Set new goals and turn dreams into reality"
 
 slideUpPanel:
   releaseToClose: "↓ Release to close"
@@ -116,6 +151,15 @@ mandalart:
     memoPlaceholder: "Enter memo (optional)"
     colorSelect: "Select Color"
     imageUpload: "Upload Image"
+    addMemo: "Add Memo"
+    hideMemo: "Hide Memo"
+    selectBackgroundColor: "Select background color"
+    enterCellTopic: "Enter cell topic"
+    enterCellMemo: "Enter cell memo"
+    toggleCompletionStatus: "Toggle completion status"
+    cancelEdit: "Cancel cell edit"
+    createCell: "Create cell"
+    saveCell: "Save cell"
   navigation:
     goUp: "Go Up"
     goBack: "Go Back"
@@ -144,6 +188,11 @@ settings:
     displayNamePlaceholder: "Enter display name"
     updateSuccess: "Profile updated successfully"
     updateError: "Failed to update profile"
+    loading: "Loading profile information..."
+    bio: "Bio"
+    bioPlaceholder: "Enter your bio"
+    themeColor: "Theme Color"
+    themeColorDescription: "The selected color will be immediately reflected on the profile card"
     editDialog:
       title: "Edit Profile"
       description: "You can change your display name"
@@ -223,10 +272,7 @@ metadata:
 
 app:
   shortName: "Mandalart"
-
-dashboardLayout:
-  title: "Dashboard"
-  description: "Manage your Mandalart goals and track progress"
+  name: "Manwol"
 
 dashboardLayout:
   title: "Dashboard"
@@ -241,67 +287,68 @@ landing:
     title:
       part1: "Turn Goals"
       part2: "Into Reality"
-    subtitle: "Use systematic Mandalart methodology to break down big goals into small steps and achieve them consistently"
+    subtitle: "Break down big goals into small steps with systematic Mandalart methodology and achieve them consistently"
     cta:
       start: "Get Started"
       login: "Login"
     trustSignals:
       - "Free to Use"
-      - "Easy Signup"
-      - "All Features Included"
+      - "Easy Sign-up"
+      - "All Features"
     demoSection:
       title: "Mandalart Goal Setting"
-      subtitle: "Break down one goal into 8 focused areas"
+      subtitle: "Break down one goal into 8 areas"
       examples:
-        - "Technical Skills"
-        - "Networking"
-        - "Portfolio"
-        - "Interview Prep"
-        - "Job Success"
-        - "Career Development"
-        - "Self-Improvement"
-        - "Work Abilities"
+        0: "Technical Skills"
+        1: "Networking"
+        2: "Portfolio"
+        3: "Interview Prep"
+        4: "Job Success"
+        5: "Certificates"
+        6: "Projects"
+        7: "Language Skills"
+        8: "Creative Skills"
   
   features:
     title: "Systematic Goal Achievement"
-    subtitle: "Through Mandalart methodology, we provide an environment to clarify goals and execute them consistently"
+    subtitle: "Provides an environment to specify goals through Mandalart methodology and execute them consistently"
     items:
       goal_breakdown:
         title: "Goal Breakdown"
-        description: "Systematically break down big goals into actionable small units"
+        description: "Break down big goals into small, actionable steps for systematic approach"
       progress_tracking:
         title: "Progress Tracking"
-        description: "Visually check and manage progress at each stage"
+        description: "Manage and overview current progress with intuitive interface"
       collaboration:
-        title: "Collaboration Features"
-        description: "Share goals with team members and achieve them together"
+        title: "Collaboration"
+        description: "Share goals with team members and achieve them together while maintaining motivation"
       analytics:
         title: "Performance Analytics"
-        description: "Analyze goal achievement rates and patterns to find improvements"
+        description: "Analyze goal achievement patterns to help create more effective plans"
     cta:
       start: "Start Now"
-      free: "Start for Free"
+      free: "Start Free"
       cases: "View Success Stories"
   
   testimonials:
     title: "User Stories"
-    subtitle: "Check out real user experiences who achieved their goals with Mandalart"
+    subtitle: "Check out real user experiences who achieved goals with Mandalart"
     items:
-      - name: "Kim Minsu"
+      - name: "John Kim"
         role: "Frontend Developer"
-        text: "After using Mandalart, my goals became clearer and my execution improved greatly. The systematic approach is really helpful."
+        text: "After using Mandalart, my goals became clearer and my execution improved significantly. The systematic approach is really helpful."
         achievement: "Promoted to Senior Developer in 6 months"
-      - name: "Park Jiyoung"
+      - name: "Jane Park"
         role: "Product Manager"
-        text: "Managing complex projects step by step is much more efficient. The whole team now looks in the same direction."
+        text: "Even complex projects become much more efficient when broken down step by step. The whole team started looking in the same direction."
         achievement: "40% improvement in project success rate"
-      - name: "Lee Junho"
+      - name: "Mike Lee"
         role: "Entrepreneur"
-        text: "Applying Mandalart to startup operations helped clarify goals and create actionable plans."
+        text: "Applying Mandalart to startup operations helped specify goals and create actionable plans."
         achievement: "Achieved 90% of business goals"
-      - name: "Choi Sumin"
+      - name: "Sarah Choi"
         role: "Marketing Specialist"
-        text: "I'm satisfied that I can systematically manage everything from personal to work goals."
+        text: "I'm satisfied that I can systematically manage everything from personal goals to work goals."
         achievement: "2x increase in marketing performance"
     stats:
       title: "Mandalart Usage Statistics"
@@ -319,36 +366,59 @@ landing:
     title: "Start Now"
     subtitle: "Turn your dreams into reality with systematic goal management"
     buttons:
-      start: "Start for Free"
+      start: "Start Free"
       login: "Login"
     features:
-      - "Use all features for free"
-      - "Free Account"
-      - "All Features"
-      - "Cancel Anytime"
+      0: "Use all features for free"
+      1: "Free account"
+      2: "All features"
+      3: "Cancel anytime"
+      creditCard: "No credit card required"
+      fullFeatures: "Access all features"
+      cancelAnytime: "Cancel anytime"
     social_proof: "Over 1,000 users are achieving their goals"
     satisfaction: "Satisfaction"
+    stats:
+      goalAchievementRate:
+        label: "Goal Achievement Rate"
+        value: "92%"
+      activeUsers:
+        label: "Active Users"
+        value: "1,000+"
   
   footer:
     brand_description: "Achieve your goals with systematic Mandalart methodology"
+    contact:
+      email: "Contact: contact@mandalart.com"
     nav:
       service: "Service"
       resources: "Resources"
       start_free: "Start Free"
       features: "Features"
       success_stories: "Success Stories"
+      login: "Login"
     links:
       guide: "User Guide"
       faq: "FAQ"
       privacy: "Privacy Policy"
       terms: "Terms of Service"
     copyright: "Mandalart. All rights reserved"
+    stats:
+      goalAchievementRate:
+        label: "Goal Achievement Rate"
+        value: "92%"
+      activeUsers:
+        label: "Active Users"
+        value: "1,000+"
+      satisfaction:
+        label: "Satisfaction"
+        value: "98%"
 
 # PremiumMandalartCardSlider translations
 slider:
   create:
     title: "Create New Mandalart"
-    description: "Please enter the title for your Mandalart"
+    description: "Please enter the title of your Mandalart"
     form:
       title_label: "Title"
       title_placeholder: "New Mandalart"
@@ -357,10 +427,9 @@ slider:
       creating: "Creating..."
     card:
       title: "Create New Mandalart"
-      description: "Set new goals and
-turn dreams into reality"
+      description: "Set new goals and\nturn dreams into reality"
   navigation:
     previous: "Previous"
     next: "Next"
     swipeUpHint: "Swipe up"
-    swipeDownHint: "Swipe down"}
+    swipeDownHint: "Swipe down"

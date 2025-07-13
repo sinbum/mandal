@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MandalartCell } from '@/types/mandalart';
 import { 
   MoreVertical, 
@@ -24,7 +25,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
 
 interface MandalartCardDesktopProps {
   cell: MandalartCell;
@@ -44,6 +44,12 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
+  // 번역 함수들
+  const t = useTranslations('common');
+  const tBoard = useTranslations('board');
+  const tMandalart = useTranslations('mandalart');
+  const tCell = useTranslations('cell');
+
   // 진행률 계산 (실제 데이터 사용)
   const progress = cell.progressInfo?.progressPercentage || 0;
   const completedTasks = cell.progressInfo?.completedCells || 0;
@@ -53,7 +59,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const cellIdHash = cell.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const daysLeft = (cellIdHash % 30) + 1;
   const priorityIndex = cellIdHash % 3;
-  const priority = ['높음', '보통', '낮음'][priorityIndex];
+  const priority = [t('high'), t('medium'), t('low')][priorityIndex];
 
   // 색상 테마
   const getThemeColors = (color?: string) => {
@@ -98,10 +104,15 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
 
   const theme = getThemeColors(cell.color);
 
-  const priorityColors = {
-    '높음': 'text-red-600 bg-red-50',
-    '보통': 'text-yellow-600 bg-yellow-50',
-    '낮음': 'text-green-600 bg-green-50'
+  const getPriorityColors = (priority: string) => {
+    const highTerms = [t('high'), 'high', 'High', '높음', '高'];
+    const mediumTerms = [t('medium'), 'medium', 'Medium', '보통', '中'];
+    const lowTerms = [t('low'), 'low', 'Low', '낮음', '低'];
+    
+    if (highTerms.includes(priority)) return 'text-red-600 bg-red-50';
+    if (mediumTerms.includes(priority)) return 'text-yellow-600 bg-yellow-50';
+    if (lowTerms.includes(priority)) return 'text-green-600 bg-green-50';
+    return 'text-gray-600 bg-gray-50';
   };
 
   const handleCopyMandalart = () => {
@@ -114,36 +125,36 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
     
     navigator.clipboard.writeText(JSON.stringify(mandalartData, null, 2))
       .then(() => {
-        toast.success('만다라트 데이터가 클립보드에 복사되었습니다');
+        toast.success(tBoard('copySuccess'));
       })
       .catch(() => {
-        toast.error('복사에 실패했습니다');
+        toast.error(tBoard('copyFailed'));
       });
   };
 
   const handleShareMandalart = async () => {
     const shareData = {
-      title: `만다라트: ${cell.topic}`,
-      text: `${cell.topic} - 진행률: ${cell.progressInfo?.progressPercentage || 0}%`,
+      title: `${tMandalart('mandalart')}: ${cell.topic}`,
+      text: `${cell.topic} - ${tBoard('progressRate')}: ${cell.progressInfo?.progressPercentage || 0}%`,
       url: `${window.location.origin}/app/cell/${cell.id}`
     };
 
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        toast.success('공유가 완료되었습니다');
+        toast.success(tBoard('shareSuccess'));
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
-          toast.error('공유에 실패했습니다');
+          toast.error(tBoard('shareFailed'));
         }
       }
     } else {
       navigator.clipboard.writeText(shareData.url)
         .then(() => {
-          toast.success('링크가 클립보드에 복사되었습니다');
+          toast.success(tBoard('linkCopied'));
         })
         .catch(() => {
-          toast.error('공유에 실패했습니다');
+          toast.error(tBoard('shareFailed'));
         });
     }
   };
@@ -155,25 +166,25 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
     if (isFavorite) {
       const newFavorites = favorites.filter((id: string) => id !== cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(newFavorites));
-      toast.success('즐겨찾기에서 제거되었습니다');
+      toast.success(tMandalart('favorites.removed'));
     } else {
       favorites.push(cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
-      toast.success('즐겨찾기에 추가되었습니다');
+      toast.success(tMandalart('favorites.added'));
     }
   };
 
   const handleViewAnalytics = () => {
     const analyticsData = {
-      총목표: cell.progressInfo?.totalCells || 0,
-      완료된목표: cell.progressInfo?.completedCells || 0,
-      진행률: cell.progressInfo?.progressPercentage || 0
+      totalGoals: cell.progressInfo?.totalCells || 0,
+      completedGoals: cell.progressInfo?.completedCells || 0,
+      progressRate: cell.progressInfo?.progressPercentage || 0
     };
 
     toast.info(
-      `📊 ${cell.topic} 통계\n` +
-      `진행률: ${analyticsData.진행률}%\n` +
-      `완료: ${analyticsData.완료된목표}/${analyticsData.총목표}`,
+      `${tBoard('analyticsTitle', { topic: cell.topic })}\n` +
+      `${tBoard('progressRate')}: ${analyticsData.progressRate}%\n` +
+      `${tBoard('completed')}: ${analyticsData.completedGoals}/${analyticsData.totalGoals}`,
       { duration: 4000 }
     );
   };
@@ -203,7 +214,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    toast.success('만다라트 데이터가 다운로드되었습니다');
+    toast.success(tBoard('downloadSuccess'));
   };
 
   const handleArchiveMandalart = () => {
@@ -212,9 +223,9 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
     if (!archived.includes(cell.id)) {
       archived.push(cell.id);
       localStorage.setItem('archivedMandalarts', JSON.stringify(archived));
-      toast.success('만다라트가 보관되었습니다');
+      toast.success(tBoard('archiveSuccess'));
     } else {
-      toast.info('이미 보관된 만다라트입니다');
+      toast.info(tBoard('alreadyArchived'));
     }
   };
 
@@ -287,7 +298,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                   <Circle size={14} className="text-white" />
                 )}
                 <span className="text-xs text-white font-medium">
-                  {cell.isCompleted ? '완료' : '진행중'}
+                  {cell.isCompleted ? tCell('completed') : tCell('inProgress')}
                 </span>
               </motion.div>
 
@@ -298,7 +309,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                 transition={{ delay: index * 0.1 + 0.4 }}
                 className={cn(
                   "px-2 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm",
-                  priorityColors[priority as keyof typeof priorityColors]
+                  getPriorityColors(priority)
                 )}
               >
                 {priority}
@@ -346,7 +357,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                       >
                         <Edit3 size={14} />
-                        편집
+                        {t('edit')}
                       </button>
                       <button 
                         onClick={(e) => {
@@ -355,10 +366,10 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                      >
-                        <Copy size={14} />
-                        데이터 복사
-                      </button>
+                                              >
+                          <Copy size={14} />
+                          {t('copyData')}
+                        </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -366,10 +377,10 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                      >
-                        <Share size={14} />
-                        공유하기
-                      </button>
+                                              >
+                          <Share size={14} />
+                          {t('share')}
+                        </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -379,7 +390,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                       >
                         <Star size={14} />
-                        즐겨찾기
+                        {t('favorites')}
                       </button>
                       <button 
                         onClick={(e) => {
@@ -390,7 +401,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                       >
                         <BarChart3 size={14} />
-                        통계 보기
+                        {t('viewStats')}
                       </button>
                       <button 
                         onClick={(e) => {
@@ -399,10 +410,10 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-                      >
-                        <Download size={14} />
-                        내보내기
-                      </button>
+                                              >
+                          <Download size={14} />
+                          {t('export')}
+                        </button>
                       <div className="border-t border-gray-100 my-1"></div>
                       <button 
                         onClick={(e) => {
@@ -411,10 +422,10 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                           setShowActions(false);
                         }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
-                      >
-                        <Archive size={14} />
-                        보관하기
-                      </button>
+                                              >
+                          <Archive size={14} />
+                          {t('archive')}
+                        </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -461,7 +472,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
             {/* 제목과 설명 */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-gray-700 transition-colors">
-                {cell.topic || '새 만다라트'}
+                {cell.topic || tBoard('newMandalart')}
               </h3>
               {cell.memo && (
                 <p className="text-gray-600 mt-2 line-clamp-2 text-sm leading-relaxed">
@@ -475,29 +486,29 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
               <div className="text-center p-3 rounded-xl" style={{ backgroundColor: theme.light }}>
                 <Target size={16} className="mx-auto mb-1" style={{ color: theme.primary }} />
                 <div className="text-lg font-bold text-gray-900">{totalTasks}</div>
-                <div className="text-xs text-gray-500">총 목표</div>
+                <div className="text-xs text-gray-500">{tBoard('totalGoals')}</div>
               </div>
               <div className="text-center p-3 rounded-xl bg-green-50">
                 <CheckCircle2 size={16} className="mx-auto mb-1 text-green-600" />
                 <div className="text-lg font-bold text-green-600">{completedTasks}</div>
-                <div className="text-xs text-gray-500">완료</div>
+                <div className="text-xs text-gray-500">{t('completed')}</div>
               </div>
               <div className="text-center p-3 rounded-xl bg-orange-50">
                 <Clock size={16} className="mx-auto mb-1 text-orange-600" />
                 <div className="text-lg font-bold text-orange-600">{daysLeft}</div>
-                <div className="text-xs text-gray-500">일 남음</div>
+                <div className="text-xs text-gray-500">{t('daysLeft')}</div>
               </div>
               <div className="text-center p-3 rounded-xl bg-blue-50">
                 <TrendingUp size={16} className="mx-auto mb-1 text-blue-600" />
                 <div className="text-lg font-bold text-blue-600">+{Math.max(Math.floor(progress/10), 1)}</div>
-                <div className="text-xs text-gray-500">이번 주</div>
+                <div className="text-xs text-gray-500">{t('thisWeek')}</div>
               </div>
             </div>
 
             {/* 진행률 바 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 font-medium">전체 진행률</span>
+                <span className="text-gray-600 font-medium">{t('overallProgress')}</span>
                 <span className="font-bold" style={{ color: theme.primary }}>{progress}%</span>
               </div>
               
@@ -516,7 +527,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Calendar size={14} />
-                <span>최근 {(cellIdHash % 7) + 1}일 전</span>
+                <span>{t('lastUpdated', { days: (cellIdHash % 7) + 1 })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Star size={14} className="text-yellow-400 fill-current" />

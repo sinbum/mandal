@@ -11,6 +11,7 @@ import {
   BreadcrumbEllipsis,
 } from '@/components/ui/breadcrumb';
 import { MoreVertical, Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -31,12 +32,13 @@ interface MandalartBreadcrumbsProps {
  * 루트 셀부터 현재 셀까지의 경로를 표시합니다.
  * 경로가 4개 이상일 경우 처음과 마지막 두 개만 표시하고 나머지는 생략합니다.
  */
-const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({ 
-  path, 
-  onDeleteCell, 
+const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
+  path,
+  onDeleteCell,
   isDeleting = false,
   isLoading = false
 }) => {
+  const t = useTranslations('MandalartBreadcrumbs');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPathModalOpen, setIsPathModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -116,12 +118,12 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                   <div className="flex items-center">
                     {isLast ? (
                       <BreadcrumbPage>
-                        {cell.topic || '무제 셀'}
+                        {cell.topic || t('common.untitledCell')}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
                         <Link href={`/app/cell/${cell.id}`}>
-                          {cell.topic || '무제 셀'}
+                          {cell.topic || t('common.untitledCell')}
                         </Link>
                       </BreadcrumbLink>
                     )}
@@ -169,7 +171,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                   className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={16} className="mr-3" />
-                  {isDeleting ? '삭제 중...' : '셀 삭제'}
+                  {isDeleting ? t('common.deleting') : t('common.deleteCell')}
                 </button>
               </div>
             </div>
@@ -182,7 +184,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <div className="flex items-center justify-between">
-              <AlertDialogTitle>전체 경로</AlertDialogTitle>
+              <AlertDialogTitle>{t('common.fullPath')}</AlertDialogTitle>
               <button
                 onClick={() => setIsPathModalOpen(false)}
                 className="p-1 hover:bg-gray-100 rounded"
@@ -207,7 +209,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                     onClick={() => setIsPathModalOpen(false)}
                     className="text-blue-600 hover:text-blue-800 text-sm hover:underline flex-1"
                   >
-                    {cell.topic || '무제 셀'}
+                    {cell.topic || t('common.untitledCell')}
                   </Link>
                 </div>
               ))}
