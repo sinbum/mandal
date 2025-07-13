@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRightIcon, HomeIcon, EllipsisHorizontalIcon } from "@heroicons/react/20/solid"
+import { useTranslations } from 'next-intl'
 
 import { cn } from "@/lib/utils"
 
@@ -83,6 +84,8 @@ function BreadcrumbEllipsis({
   className,
   ...props
 }: React.ComponentProps<"span">) {
+  const t = useTranslations('common');
+  
   return (
     <span
       data-slot="breadcrumb-ellipsis"
@@ -92,7 +95,7 @@ function BreadcrumbEllipsis({
       {...props}
     >
       <EllipsisHorizontalIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
-      <span className="sr-only">More</span>
+      <span className="sr-only">{t('more')}</span>
     </span>
   )
 }
@@ -105,6 +108,7 @@ function BreadcrumbHome({
   asChild?: boolean
 }) {
   const Comp = asChild ? Slot : "a"
+  const t = useTranslations('navigation');
   
   return (
     <Comp
@@ -114,7 +118,7 @@ function BreadcrumbHome({
     >
       <div className="flex items-center">
         <HomeIcon aria-hidden="true" className="size-5 shrink-0" />
-        <span className="sr-only">Home</span>
+        <span className="sr-only">{t('home')}</span>
       </div>
     </Comp>
   )

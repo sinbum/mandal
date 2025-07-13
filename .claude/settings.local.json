@@ -32,8 +32,20 @@
       "Bash(true)",
       "Bash(cp:*)",
       "Bash(git restore:*)",
-      "Bash(timeout 10s npm run dev)"
+      "Bash(timeout 10s npm run dev)",
+      "mcp__task-master__initialize_project",
+      "mcp__task-master__get_tasks",
+      "mcp__task-master__parse_prd",
+      "mcp__task-master__add_task",
+      "mcp__task-master__next_task",
+      "mcp__task-master__get_task",
+      "mcp__task-master__set_task_status",
+      "mcp__task-master__models"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "task-master"
+  ]
 }

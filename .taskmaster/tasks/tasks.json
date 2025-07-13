@@ -1,0 +1,67 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "다국어 미들웨어 완성",
+        "description": "next-intl 미들웨어 설정을 완성하고 로케일 별칭 처리 개선",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "- locale alias 처리 개선\n- 미들웨어 최적화\n- 언어 감지 로직 보완",
+        "testStrategy": "미들웨어 단위 테스트 및 통합 테스트",
+        "subtasks": []
+      },
+      {
+        "id": "2",
+        "title": "UI 컴포넌트 다국어 적용",
+        "description": "모든 UI 컴포넌트에 번역 적용 및 언어별 폰트 최적화",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "details": "- 모든 텍스트 번역\n- 언어별 폰트 설정\n- RTL 언어 지원 검토",
+        "testStrategy": "각 언어별 UI 테스트",
+        "subtasks": []
+      },
+      {
+        "id": "3",
+        "title": "성능 최적화",
+        "description": "번들 크기 최적화 및 로딩 성능 개선",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "2"
+        ],
+        "details": "- 번들 분석\n- 코드 스플리팅\n- 이미지 최적화\n- 캐싱 전략",
+        "testStrategy": "성능 메트릭 측정 및 비교",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "다국어 미들웨어 완성",
+        "description": "next-intl 미들웨어 설정을 완성하고 로케일 별칭 처리 개선",
+        "details": "- i18n.ts 설정 파일 생성\n- next-intl 미들웨어 구현\n- 로케일 라우팅 설정\n- Supabase 미들웨어와 통합",
+        "testStrategy": "미들웨어 단위 테스트 및 통합 테스트",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-01-13T00:00:00Z",
+      "updated": "2025-07-13T07:14:44.940Z",
+      "tags": {
+        "master": {
+          "active": true,
+          "created": "2025-01-13T00:00:00Z",
+          "description": "Main development branch"
+        }
+      },
+      "currentTag": "master",
+      "description": "Tasks for master context"
+    }
+  }
+}

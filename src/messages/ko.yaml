@@ -34,6 +34,11 @@ common:
   favorites: "즐겨찾기"
   export: "내보내기"
   menu: "메뉴"
+  more: "더보기"
+  untitledCell: "제목 없음"
+  deleting: "삭제 중..."
+  deleteCell: "셀 삭제"
+  fullPath: "전체 경로"
   swipeHint: "좌우로 스와이프하여 탐색"
   mouseWheelHint: "마우스 휠로 탐색"
 
@@ -113,6 +118,7 @@ mandalart:
     remaining: "남은"
     lastUpdated: "최근 업데이트"
     active: "활성"
+  active: "활성"
   favorites:
     added: "즐겨찾기에 추가되었습니다"
     removed: "즐겨찾기에서 제거되었습니다"
@@ -417,6 +423,10 @@ landing:
 
 # PremiumMandalartCardSlider 번역
 slider:
+  common:
+    next: "다음"
+  swipeUpHint: "위로 스와이프"
+  swipeDownHint: "아래로 스와이프"
   create:
     title: "새 만다라트 만들기"
     description: "만다라트의 제목을 입력해주세요"
