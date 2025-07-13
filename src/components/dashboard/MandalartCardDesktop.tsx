@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { MandalartCell } from '@/types/mandalart';
 import { 
   MoreVertical, 
@@ -39,8 +38,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   onDelete,
   onEdit 
 }) => {
-  const params = useParams();
-  const locale = params.locale as string;
+  const locale = useLocale();
   const [isHovered, setIsHovered] = useState(false);
   const [showActions, setShowActions] = useState(false);
 

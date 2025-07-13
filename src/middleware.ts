@@ -28,16 +28,19 @@ export async function middleware(request: NextRequest) {
   }
 
   // 1. 먼저 i18n 미들웨어 실행 (로케일 감지 및 리다이렉트)
+  console.log('[Middleware] Original pathname:', request.nextUrl.pathname);
   const intlResponse = intlMiddleware(request);
   
   // i18n 미들웨어가 리다이렉트를 반환한 경우, 즉시 반환
   if (intlResponse && intlResponse.status !== 200) {
+    console.log('[Middleware] Intl redirect:', intlResponse.headers.get('location'));
     return intlResponse;
   }
 
   // 2. 로케일이 포함된 경로에서 공개 경로 확인
   const updatedPathname = request.nextUrl.pathname;
   const locale = updatedPathname.split('/')[1]; // /ko/auth/login -> ko
+  console.log('[Middleware] Detected locale:', locale, 'from path:', updatedPathname);
   
   // 로케일을 제거한 실제 경로
   const pathWithoutLocale = updatedPathname.replace(`/${locale}`, '') || '/';

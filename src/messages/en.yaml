@@ -99,6 +99,7 @@ dashboard:
     completionRate: "Completion Rate"
 
 mandalart:
+  active: "Active"
   board:
     title: "Mandalart Board"
     centerGoal: "Center Goal"
@@ -414,6 +415,23 @@ landing:
         label: "Satisfaction"
         value: "98%"
 
+# Progress status translations
+progress:
+  completed: "Completed"
+  inProgress: "In Progress"
+  empty: "Empty"
+
+# Progress rate translation
+progressRate: "Progress Rate"
+
+# Cell specific translations
+cell:
+  centerCellLabel: "Center Cell"
+  centerCellDescription: "This is the center cell. It cannot be edited."
+  gridPositionLabel: "Grid Position"
+  inProgress: "In Progress"
+  filledCellDescription: "Cell has content"
+
 # PremiumMandalartCardSlider translations
 slider:
   create:
@@ -428,6 +446,17 @@ slider:
     card:
       title: "Create New Mandalart"
       description: "Set new goals and\nturn dreams into reality"
+  board:
+    createNewMandalart: "Create New Mandalart"
+    createNewMandalartDescription: "Set new goals and turn dreams into reality"
+    enterMandalartTitle: "Enter Mandalart title"
+    newMandalart: "New Mandalart"
+  common:
+    previous: "Previous"
+    next: "Next"
+    cancel: "Cancel"
+    create: "Create"
+    title: "Title"
   navigation:
     previous: "Previous"
     next: "Next"

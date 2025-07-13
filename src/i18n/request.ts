@@ -17,7 +17,7 @@ export default getRequestConfig(async ({locale}) => {
       locale, // 검증된 로케일 사용
       messages,
       // 시간대 설정 (필요시)
-      timeZone: locale === 'jp' ? 'Asia/Tokyo' : 'Asia/Seoul',
+      timeZone: locale === 'ja' ? 'Asia/Tokyo' : 'Asia/Seoul',
       // 기본 날짜 형식
       formats: {
         dateTime: {

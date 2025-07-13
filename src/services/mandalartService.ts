@@ -552,7 +552,7 @@ export class MandalartService {
 
         // 3. 캐시 무효화 및 업데이트
         if (changedCell.change_type === 'created') {
-          console.log(`새 셀 캐시 추가: ${cell.id}`);
+          // console.log(`새 셀 캐시 추가: ${cell.id}`);
           cellCache.set(cell.id, cell, []);
         } else if (changedCell.change_type === 'updated') {
           console.log(`기존 셀 캐시 업데이트: ${cell.id}`);
@@ -754,7 +754,7 @@ export class MandalartService {
         })
       );
       
-      console.log('rootCells with children and progress', rootCellsWithChildrenAndProgress);
+      // console.log('rootCells with children and progress', rootCellsWithChildrenAndProgress);
       return rootCellsWithChildrenAndProgress;
     } catch (err) {
       console.error('사용자 셀과 자식들 조회 실패:', err);
@@ -860,7 +860,7 @@ export class MandalartService {
         })
       );
       
-      console.log('rootCells with children (optimized) and progress', rootCellsWithChildrenAndProgress);
+      // console.log('rootCells with children (optimized) and progress', rootCellsWithChildrenAndProgress);
       return rootCellsWithChildrenAndProgress;
     } catch (err) {
       console.error('사용자 셀과 자식들 조회 실패 (최적화):', err);

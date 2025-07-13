@@ -43,7 +43,7 @@ class AuthManager {
       
       // 인증 상태 변경 리스너 먼저 설정 (한 번만)
       this.supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        // console.log('Auth state changed:', event, session?.user?.id);
         this.user = session?.user || null;
         this.loading = false;
         this.notifyListeners();
@@ -55,7 +55,7 @@ class AuthManager {
       this.loading = false;
       this.initialized = true;
       
-      console.log('Auth 초기화 완료:', !!user);
+      // console.log('Auth 초기화 완료:', !!user);
       this.notifyListeners();
     } catch (error) {
       console.error('Auth initialization failed:', error);

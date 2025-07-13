@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { MandalartCell } from '@/types/mandalart';
 import {
   MoreVertical,
@@ -17,7 +17,7 @@ import {
   Star
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface MandalartCardProps {
   cell: MandalartCell;
@@ -28,10 +28,20 @@ interface MandalartCardProps {
 
 const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, onEdit }) => {
   const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string;
+  const locale = useLocale();
   const [showActions, setShowActions] = useState(false);
   const t = useTranslations('mandalart');
+  
+  // 디버깅 로그
+  React.useEffect(() => {
+    console.log('🔍 [MandalartCard] Debug Info:', {
+      locale,
+      cellId: cell.id,
+      activeTranslation: t('active'),
+      boardGoalsTranslation: t('board.goals'),
+      sampleMessage: t.has ? t.has('active') : 't.has not available'
+    });
+  }, [locale, t]);
 
   // 색상 테마
   const getThemeColors = (color?: string) => {
@@ -97,11 +107,11 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
     if (isFavorite) {
       const newFavorites = favorites.filter((id: string) => id !== cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(newFavorites));
-      toast.success(t('mandalart.favorites.removed'));
+      toast.success(t('favorites.removed'));
     } else {
       favorites.push(cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
-      toast.success(t('mandalart.favorites.added'));
+      toast.success(t('favorites.added'));
     }
   };
 

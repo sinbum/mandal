@@ -67,7 +67,7 @@ export default function HomePage() {
         // 로딩한 데이터를 캐시에 저장하여 셀 페이지에서 빠르게 접근 가능
         cellCache.populateFromRootCells(cells);
         
-        console.log('홈페이지 데이터 로딩 및 캐시 완료, 셀 개수:', cells.length);
+        // console.log('홈페이지 데이터 로딩 및 캐시 완료, 셀 개수:', cells.length);
       } catch (err) {
         console.error('데이터 로드 오류:', err);
         toast.error(t('empty.description'));

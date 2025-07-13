@@ -99,6 +99,7 @@ dashboard:
     completionRate: "完了率"
 
 mandalart:
+  active: "アクティブ"
   board:
     title: "マンダラートボード"
     centerGoal: "中心目標"
@@ -414,6 +415,23 @@ landing:
         label: "満足度"
         value: "98%"
 
+# Progress status translations
+progress:
+  completed: "完了"
+  inProgress: "進行中"
+  empty: "空"
+
+# Progress rate translation
+progressRate: "進捕率"
+
+# Cell specific translations
+cell:
+  centerCellLabel: "中央セル"
+  centerCellDescription: "これは中央セルです。編集はできません。"
+  gridPositionLabel: "グリッド位置"
+  inProgress: "進行中"
+  filledCellDescription: "セルに内容があります"
+
 # PremiumMandalartCardSlider 翻訳
 slider:
   create:
@@ -428,6 +446,17 @@ slider:
     card:
       title: "新しいマンダラートを作成"
       description: "新しい目標を設定し\n夢を現実にしてみてください"
+  board:
+    createNewMandalart: "新しいマンダラートを作成"
+    createNewMandalartDescription: "新しい目標を設定し、夢を現実にしてみてください"
+    enterMandalartTitle: "マンダラートのタイトルを入力してください"
+    newMandalart: "新しいマンダラート"
+  common:
+    previous: "前へ"
+    next: "次へ"
+    cancel: "キャンセル"
+    create: "作成"
+    title: "タイトル"
   navigation:
     previous: "前へ"
     next: "次へ"

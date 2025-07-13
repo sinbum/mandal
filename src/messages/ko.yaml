@@ -100,6 +100,7 @@ dashboard:
     completionRate: "완료율"
 
 mandalart:
+  active: "활성"
   board:
     title: "만다라트 보드"
     centerGoal: "중심 목표"
@@ -415,6 +416,23 @@ landing:
         label: "만족도"
         value: "98%"
 
+# Progress status translations
+progress:
+  completed: "완료"
+  inProgress: "진행 중"
+  empty: "비어있음"
+
+# Progress rate translation
+progressRate: "진행률"
+
+# Cell specific translations
+cell:
+  centerCellLabel: "중앙 셀"
+  centerCellDescription: "중앙 셀입니다. 편집할 수 없습니다."
+  gridPositionLabel: "그리드 위치"
+  inProgress: "진행 중"
+  filledCellDescription: "셀에 내용이 있습니다"
+
 # PremiumMandalartCardSlider 번역
 slider:
   create:
@@ -429,6 +447,17 @@ slider:
     card:
       title: "새 만다라트 만들기"
       description: "새로운 목표를 설정하고\n꿈을 현실로 만들어보세요"
+  board:
+    createNewMandalart: "새 만다라트 만들기"
+    createNewMandalartDescription: "새로운 목표를 설정하고 꿈을 현실로 만들어보세요"
+    enterMandalartTitle: "만다라트 제목을 입력하세요"
+    newMandalart: "새 만다라트"
+  common:
+    previous: "이전"
+    next: "다음"
+    cancel: "취소"
+    create: "생성"
+    title: "제목"
   navigation:
     previous: "이전"
     next: "다음"

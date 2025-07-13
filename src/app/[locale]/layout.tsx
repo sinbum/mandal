@@ -116,7 +116,7 @@ export default async function LocaleLayout({
   }
 
   // 해당 로케일의 메시지 가져오기
-  const messages = await getMessages();
+  const messages = await getMessages({locale});
   
   const fontClassName = getFontClassName(locale);
 
@@ -124,7 +124,7 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning={true}>
       <head></head>
       <body className={`app-body ${fontClassName}`} suppressHydrationWarning={true}>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleProvider>
             <BrowserCompatibilityProvider />
             <Toaster position="top-center" />

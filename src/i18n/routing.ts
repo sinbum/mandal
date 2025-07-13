@@ -7,8 +7,8 @@ export const routing = defineRouting({
   // 기본 로케일 (한국어)
   defaultLocale: 'ko',
   
-  // 로케일 감지 방식
-  localeDetection: true,
+  // 로케일 감지 방식 (URL 기반으로만 감지)
+  localeDetection: false,
   
   // 기본 로케일 경로에서 prefix 제거 
   localePrefix: 'always',

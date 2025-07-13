@@ -52,7 +52,7 @@ class CellCache {
       
       request.onsuccess = () => {
         this.db = request.result;
-        console.log('IndexedDB 영구 캐시 활성화');
+        // console.log('IndexedDB 영구 캐시 활성화');
       };
       
       request.onupgradeneeded = (event) => {
@@ -299,24 +299,24 @@ class CellCache {
    * 홈페이지에서 로딩한 루트 셀들과 자식들을 캐시에 저장
    */
   populateFromRootCells(rootCells: MandalartCell[]): void {
-    console.log('캐시 채우기 시작:', rootCells.length, '개의 루트 셀');
+    // console.log('캐시 채우기 시작:', rootCells.length, '개의 루트 셀');
     
     rootCells.forEach(rootCell => {
       const children = rootCell.children || [];
       
       // 루트 셀 캐시
       this.set(rootCell.id, rootCell, children);
-      console.log(`루트 셀 캐시됨: ${rootCell.id}, 자식 개수: ${children.length}`);
+      // console.log(`루트 셀 캐시됨: ${rootCell.id}, 자식 개수: ${children.length}`);
       
       // 자식 셀들도 개별적으로 캐시 (빈 자식 배열로)
       children.forEach(child => {
         this.set(child.id, child, []);
-        console.log(`자식 셀 캐시됨: ${child.id}`);
+        // console.log(`자식 셀 캐시됨: ${child.id}`);
       });
     });
     
     this.ensureCacheInitialized();
-    console.log('캐시 채우기 완료, 총 캐시된 항목:', this.cache.size);
+    // console.log('캐시 채우기 완료, 총 캐시된 항목:', this.cache.size);
   }
 
   /**
