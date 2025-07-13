@@ -12,6 +12,8 @@ export interface MandalartCell {
   depth: number;
   position: number;
   mandalartId?: string; // 셀이 속한 만다라트 ID
+  createdAt?: string; // 생성 시간
+  updatedAt?: string; // 수정 시간
   children?: MandalartCell[]; // 자식 셀 목록 (UI를 위해 확장)
   // 진행률 관련 정보 (루트 셀에만 적용)
   progressInfo?: {

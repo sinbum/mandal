@@ -48,7 +48,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const t = useTranslations('common');
   const tBoard = useTranslations('board');
   const tMandalart = useTranslations('mandalart');
-  const tCell = useTranslations('cell');
+  const tCell = useTranslations('mandalart.cell');
 
   // 진행률 계산 (실제 데이터 사용)
   const progress = cell.progressInfo?.progressPercentage || 0;
