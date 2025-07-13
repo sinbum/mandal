@@ -266,7 +266,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, on
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
                   <Target size={14} className="text-gray-400" />
-                  <span className="text-gray-600">{t('cell.progress')}</span>
+                  <span className="text-gray-600">{t('cell.progressRate')}</span>
                 </div>
                 <span className="font-semibold text-gray-900">{progress}%</span>
               </div>

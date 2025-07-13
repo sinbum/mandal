@@ -18,6 +18,7 @@ common:
   update: "更新"
   saving: "保存中..."
   create: "作成"
+  creating: "作成中..."
   enterMemo: "メモを入力"
   high: "高"
   medium: "中"
@@ -36,6 +37,7 @@ common:
   menu: "メニュー"
   swipeHint: "左右にスワイプしてナビゲート"
   mouseWheelHint: "マウスホイールでナビゲート"
+  empty: "空"
 
 board:
   copySuccess: "データがコピーされました"
@@ -88,6 +90,7 @@ dashboard:
   createNew: "新しいマンダラートを作成"
   recentBoards: "最近のボード"
   allBoards: "すべてのボード"
+  deleteConfirmation: "本当にこのマンダラートを削除しますか？この操作は元に戻すことができません。"
   empty:
     title: "まだマンダラートがありません"
     description: "最初のマンダラートを作成して目標を体系的に管理しましょう"
@@ -100,6 +103,8 @@ dashboard:
 
 mandalart:
   active: "アクティブ"
+  common:
+    overallProgress: "全体進捗"
   board:
     title: "マンダラートボード"
     centerGoal: "中心目標"
@@ -121,13 +126,13 @@ mandalart:
     memo: "メモ"
     completed: "完了"
     inProgress: "進行中"
-    progress: "進捗"
     completedTasks: "{completed}/{total} 完了"
     edit: "セルを編集"
     delete: "セルを削除"
     addChild: "サブセルを追加"
     addHint: "クリックして新しいセルを追加"
     addHintShort: "クリックして<br/>追加"
+    addCellHint: "クリックして新しいセルを追加"
     addAriaLabel: "マンダラートセルを追加"
     cellAriaLabel: "マンダラートセル: {topic}"
     hasChildren: "サブセルあり"
@@ -136,6 +141,7 @@ mandalart:
     empty: "空"
     centerDescription: "これは中央セルです。編集はできません。"
     emptyDescription: "このセルは空です。クリックして新しいコンテンツを追加してください。"
+    emptyCellDescription: "このセルは空です。クリックして新しいコンテンツを追加してください。"
     content: "内容"
     created: "新しいセルが作成されました"
     saved: "セルが保存されました"
@@ -147,6 +153,32 @@ mandalart:
     noTitle: "タイトルなし"
     deleteConfirm: "'{title}' セルを削除しますか？\n\nこの操作は元に戻すことができず、すべてのサブセルも一緒に削除されます."
     deleteConfirmCurrent: "本当にこのセルを削除しますか？\n\nこの操作は元に戻すことができず、すべてのサブセルも一緒に削除されます."
+    # Progress related keys
+    progress:
+      title: "進捗状況"
+      completed: "完了 {count}個"
+      inProgress: "進行中 {count}個"
+      empty: "空 {count}個"
+    progressRate: "進捗率"
+    # Grid and cell labels
+    centerCellLabel: "中央セル: {topic}"
+    centerCellDescription: "これは中央セルです。編集はできません。"
+    gridPositionLabel: "グリッド位置 {index}: {topic}"
+    filledCellDescription: "内容があるセル: {topic}、状態: {status}"
+    # Actions
+    editCell: "セルを編集"
+    createNewCell: "新しいセルを作成"
+    clickToEnter: "クリックして入力"
+    clickToAdd: "クリックして追加"
+    # Sub-cells
+    hasSubCells: "サブセルあり"
+    # Completion actions
+    cancelCompletion: "完了をキャンセル"
+    # Form related keys
+    topicEnterHint: "トピックを入力"
+    # Common namespace for shared values
+    common:
+      empty: "空"
   form:
     topicPlaceholder: "トピックを入力"
     memoPlaceholder: "メモを入力（任意）"
@@ -266,6 +298,14 @@ loading:
   deleting: "削除中..."
   uploading: "アップロード中..."
   settings: "設定を読み込み中..."
+
+# MandalartBreadcrumbs 翻訳
+MandalartBreadcrumbs:
+  common:
+    untitledCell: "タイトルなしセル"
+    deleting: "削除中..."
+    deleteCell: "セルを削除"
+    fullPath: "完全パス"
 
 metadata:
   title: "マンダラートプランナー"
@@ -415,22 +455,6 @@ landing:
         label: "満足度"
         value: "98%"
 
-# Progress status translations
-progress:
-  completed: "完了"
-  inProgress: "進行中"
-  empty: "空"
-
-# Progress rate translation
-progressRate: "進捕率"
-
-# Cell specific translations
-cell:
-  centerCellLabel: "中央セル"
-  centerCellDescription: "これは中央セルです。編集はできません。"
-  gridPositionLabel: "グリッド位置"
-  inProgress: "進行中"
-  filledCellDescription: "セルに内容があります"
 
 # PremiumMandalartCardSlider 翻訳
 slider:
@@ -460,5 +484,5 @@ slider:
   navigation:
     previous: "前へ"
     next: "次へ"
-    swipeUpHint: "上にスワイプ"
-    swipeDownHint: "下にスワイプ"
+  swipeUpHint: "上にスワイプ"
+  swipeDownHint: "下にスワイプ"

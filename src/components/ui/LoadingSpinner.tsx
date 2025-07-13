@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -12,11 +13,10 @@ interface LoadingSpinnerProps {
  */
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   size = 'md', 
-  message = '로딩 중...',
-}) => {
-  const t = useTranslations('common'); 
+  message,
   fullScreen = true 
 }) => {
+  const t = useTranslations('common');
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',

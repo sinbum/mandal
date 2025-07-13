@@ -86,10 +86,17 @@ export default function HomePage() {
         try {
           const cells = await mandalartAPI.fetchUserCellsWithChildrenOptimized();
           
-          // 생성 시간 기준으로 정렬 (최신순)
+          // 생성 시간 기준으로 정렬 (최신순), createdAt가 없으면 ID로 대체
           const sortedCells = [...cells].sort((a, b) => {
-            const dateA = new Date(a.createdAt || 0).getTime();
-            const dateB = new Date(b.createdAt || 0).getTime();
+            // createdAt가 있으면 사용, 없으면 현재 시간 또는 ID 기준으로 fallback
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            
+            // 둘 다 createdAt가 없으면 ID로 비교 (최신 ID가 더 큰 경우)
+            if (dateA === 0 && dateB === 0) {
+              return b.id.localeCompare(a.id);
+            }
+            
             return dateB - dateA; // 내림차순 (최신이 먼저)
           });
           

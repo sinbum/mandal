@@ -46,7 +46,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   const t = useTranslations('common');
   const tBoard = useTranslations('board');
   const tMandalart = useTranslations('mandalart');
-  const tCell = useTranslations('cell');
+  const tCell = useTranslations('mandalart');
 
   // 진행률 계산 (실제 데이터 사용)
   const progress = cell.progressInfo?.progressPercentage || 0;
@@ -296,7 +296,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
                   <Circle size={14} className="text-white" />
                 )}
                 <span className="text-xs text-white font-medium">
-                  {cell.isCompleted ? tCell('completed') : tCell('inProgress')}
+                  {cell.isCompleted ? tCell('cell.completed') : tCell('cell.inProgress')}
                 </span>
               </motion.div>
 

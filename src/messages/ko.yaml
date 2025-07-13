@@ -18,7 +18,8 @@ common:
   update: "업데이트"
   saving: "저장 중..."
   create: "생성"
-  enterMemo: "메모를 입력하세요"
+  creating: "생성 중..."
+  enterMemo: "멤모를 입력하세요"
   high: "높음"
   medium: "보통"
   low: "낮음"
@@ -36,6 +37,7 @@ common:
   menu: "메뉴"
   swipeHint: "좌우로 스와이프하여 탐색"
   mouseWheelHint: "마우스 휠로 탐색"
+  empty: "비어있음"
 
 board:
   copySuccess: "데이터가 복사되었습니다"
@@ -101,6 +103,8 @@ dashboard:
 
 mandalart:
   active: "활성"
+  common:
+    overallProgress: "전체 진행률"
   board:
     title: "만다라트 보드"
     centerGoal: "중심 목표"
@@ -122,13 +126,13 @@ mandalart:
     memo: "메모"
     completed: "완료"
     inProgress: "진행 중"
-    progress: "진행률"
     completedTasks: "{completed}/{total} 완료"
     edit: "셀 편집"
     delete: "셀 삭제"
     addChild: "하위 셀 추가"
     addHint: "클릭하여 새 셀을 추가하세요"
     addHintShort: "클릭하여<br/>추가"
+    addCellHint: "클릭하여 새 셀을 추가하세요"
     addAriaLabel: "만다라트 셀 추가"
     cellAriaLabel: "만다라트 셀: {topic}"
     hasChildren: "하위 셀 있음"
@@ -137,6 +141,7 @@ mandalart:
     empty: "비어있음"
     centerDescription: "중앙 셀입니다. 이 셀은 편집할 수 없습니다."
     emptyDescription: "빈 셀입니다. 클릭하여 새 내용을 추가하세요."
+    emptyCellDescription: "빈 셀입니다. 클릭하여 새 내용을 추가하세요."
     content: "셀 내용"
     created: "새 셀이 생성되었습니다"
     saved: "셀이 저장되었습니다"
@@ -148,6 +153,32 @@ mandalart:
     noTitle: "제목 없음"
     deleteConfirm: "'{title}' 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다."
     deleteConfirmCurrent: "정말로 이 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다."
+    # Progress related keys
+    progress:
+      title: "진행 상황"
+      completed: "완료 {count}개"
+      inProgress: "진행 중 {count}개"
+      empty: "비어있음 {count}개"
+    progressRate: "진행률"
+    # Grid and cell labels
+    centerCellLabel: "중앙 셀: {topic}"
+    centerCellDescription: "중앙 셀입니다. 편집할 수 없습니다."
+    gridPositionLabel: "그리드 위치 {index}: {topic}"
+    filledCellDescription: "내용이 있는 셀: {topic}, 상태: {status}"
+    # Actions
+    editCell: "셀 편집"
+    createNewCell: "새 셀 만들기"
+    clickToEnter: "클릭하여 입력"
+    clickToAdd: "클릭하여 추가"
+    # Sub-cells
+    hasSubCells: "하위 셀 있음"
+    # Completion actions
+    cancelCompletion: "완료 취소"
+    # Form related keys  
+    topicEnterHint: "주제를 입력하세요"
+    # Common namespace for shared values
+    common:
+      empty: "비어있음"
   form:
     topicPlaceholder: "주제를 입력하세요"
     memoPlaceholder: "메모를 입력하세요 (선택사항)"
@@ -267,6 +298,14 @@ loading:
   deleting: "삭제 중..."
   uploading: "업로드 중..."
   settings: "설정을 불러오는 중..."
+
+# MandalartBreadcrumbs 번역
+MandalartBreadcrumbs:
+  common:
+    untitledCell: "제목 없는 셀"
+    deleting: "삭제 중..."
+    deleteCell: "셀 삭제"
+    fullPath: "전체 경로"
 
 metadata:
   title: "만다라트 플래너"
@@ -416,22 +455,6 @@ landing:
         label: "만족도"
         value: "98%"
 
-# Progress status translations
-progress:
-  completed: "완료"
-  inProgress: "진행 중"
-  empty: "비어있음"
-
-# Progress rate translation
-progressRate: "진행률"
-
-# Cell specific translations
-cell:
-  centerCellLabel: "중앙 셀"
-  centerCellDescription: "중앙 셀입니다. 편집할 수 없습니다."
-  gridPositionLabel: "그리드 위치"
-  inProgress: "진행 중"
-  filledCellDescription: "셀에 내용이 있습니다"
 
 # PremiumMandalartCardSlider 번역
 slider:
@@ -461,6 +484,6 @@ slider:
   navigation:
     previous: "이전"
     next: "다음"
-    swipeUpHint: "위로 스와이프"
-    swipeDownHint: "아래로 스와이프"
+  swipeUpHint: "위로 스와이프"
+  swipeDownHint: "아래로 스와이프"
 

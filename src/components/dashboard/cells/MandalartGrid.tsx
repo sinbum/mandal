@@ -53,6 +53,8 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   gridTitle = "만다라트 그리드",
   showProgressStats = true
 }) => {
+  const t = useTranslations('mandalart');
+
   // 키보드 네비게이션을 위한 포커스 상태
   const [focusedCellIndex, setFocusedCellIndex] = useState<number | null>(null);
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
@@ -152,7 +154,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     // 중앙 셀은 클릭할 수 없음
     if (cellIndex === 4) return;
     
-    const targetPosition = gridToPosition[cellIndex];
+    const targetPosition = gridToPosition[cellIndex as keyof typeof gridToPosition];
     if (targetPosition === null) return;
     
     const displayCell = sortedCells.find(cell => cell.position === targetPosition) || 
@@ -171,7 +173,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
     // 중앙 셀은 호버 처리하지 않음
     if (cellIndex === 4) return;
     
-    const targetPosition = gridToPosition[cellIndex];
+    const targetPosition = gridToPosition[cellIndex as keyof typeof gridToPosition];
     if (targetPosition === null) return;
     
     const displayCell = sortedCells.find(cell => cell.position === targetPosition) || 
@@ -215,7 +217,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
               gridIndex={index}
               touchOptimized={touchOptimized}
               animationEnabled={animationEnabled}
-              aria-label={t('cell.centerCellLabel', { topic: centerCell.topic || t('common.empty') })}
+              aria-label={t('cell.centerCellLabel', { topic: centerCell.topic || t('cell.common.empty') })}
               aria-describedby={`center-cell-description`}
             />
             {/* 중앙 셀 설명 (스크린 리더용) */}
@@ -227,7 +229,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
       }
       
       // 해당 그리드 위치의 position 값 가져오기
-      const targetPosition = gridToPosition[index];
+      const targetPosition = gridToPosition[index as keyof typeof gridToPosition];
       
       // position에 해당하는 셀 찾기
       const displayCell = sortedCells.find(cell => cell.position === targetPosition) || 
@@ -257,7 +259,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             gridIndex={index}
             touchOptimized={touchOptimized}
             animationEnabled={animationEnabled}
-            aria-label={t('cell.gridPositionLabel', { index: index + 1, topic: displayCell.topic || t('common.empty') })}
+            aria-label={t('cell.gridPositionLabel', { index: index + 1, topic: displayCell.topic || t('cell.common.empty') })}
             aria-describedby={`cell-${index}-description`}
           />
           {/* 셀 설명 (스크린 리더용) */}
@@ -317,22 +319,22 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-success rounded-full"></div>
-                <span>{t('progress.completed', { count: cells.filter(cell => cell.isCompleted).length })}</span>
+                <span>{t('cell.progress.completed', { count: cells.filter(cell => cell.isCompleted).length })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-gray-300 rounded-full"></div>
-                <span>{t('progress.inProgress', { count: cells.filter(cell => !cell.isCompleted && cell.topic).length })}</span>
+                <span>{t('cell.progress.inProgress', { count: cells.filter(cell => !cell.isCompleted && cell.topic).length })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] border-2 border-dashed border-gray-300 rounded-full"></div>
-                <span>{t('progress.empty', { count: 8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length })}</span>
+                <span>{t('cell.progress.empty', { count: 8 - cells.filter(cell => cell.topic && cell.topic.trim() !== '').length })}</span>
               </div>
             </div>
             
             {/* 진행률 표시 */}
             <div className="mt-4 pt-2 sm:mt-4 max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
               <div className="flex items-center justify-between text-xs sm:text-[clamp(0.75rem,1.2vw,1.25rem)] text-muted-foreground mb-1 sm:mb-[0.5vh]">
-                <span>{t('progressRate')}</span>
+                <span>{t('cell.progressRate')}</span>
                 <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 sm:h-[clamp(0.5rem,1vh,1.5rem)]">

@@ -53,6 +53,7 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
   isHighlighted = false,
 }) => {
   const { topic, color, imageUrl, isCompleted } = cell || {};
+  const t = useTranslations('mandalart');
   
   // 빈 셀인 경우 (id가 empty- 로 시작)
   const isEmpty = cell?.id?.startsWith('empty-');
@@ -427,8 +428,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
                 onToggleComplete();
               }
             }}
-            aria-label={isCompleted ? t('cancelCompletion') : t('markAsCompleted')}
-            title={isCompleted ? t('cancelCompletion') : t('markAsCompleted')}
+            aria-label={isCompleted ? t('cell.cancelCompletion') : t('cell.markAsCompleted')}
+            title={isCompleted ? t('cell.cancelCompletion') : t('cell.markAsCompleted')}
           >
             <svg 
               className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" 

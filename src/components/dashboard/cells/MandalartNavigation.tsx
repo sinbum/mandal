@@ -6,6 +6,8 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
   path, 
   onNavigate 
 }) => {
+  const t = useTranslations('mandalart');
+
   // 수정된 방식의 브레드크럼 렌더링
   const renderBreadcrumbs = () => {
     // 경로가 없거나 한 개만 있으면 그대로 표시 (루트 경로)
@@ -19,7 +21,7 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
               bg-blue-50 text-blue-700
             `}
           >
-            {cell.topic || t('common.untitledCell')}
+            {cell.topic || t('cell.noTitle')}
           </button>
         </React.Fragment>
       ));
@@ -35,14 +37,14 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
           onClick={() => onNavigate(parentCell.id)}
           className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100 transition-colors text-gray-700"
         >
-          ../{parentCell.topic || t('common.untitledCell')}
+          ../{parentCell.topic || t('cell.noTitle')}
         </button>
         <span className="text-gray-400">/</span>
         <button
           onClick={() => onNavigate(currentCell.id)}
           className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100 transition-colors bg-blue-50 text-blue-700"
         >
-          {currentCell.topic || t('untitledCell')}
+          {currentCell.topic || t('cell.noTitle')}
         </button>
       </>
     );

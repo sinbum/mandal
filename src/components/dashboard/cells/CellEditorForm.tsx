@@ -23,6 +23,8 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
   onCancel,
   isNewCell = false,
 }) => {
+  const t = useTranslations('mandalart');
+
   const [topic, setTopic] = useState(cell.topic || '');
   const [memo, setMemo] = useState(cell.memo || '');
   const [color, setColor] = useState(cell.color || '');
@@ -229,7 +231,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
             <CardHeader className="mb-4 relative">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">
-                  {isNewCell ? t('createNewCell') : t('editCell')}
+                  {isNewCell ? t('cell.createNewCell') : t('cell.editCell')}
                 </CardTitle>
                 {/* 색상 선택 동그라미 버튼 */}
                 <div className="relative" ref={colorPickerRef}>
