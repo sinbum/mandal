@@ -29,13 +29,15 @@ export default function LandingPageClient({ locale, translations }: LandingPageC
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [appName, setAppName] = useState('Mandalart');
   const router = useRouter();
   const supabase = createClient();
 
   // 하이드레이션 완료 추적
   useEffect(() => {
     setIsHydrated(true);
-  }, []);
+    setAppName(translations.appName);
+  }, [translations.appName]);
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function LandingPageClient({ locale, translations }: LandingPageC
                 height={32} 
                 className="rounded"
               />
-              <span className="text-xl font-bold text-gray-900">{translations.appName}</span>
+              <span className="text-xl font-bold text-gray-900">{appName}</span>
             </div>
             
             <div className="flex items-center space-x-4">

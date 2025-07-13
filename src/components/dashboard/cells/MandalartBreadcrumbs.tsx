@@ -38,8 +38,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
   isDeleting = false,
   isLoading = false
 }) => {
-  const t = useTranslations('common');
-  const tMandalart = useTranslations('mandalart');
+  const t = useTranslations('MandalartBreadcrumbs');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPathModalOpen, setIsPathModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -119,12 +118,12 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                   <div className="flex items-center">
                     {isLast ? (
                       <BreadcrumbPage>
-                        {cell.topic || t('untitledCell')}
+                        {cell.topic || t('common.untitledCell')}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
                         <Link href={`/app/cell/${cell.id}`}>
-                          {cell.topic || t('untitledCell')}
+                          {cell.topic || t('common.untitledCell')}
                         </Link>
                       </BreadcrumbLink>
                     )}
@@ -172,7 +171,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                   className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={16} className="mr-3" />
-                  {isDeleting ? t('deleting') : t('deleteCell')}
+                  {isDeleting ? t('common.deleting') : t('common.deleteCell')}
                 </button>
               </div>
             </div>
@@ -185,7 +184,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <div className="flex items-center justify-between">
-              <AlertDialogTitle>{t('fullPath')}</AlertDialogTitle>
+              <AlertDialogTitle>{t('common.fullPath')}</AlertDialogTitle>
               <button
                 onClick={() => setIsPathModalOpen(false)}
                 className="p-1 hover:bg-gray-100 rounded"
@@ -210,7 +209,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
                     onClick={() => setIsPathModalOpen(false)}
                     className="text-blue-600 hover:text-blue-800 text-sm hover:underline flex-1"
                   >
-                    {cell.topic || t('untitledCell')}
+                    {cell.topic || t('common.untitledCell')}
                   </Link>
                 </div>
               ))}

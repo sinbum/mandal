@@ -34,11 +34,6 @@ common:
   favorites: "お気に入り"
   export: "エクスポート"
   menu: "メニュー"
-  more: "もっと見る"
-  untitledCell: "タイトルなし"
-  deleting: "削除中..."
-  deleteCell: "セルを削除"
-  fullPath: "フルパス"
   swipeHint: "左右にスワイプしてナビゲート"
   mouseWheelHint: "マウスホイールでナビゲート"
 
@@ -93,7 +88,6 @@ dashboard:
   createNew: "新しいマンダラートを作成"
   recentBoards: "最近のボード"
   allBoards: "すべてのボード"
-  deleteConfirmation: "本当にこのマンダラートを削除しますか？この操作は元に戻すことができません。"
   empty:
     title: "まだマンダラートがありません"
     description: "最初のマンダラートを作成して目標を体系的に管理しましょう"
@@ -118,7 +112,6 @@ mandalart:
     remaining: "残り"
     lastUpdated: "最終更新"
     active: "アクティブ"
-  active: "アクティブ"
   favorites:
     added: "お気に入りに追加されました"
     removed: "お気に入りから削除されました"
@@ -423,10 +416,6 @@ landing:
 
 # PremiumMandalartCardSlider 翻訳
 slider:
-  common:
-    next: "次へ"
-  swipeUpHint: "上にスワイプ"
-  swipeDownHint: "下にスワイプ"
   create:
     title: "新しいマンダラートを作成"
     description: "マンダラートのタイトルを入力してください"

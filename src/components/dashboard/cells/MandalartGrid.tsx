@@ -53,7 +53,6 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   gridTitle = "만다라트 그리드",
   showProgressStats = true
 }) => {
-  const t = useTranslations();
   // 키보드 네비게이션을 위한 포커스 상태
   const [focusedCellIndex, setFocusedCellIndex] = useState<number | null>(null);
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);

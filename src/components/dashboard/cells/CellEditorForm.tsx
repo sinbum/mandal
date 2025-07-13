@@ -23,10 +23,6 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
   onCancel,
   isNewCell = false,
 }) => {
-  // Translation hooks
-  const t = useTranslations('mandalart');
-  const tCommon = useTranslations('common');
-  
   const [topic, setTopic] = useState(cell.topic || '');
   const [memo, setMemo] = useState(cell.memo || '');
   const [color, setColor] = useState(cell.color || '');
