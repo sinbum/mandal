@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { MandalartCell } from '@/types/mandalart';
 import MandalartCellComponent from './MandalartCell';
 import { cn } from '@/lib/utils';
@@ -331,7 +332,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             {/* 진행률 표시 */}
             <div className="mt-4 pt-2 sm:mt-4 max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
               <div className="flex items-center justify-between text-xs sm:text-[clamp(0.75rem,1.2vw,1.25rem)] text-muted-foreground mb-1 sm:mb-[0.5vh]">
-                <span>진행률</span>
+                <span>{t('progressRate')}</span>
                 <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 sm:h-[clamp(0.5rem,1vh,1.5rem)]">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { designUtils } from '@/design-system/utils';
 
@@ -62,6 +63,8 @@ const InputField: React.FC<InputFieldProps> = ({
   readOnly = false,
   ...props
 }) => {
+  const params = useParams();
+  const locale = params?.locale as string || 'ko';
   // 오류 상태 결정
   const hasError = Boolean(error) || invalid;
   
@@ -87,10 +90,12 @@ const InputField: React.FC<InputFieldProps> = ({
     disabled,
   });
   
-  // 모바일 최적화 props
+  // 모바일 최적화 props (언어별 최적화 포함)
   const mobileProps = {
     inputMode: inputMode || getMobileInputMode(type),
-    autoComplete: autoComplete || getAutoComplete(type),
+    autoComplete: autoComplete || getAutoComplete(type, locale),
+    lang: locale,
+    spellCheck: getSpellCheck(locale),
   };
   
   return (
@@ -245,8 +250,9 @@ function getMobileInputMode(type: string): string {
   }
 }
 
-// 자동 완성 결정
-function getAutoComplete(type: string): string {
+// 자동 완성 결정 (언어별 최적화)
+function getAutoComplete(type: string, locale: string = 'ko'): string {
+  // 기본 타입별 자동완성
   switch (type) {
     case 'email':
       return 'email';
@@ -257,8 +263,21 @@ function getAutoComplete(type: string): string {
     case 'url':
       return 'url';
     default:
-      return 'off';
+      // 한국어와 일본어는 IME 입력 개선을 위해 자동완성 비활성화
+      if (locale === 'ko' || locale === 'ja') {
+        return 'off';
+      }
+      return 'on';
   }
+}
+
+// 맞춤법 검사 설정 (언어별)
+function getSpellCheck(locale: string = 'ko'): boolean {
+  // 한국어와 일본어는 맞춤법 검사 비활성화 (IME 간섭 방지)
+  if (locale === 'ko' || locale === 'ja') {
+    return false;
+  }
+  return true;
 }
 
 export default InputField;

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import ColorPalette from '@/components/ui/ColorPalette';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import HeaderBar from '@/components/layout/HeaderBar';
 import MobileLayout from '@/components/layout/MobileLayout';
@@ -207,7 +208,7 @@ export default function ProfilePage() {
               style={{ backgroundColor: themeColor, color: 'black' }}
               size="sm"
             >
-              {isLoading ? '저장 중...' : '저장하기'}
+              {isLoading ? t('saving') : t('save')}
             </Button>
           </CardFooter>
         </Card>

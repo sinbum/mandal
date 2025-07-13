@@ -1,8 +1,11 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function TestimonialsSection() {
-  const testimonials = [
+  const t = useTranslations('landing.testimonials');
+  
+  const testimonials = t.raw('items') || [
     {
       name: "김민수",
       role: "스타트업 CEO",
@@ -39,10 +42,10 @@ export default function TestimonialsSection() {
         {/* Section Header */}
         <div className="text-center mb-20">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-            사용자들의 이야기
+            {t('title')}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            만다라트로 목표를 달성한 실제 사용자들의 경험을 확인해보세요.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -80,20 +83,20 @@ export default function TestimonialsSection() {
 
         {/* Stats Section */}
         <div className="bg-gray-900 rounded-xl p-8 text-white text-center">
-          <h3 className="text-2xl font-semibold mb-8">만다라트 사용 통계</h3>
+          <h3 className="text-2xl font-semibold mb-8">{t('stats.title')}</h3>
           
           <div className="grid md:grid-cols-3 gap-8">
             <div>
-              <div className="text-3xl font-bold mb-2">92%</div>
-              <div className="text-gray-300">목표 달성률</div>
+              <div className="text-3xl font-bold mb-2">{t('stats.achievement_rate.value')}</div>
+              <div className="text-gray-300">{t('stats.achievement_rate.label')}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">21일</div>
-              <div className="text-gray-300">첫 성과까지</div>
+              <div className="text-3xl font-bold mb-2">{t('stats.time_to_result.value')}</div>
+              <div className="text-gray-300">{t('stats.time_to_result.label')}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">1,000+</div>
-              <div className="text-gray-300">활성 사용자</div>
+              <div className="text-3xl font-bold mb-2">{t('stats.active_users.value')}</div>
+              <div className="text-gray-300">{t('stats.active_users.label')}</div>
             </div>
           </div>
         </div>

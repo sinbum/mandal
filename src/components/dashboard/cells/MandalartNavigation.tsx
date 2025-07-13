@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { MandalartNavigationProps } from '@/types/mandalart';
 
 const MandalartNavigation: React.FC<MandalartNavigationProps> = ({ 
@@ -41,7 +42,7 @@ const MandalartNavigation: React.FC<MandalartNavigationProps> = ({
           onClick={() => onNavigate(currentCell.id)}
           className="text-xs font-medium px-2 py-1 rounded hover:bg-gray-100 transition-colors bg-blue-50 text-blue-700"
         >
-          {currentCell.topic || '무제 셀'}
+          {currentCell.topic || t('untitledCell')}
         </button>
       </>
     );

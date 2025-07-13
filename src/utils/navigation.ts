@@ -2,12 +2,12 @@ import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
 export interface NavigationUtils {
-  navigateToHome: () => void;
-  navigateToApp: () => void;
-  navigateToLogin: () => void;
-  navigateToSignup: () => void;
-  navigateToProfile: () => void;
-  navigateToCell: (cellId: string) => void;
+  navigateToHome: (locale?: string) => void;
+  navigateToApp: (locale?: string) => void;
+  navigateToLogin: (locale?: string) => void;
+  navigateToSignup: (locale?: string) => void;
+  navigateToProfile: (locale?: string) => void;
+  navigateToCell: (cellId: string, locale?: string) => void;
   navigateBack: () => void;
   reload: () => void;
 }
@@ -15,28 +15,28 @@ export interface NavigationUtils {
 export function useNavigation(): NavigationUtils {
   const router = useRouter();
 
-  const navigateToHome = useCallback(() => {
-    router.push('/');
+  const navigateToHome = useCallback((locale = 'ko') => {
+    router.push(`/${locale}`);
   }, [router]);
 
-  const navigateToApp = useCallback(() => {
-    router.push('/app');
+  const navigateToApp = useCallback((locale = 'ko') => {
+    router.push(`/${locale}/app`);
   }, [router]);
 
-  const navigateToLogin = useCallback(() => {
-    router.push('/auth/login');
+  const navigateToLogin = useCallback((locale = 'ko') => {
+    router.push(`/${locale}/auth/login`);
   }, [router]);
 
-  const navigateToSignup = useCallback(() => {
-    router.push('/auth/signup');
+  const navigateToSignup = useCallback((locale = 'ko') => {
+    router.push(`/${locale}/auth/signup`);
   }, [router]);
 
-  const navigateToProfile = useCallback(() => {
-    router.push('/profile');
+  const navigateToProfile = useCallback((locale = 'ko') => {
+    router.push(`/${locale}/app/profile`);
   }, [router]);
 
-  const navigateToCell = useCallback((cellId: string) => {
-    router.push(`/cell/${cellId}`);
+  const navigateToCell = useCallback((cellId: string, locale = 'ko') => {
+    router.push(`/${locale}/app/cell/${cellId}`);
   }, [router]);
 
   const navigateBack = useCallback(() => {

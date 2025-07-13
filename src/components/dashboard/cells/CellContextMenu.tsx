@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { MandalartCell } from '@/types/mandalart';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,9 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
   onToggleComplete,
   onDelete
 }) => {
+  const t = useTranslations('common');
+  const tMandalart = useTranslations('mandalart');
+  
   if (!cell) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -42,7 +46,7 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
       ),
-      label: '편집',
+      label: t('edit'),
       onClick: () => {
         onEdit();
         onClose();
@@ -55,7 +59,7 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       ),
-      label: cell.isCompleted ? '완료 취소' : '완료 표시',
+      label: cell.isCompleted ? tMandalart('cell.markAsInProgress') : tMandalart('cell.markAsCompleted'),
       onClick: () => {
         onToggleComplete();
         onClose();
@@ -70,7 +74,7 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
       ),
-      label: '삭제',
+      label: t('delete'),
       onClick: () => {
         onDelete();
         onClose();
@@ -99,10 +103,10 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
             {/* 헤더 */}
             <div className="px-3 py-2 border-b border-gray-100">
               <h3 className="text-sm font-medium text-gray-900 truncate">
-                {cell.topic || '제목 없음'}
+                {cell.topic || tMandalart('cell.noTitle')}
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                셀 작업 선택
+                {tMandalart('cell.edit')}
               </p>
             </div>
 
@@ -135,7 +139,7 @@ const CellContextMenu: React.FC<CellContextMenuProps> = ({
                 className="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={onClose}
               >
-                취소
+                {t('cancel')}
               </button>
             </div>
           </motion.div>

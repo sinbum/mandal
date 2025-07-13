@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
 import { 
@@ -21,9 +22,16 @@ interface LoginFormData {
 }
 
 function LoginContent() {
-  // const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const navigation = useNavigation();
   const searchParams = useSearchParams();
+  
+  // 다국어 번역 훅
+  const t = useTranslations('auth.login');
+  const tAuth = useTranslations('auth');
+  const tErrors = useTranslations('auth.errors');
+  const tLoading = useTranslations('loading');
   
   const formState = useFormState<LoginFormData>({
     email: '',
@@ -39,7 +47,7 @@ function LoginContent() {
 
       // URL에서 에러 파라미터 확인
       if (errorParam === 'confirmation_failed') {
-        toast.error(AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
+        toast.error(tErrors('loginFailed'));
         return;
       }
 
@@ -53,16 +61,16 @@ function LoginContent() {
           }
 
           if (result.data && typeof result.data === 'object' && 'session' in result.data && result.data.session) {
-            toast.success(AUTH_MESSAGES.EMAIL_VERIFICATION_SUCCESS);
+            toast.success(tAuth('login.submit'));
             
             // 성공 후 앱 페이지로 이동
             setTimeout(() => {
-              navigation.navigateToApp();
+              navigation.navigateToApp(locale);
             }, 1500);
           }
         } catch (err: unknown) {
           console.error('이메일 인증 오류:', err);
-          toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.EMAIL_VERIFICATION_FAILED);
+          toast.error(err instanceof Error ? err.message : tErrors('loginFailed'));
         } finally {
           formState.setLoading(false);
         }
@@ -79,7 +87,7 @@ function LoginContent() {
         const result = await checkUserSession();
         
         if (result.success && result.data) {
-          navigation.navigateToApp();
+          navigation.navigateToApp(locale);
         }
       } catch (error) {
         console.error('세션 확인 오류:', error);
@@ -97,7 +105,7 @@ function LoginContent() {
     // 유효성 검사
     const validationError = validateAuthForm(formState.data.email, formState.data.password);
     if (validationError) {
-      toast.error(validationError);
+      toast.error(tErrors('invalidEmail')); // 실제 에러에 맞게 매핑 필요
       formState.setLoading(false);
       return;
     }
@@ -109,27 +117,28 @@ function LoginContent() {
         throw new Error(result.error);
       }
       
-      toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
+      toast.success(t('submit'));
       
       // 즉시 이동 (Next.js 라우팅은 비동기적으로 처리됨)
-      navigation.navigateToApp();
+      navigation.navigateToApp(locale);
       
       // 백업으로 직접 이동도 시도
       setTimeout(() => {
-        if (typeof window !== 'undefined' && window.location.pathname !== '/app') {
-          window.location.href = '/app';
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/app')) {
+          window.location.href = `/${locale}/app`;
         }
       }, 1000);
     } catch (err: unknown) {
       console.error('로그인 오류:', err);
-      toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.LOGIN_FAILED);
+      toast.error(err instanceof Error ? err.message : tErrors('loginFailed'));
       formState.setLoading(false);
     }
   };
 
   return (
-    <AuthLayout title="로그인">
+    <AuthLayout title={t('title')}>
       <AuthForm
+        pageName="login"
         email={formState.data.email}
         password={formState.data.password}
         onEmailChange={(value) => formState.updateField('email', value)}
@@ -137,12 +146,12 @@ function LoginContent() {
         onSubmit={handleLogin}
         isLoading={formState.isLoading}
         error={formState.error}
-        submitLabel="로그인"
-        loadingLabel={LOADING_STATES.LOGIN}
+        submitLabel={t('submit')}
+        loadingLabel={tLoading('default')}
         alternativeAction={{
-          label: '계정이 없으신가요?',
-          buttonText: '회원가입하기',
-          onClick: navigation.navigateToSignup
+          label: t('noAccount'),
+          buttonText: t('signUpLink'),
+          onClick: () => navigation.navigateToSignup(locale)
         }}
       />
     </AuthLayout>

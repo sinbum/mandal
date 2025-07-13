@@ -183,6 +183,9 @@ module.exports = {
           'Cascadia Code',
           'monospace'
         ],
+        'inter': ['Inter', 'system-ui', 'sans-serif'],
+        'noto-sans-kr': ['Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'sans-serif'],
+        'noto-sans-jp': ['Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'sans-serif'],
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.025em' }],

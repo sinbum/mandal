@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useIsLoggedIn } from '@/hooks/useAuth';
+import { useTranslations } from 'next-intl';
 
 export default function AuthButton() {
   const isLoggedIn = useIsLoggedIn(); // 전역 인증 상태 사용
@@ -34,7 +35,7 @@ export default function AuthButton() {
       ) : (
         <Link href="/auth/login">
           <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
-            로그인
+            {t('login')}
           </button>
         </Link>
       )}

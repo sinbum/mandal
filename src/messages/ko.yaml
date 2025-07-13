@@ -1,0 +1,361 @@
+# 한국어 번역 파일
+common:
+  save: "저장"
+  cancel: "취소"
+  delete: "삭제"
+  edit: "편집"
+  loading: "로딩 중..."
+  error: "오류가 발생했습니다"
+  success: "성공"
+  confirm: "확인"
+  close: "닫기"
+  next: "다음"
+  previous: "이전"
+  submit: "제출"
+  search: "검색"
+  add: "추가"
+  remove: "제거"
+  update: "업데이트"
+
+slideUpPanel:
+  releaseToClose: "↓ 놓으면 닫힘"
+  resizeHint: "↕ 크기 조절"
+  pullToClose: "아래로 당겨서 닫기"
+
+auth:
+  login:
+    title: "로그인"
+    email: "이메일"
+    password: "비밀번호"
+    submit: "로그인"
+    forgotPassword: "비밀번호를 잊으셨나요?"
+    noAccount: "계정이 없으신가요?"
+    signUpLink: "회원가입"
+# ... (rest of the file)
+  signup:
+    title: "회원가입"
+    email: "이메일"
+    password: "비밀번호"
+    confirmPassword: "비밀번호 확인"
+    submit: "회원가입"
+    hasAccount: "이미 계정이 있으신가요?"
+    loginLink: "로그인"
+  errors:
+    invalidEmail: "유효하지 않은 이메일 주소입니다"
+    passwordTooShort: "비밀번호는 최소 6자 이상이어야 합니다"
+    passwordMismatch: "비밀번호가 일치하지 않습니다"
+    loginFailed: "로그인에 실패했습니다"
+    signupFailed: "회원가입에 실패했습니다"
+
+dashboard:
+  title: "만다라트 플래너"
+  welcome: "안녕하세요, {name}님!"
+  createNew: "새 만다라트 만들기"
+  recentBoards: "최근 보드"
+  allBoards: "모든 보드"
+  empty:
+    title: "아직 만다라트가 없습니다"
+    description: "첫 번째 만다라트를 만들어 목표를 체계적으로 관리해보세요"
+    button: "만다라트 만들기"
+  stats:
+    totalBoards: "전체 보드"
+    completedGoals: "완료된 목표"
+    inProgress: "진행 중"
+    completionRate: "완료율"
+
+mandalart:
+  board:
+    title: "만다라트 보드"
+    centerGoal: "중심 목표"
+    subGoals: "세부 목표"
+    gridPosition: "그리드 위치 {position}"
+    edit: "편집하기"
+    delete: "삭제하기"
+    newMandalart: "새 만다라트"
+    goalAchieving: "목표 달성 중"
+    goals: "목표"
+    remaining: "남은"
+    lastUpdated: "최근 업데이트"
+    active: "활성"
+  favorites:
+    added: "즐겨찾기에 추가되었습니다"
+    removed: "즐겨찾기에서 제거되었습니다"
+  cell:
+    topic: "주제"
+    memo: "메모"
+    completed: "완료"
+    inProgress: "진행 중"
+    progress: "진행률"
+    completedTasks: "{completed}/{total} 완료"
+    edit: "셀 편집"
+    delete: "셀 삭제"
+    addChild: "하위 셀 추가"
+    addHint: "클릭하여 새 셀을 추가하세요"
+    addHintShort: "클릭하여<br/>추가"
+    addAriaLabel: "만다라트 셀 추가"
+    cellAriaLabel: "만다라트 셀: {topic}"
+    hasChildren: "하위 셀 있음"
+    markAsCompleted: "완료로 표시"
+    markAsInProgress: "진행 중으로 표시"
+    empty: "비어있음"
+    centerDescription: "중앙 셀입니다. 이 셀은 편집할 수 없습니다."
+    emptyDescription: "빈 셀입니다. 클릭하여 새 내용을 추가하세요."
+    content: "셀 내용"
+    created: "새 셀이 생성되었습니다"
+    saved: "셀이 저장되었습니다"
+    deleted: "셀이 삭제되었습니다"
+    createFailed: "새 셀 생성에 실패했습니다"
+    deleteFailed: "셀 삭제에 실패했습니다"
+    deleteError: "셀 삭제 중 오류가 발생했습니다"
+    saveError: "셀 저장 중 오류가 발생했습니다"
+    noTitle: "제목 없음"
+    deleteConfirm: "'{title}' 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다."
+    deleteConfirmCurrent: "정말로 이 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다."
+  form:
+    topicPlaceholder: "주제를 입력하세요"
+    memoPlaceholder: "메모를 입력하세요 (선택사항)"
+    colorSelect: "색상 선택"
+    imageUpload: "이미지 업로드"
+  navigation:
+    goUp: "상위로 이동"
+    goBack: "뒤로 가기"
+    breadcrumb: "위치"
+  page:
+    notFound: "셀을 찾을 수 없습니다"
+    notFoundDescription: "요청하신 셀 정보를 찾을 수 없습니다"
+    errorOccurred: "오류 발생"
+    cellNotFound: "셀 정보를 찾을 수 없습니다"
+    loadFailed: "데이터 로드에 실패했습니다"
+
+settings:
+  title: "설정"
+  back: "뒤로가기"
+  language: 
+    title: "언어 설정"
+    description: "앱에서 사용할 언어를 선택하세요"
+    korean: "한국어"
+    english: "English"
+    japanese: "日本語"
+  profile:
+    title: "프로필"
+    edit: "프로필 편집"
+    current: "현재: {name}"
+    displayName: "표시 이름"
+    displayNamePlaceholder: "표시 이름을 입력하세요"
+    updateSuccess: "프로필이 업데이트되었습니다"
+    updateError: "프로필 업데이트에 실패했습니다"
+    editDialog:
+      title: "프로필 편집"
+      description: "표시 이름을 변경할 수 있습니다"
+  app:
+    title: "앱 설정"
+    darkMode: "다크 모드"
+    notifications: "알림"
+    enabled: "활성화됨"
+    disabled: "비활성화됨"
+    darkModeToggle:
+      enabled: "다크 모드가 활성화되었습니다"
+      disabled: "다크 모드가 비활성화되었습니다"
+    notificationsToggle:
+      enabled: "알림이 활성화되었습니다"
+      disabled: "알림이 비활성화되었습니다"
+  data:
+    title: "데이터"
+    export: "데이터 내보내기"
+    exportDescription: "만다라트 데이터를 JSON 파일로 내보내기"
+    exportComingSoon: "데이터 내보내기 기능은 곧 제공될 예정입니다"
+  account:
+    title: "계정"
+    delete: "계정 삭제"
+    deleteDescription: "모든 데이터가 영구적으로 삭제됩니다"
+    deleteConfirm: "정말로 계정을 삭제하시겠습니까?"
+    deleteWarning: "이 작업은 되돌릴 수 없으며, 모든 만다라트 데이터가 영구적으로 삭제됩니다"
+    deleteComingSoon: "계정 삭제 기능은 곧 제공될 예정입니다"
+    deleteDialog:
+      title: "계정 삭제"
+      description: "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 만다라트 데이터가 영구적으로 삭제됩니다"
+  accountInfo:
+    title: "계정 정보"
+    email: "이메일"
+    joinDate: "가입일"
+  user:
+    defaultName: "사용자"
+  errors:
+    loadUserData: "사용자 데이터 로드 오류"
+    profileUpdate: "프로필 업데이트 중 오류가 발생했습니다"
+
+navigation:
+  home: "홈"
+  dashboard: "대시보드"
+  settings: "설정"
+  profile: "프로필"
+  logout: "로그아웃"
+  menu: "메뉴"
+  mandalart: "만다라트"
+  loggingOut: "로그아웃 중..."
+  noRecentMandalart: "최근 이용한 만다라트가 없습니다"
+  logoutSuccess: "성공적으로 로그아웃되었습니다"
+  logoutError: "로그아웃 중 오류가 발생했습니다"
+  logoutUnexpectedError: "로그아웃 중 예상치 못한 오류가 발생했습니다"
+  localStorageError: "로컬스토리지 접근 오류"
+
+errors:
+  notFound: "페이지를 찾을 수 없습니다"
+  serverError: "서버 오류가 발생했습니다"
+  networkError: "네트워크 연결을 확인해주세요"
+  unauthorized: "로그인이 필요합니다"
+  forbidden: "접근 권한이 없습니다"
+  breadcrumbBuild: "브레드크럼 경로 구성 실패"
+  errorOccurred: "오류 발생"
+  retry: "다시 시도"
+  goBack: "돌아가기"
+
+loading:
+  default: "로딩 중..."
+  saving: "저장 중..."
+  deleting: "삭제 중..."
+  uploading: "업로드 중..."
+  settings: "설정을 불러오는 중..."
+
+dashboardLayout:
+  title: "대시보드"
+  description: "나의 만다라트 목표들을 관리하고 진행상황을 확인하세요"
+
+AppHeaderBar:
+  title: "앱 헤더"
+  description: "앱 상단 헤더 영역"
+
+metadata:
+  title: "만다라트 플래너"
+  description: "만다라트 플래너는 목표 달성을 위한 체계적인 계획을 돕는 도구입니다."
+
+app:
+  shortName: "만다라트"
+
+landing:
+  hero:
+    title:
+      part1: "목표를"
+      part2: "현실로"
+    subtitle: "체계적인 만다라트 기법으로 큰 목표를 작은 단계로 나누어 꾸준히 달성해 나가세요"
+    cta:
+      start: "시작하기"
+      login: "로그인"
+    trustSignals:
+      - "무료 사용"
+      - "간편 가입"
+      - "모든 기능 제공"
+    demoSection:
+      title: "만다라트 목표 설정"
+      subtitle: "하나의 목표를 8개 영역으로 세분화"
+      examples:
+        - "기술 역량"
+        - "네트워킹"
+        - "포트폴리오"
+        - "면접 준비"
+        - "취업 성공"
+        - "경력 개발"
+        - "자기계발"
+        - "업무 능력"
+  
+  features:
+    title: "체계적인 목표 달성"
+    subtitle: "만다라트 기법을 통해 목표를 구체화하고 꾸준히 실행할 수 있는 환경을 제공합니다"
+    items:
+      goal_breakdown:
+        title: "목표 분해"
+        description: "큰 목표를 실행 가능한 작은 단위로 체계적으로 분해합니다"
+      progress_tracking:
+        title: "진행 추적"
+        description: "각 단계별 진행상황을 시각적으로 확인하고 관리할 수 있습니다"
+      collaboration:
+        title: "협업 기능"
+        description: "팀원들과 목표를 공유하고 함께 달성해 나갈 수 있습니다"
+      analytics:
+        title: "성과 분석"
+        description: "목표 달성률과 패턴을 분석하여 개선점을 찾을 수 있습니다"
+    cta:
+      start: "지금 시작해보세요"
+      free: "무료로 시작하기"
+      cases: "성공 사례 보기"
+  
+  testimonials:
+    title: "사용자들의 이야기"
+    subtitle: "만다라트로 목표를 달성한 실제 사용자들의 경험을 확인해보세요"
+    items:
+      - name: "김민수"
+        role: "프론트엔드 개발자"
+        text: "만다라트를 사용한 후 목표가 명확해지고 실행력이 크게 향상되었습니다. 체계적인 접근 방식이 정말 도움이 됩니다."
+        achievement: "6개월 만에 시니어 개발자로 승진"
+      - name: "박지영"
+        role: "프로덕트 매니저"
+        text: "복잡한 프로젝트도 단계별로 나누어 관리하니 훨씬 효율적이에요. 팀 전체가 같은 방향을 바라보게 되었습니다."
+        achievement: "프로젝트 성공률 40% 향상"
+      - name: "이준호"
+        role: "창업자"
+        text: "스타트업 운영에 만다라트를 적용하니 목표가 구체화되고 실행 가능한 계획이 세워졌습니다."
+        achievement: "사업 목표 90% 달성"
+      - name: "최수민"
+        role: "마케팅 전문가"
+        text: "개인 목표부터 업무 목표까지 모든 것을 체계적으로 관리할 수 있어서 만족스럽습니다."
+        achievement: "마케팅 성과 2배 증가"
+    stats:
+      title: "만다라트 사용 통계"
+      achievement_rate:
+        value: "92%"
+        label: "목표 달성률"
+      time_to_result:
+        value: "30일"
+        label: "첫 성과까지"
+      active_users:
+        value: "1,000+"
+        label: "활성 사용자"
+  
+  cta:
+    title: "지금 시작하세요"
+    subtitle: "체계적인 목표 관리로 꿈을 현실로 만들어보세요"
+    buttons:
+      start: "무료로 시작하기"
+      login: "로그인"
+    features:
+      - "무료로 모든 기능을 사용하세요"
+      - "무료 계정"
+      - "모든 기능"
+      - "언제든 해지"
+    social_proof: "1,000명 이상의 사용자가 목표를 달성하고 있습니다"
+    satisfaction: "만족도"
+  
+  footer:
+    brand_description: "체계적인 만다라트 기법으로 목표를 달성하세요"
+    nav:
+      service: "서비스"
+      resources: "리소스"
+      start_free: "무료 시작하기"
+      features: "기능 소개"
+      success_stories: "성공 사례"
+    links:
+      guide: "사용 가이드"
+      faq: "자주 묻는 질문"
+      privacy: "개인정보처리방침"
+      terms: "서비스 이용약관"
+    copyright: "만다라트. 모든 권리 보유"
+
+# PremiumMandalartCardSlider 번역
+slider:
+  create:
+    title: "새 만다라트 만들기"
+    description: "만다라트의 제목을 입력해주세요"
+    form:
+      title_label: "제목"
+      title_placeholder: "새 만다라트"
+      cancel: "취소"
+      create: "생성"
+      creating: "생성 중..."
+    card:
+      title: "새 만다라트 생성"
+      description: "새로운 목표를 설정하고\n꿈을 현실로 만들어보세요"
+  navigation:
+    previous: "이전"
+    next: "다음"
+    swipeUpHint: "위로 스와이프"
+    swipeDownHint: "아래로 스와이프"

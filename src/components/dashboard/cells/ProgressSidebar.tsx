@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { MandalartCell } from '@/types/mandalart';
 
 interface ProgressSidebarProps {
@@ -36,7 +37,7 @@ const ProgressSidebar: React.FC<ProgressSidebarProps> = ({ cells, className = ""
       {/* 진행률 표시 */}
       <div className="mt-6">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-          <span>전체 진행률</span>
+          <span>{t('overallProgress')}</span>
           <span className="font-medium">{progressPercentage}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-3">

@@ -3,8 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { APP_CONFIG } from '@/constants/app';
 import { Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('landing.footer');
   const currentYear = new Date().getFullYear();
   
   return (
@@ -24,8 +26,7 @@ export default function Footer() {
               <span className="text-xl font-semibold text-gray-900">{APP_CONFIG.name}</span>
             </div>
             <p className="text-gray-600 leading-relaxed mb-6 max-w-md">
-              체계적인 만다라트 기법으로 목표를 달성하세요.
-              꿈을 현실로 만드는 가장 효과적인 방법입니다.
+              {t('brand_description')}
             </p>
             <div className="flex items-center gap-2 text-gray-500">
               <Mail className="w-4 h-4" />
@@ -35,26 +36,26 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-medium mb-4 text-gray-900">서비스</h3>
+            <h3 className="font-medium mb-4 text-gray-900">{t('nav.service')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/auth/signup" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  무료 시작하기
+                  {t('nav.start_free')}
                 </Link>
               </li>
               <li>
                 <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  로그인
+                  Login
                 </Link>
               </li>
               <li>
                 <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  기능 소개
+                  {t('nav.features')}
                 </Link>
               </li>
               <li>
                 <Link href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  성공 사례
+                  {t('nav.success_stories')}
                 </Link>
               </li>
             </ul>
@@ -62,26 +63,26 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-medium mb-4 text-gray-900">리소스</h3>
+            <h3 className="font-medium mb-4 text-gray-900">{t('nav.resources')}</h3>
             <ul className="space-y-2">
               <li>
                 <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  사용 가이드
+                  {t('links.guide')}
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  자주 묻는 질문
+                  {t('links.faq')}
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  개인정보처리방침
+                  {t('links.privacy')}
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  서비스 이용약관
+                  {t('links.terms')}
                 </a>
               </li>
             </ul>
@@ -92,13 +93,13 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-600 text-sm">
-              © {currentYear} 만다라트. 모든 권리 보유.
+              © {currentYear} {t('copyright')}
             </div>
             
             <div className="flex items-center gap-6 text-sm text-gray-600">
-              <span>목표 달성률 92%</span>
-              <span>1,000+ 사용자</span>
-              <span>4.9/5 만족도</span>
+              <span>Goal Achievement Rate 92%</span>
+              <span>1,000+ Users</span>
+              <span>Satisfaction 4.9/5</span>
             </div>
           </div>
         </div>

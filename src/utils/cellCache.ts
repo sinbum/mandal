@@ -20,7 +20,21 @@ class CellCache {
   private readonly dbVersion = 1;
 
   constructor() {
-    this.initIndexedDB();
+    // 서버 사이드 렌더링 환경에서는 캐시 초기화를 건너뛰기
+    if (typeof window !== 'undefined') {
+      this.initIndexedDB();
+    }
+  }
+
+  /**
+   * 캐시가 정상적으로 초기화되었는지 확인
+   */
+  private ensureCacheInitialized(): boolean {
+    if (!this.cache || typeof this.cache.set !== 'function' || typeof this.cache.get !== 'function' || typeof this.cache.delete !== 'function') {
+      console.warn('캐시가 초기화되지 않았거나 손상되었습니다. 새로운 Map 인스턴스를 생성합니다.');
+      this.cache = new Map<string, CellCacheData>();
+    }
+    return true;
   }
 
   /**
@@ -125,6 +139,7 @@ class CellCache {
    * 부모 체인 무효화
    */
   private async invalidateParentChain(cellId: string): Promise<void> {
+    this.ensureCacheInitialized();
     const cached = this.cache.get(cellId);
     if (cached?.cell.parentId) {
       this.remove(cached.cell.parentId);
@@ -136,6 +151,7 @@ class CellCache {
    * 자식 체인 무효화
    */
   private async invalidateChildChain(cellId: string): Promise<void> {
+    this.ensureCacheInitialized();
     const cached = this.cache.get(cellId);
     if (cached?.children) {
       const invalidatePromises = cached.children.map(async (child) => {
@@ -150,6 +166,7 @@ class CellCache {
    * 캐시에 셀 데이터 저장 (메모리 + IndexedDB)
    */
   set(cellId: string, cell: MandalartCell, children: MandalartCell[] = []): void {
+    this.ensureCacheInitialized();
     const cacheData = {
       cell,
       children,
@@ -170,12 +187,14 @@ class CellCache {
    * 캐시에서 셀 데이터 조회 (메모리 우선, IndexedDB 폴백)
    */
   async get(cellId: string): Promise<{ cell: MandalartCell; children: MandalartCell[] } | null> {
+    this.ensureCacheInitialized();
     // 1. 메모리 캐시 확인
     let cached = this.cache.get(cellId);
     
     if (cached) {
       // TTL 체크
       if (Date.now() - cached.timestamp > this.TTL) {
+        this.ensureCacheInitialized();
         this.cache.delete(cellId);
         cached = undefined;
       }
@@ -204,6 +223,7 @@ class CellCache {
    * 동기 방식으로 메모리 캐시만 조회 (기존 호환성 유지)
    */
   getSync(cellId: string): { cell: MandalartCell; children: MandalartCell[] } | null {
+    this.ensureCacheInitialized();
     const cached = this.cache.get(cellId);
     
     if (!cached) {
@@ -212,6 +232,7 @@ class CellCache {
 
     // TTL 체크
     if (Date.now() - cached.timestamp > this.TTL) {
+      this.ensureCacheInitialized();
       this.cache.delete(cellId);
       return null;
     }
@@ -226,6 +247,7 @@ class CellCache {
    * 캐시에서 셀만 조회 (동기)
    */
   getCell(cellId: string): MandalartCell | null {
+    this.ensureCacheInitialized();
     const cached = this.cache.get(cellId);
     if (!cached || Date.now() - cached.timestamp > this.TTL) {
       return null;
@@ -237,6 +259,7 @@ class CellCache {
    * 캐시에서 자식 셀들만 조회 (동기)
    */
   getChildren(cellId: string): MandalartCell[] | null {
+    this.ensureCacheInitialized();
     const cached = this.cache.get(cellId);
     if (!cached || Date.now() - cached.timestamp > this.TTL) {
       return null;
@@ -292,6 +315,7 @@ class CellCache {
       });
     });
     
+    this.ensureCacheInitialized();
     console.log('캐시 채우기 완료, 총 캐시된 항목:', this.cache.size);
   }
 
@@ -299,6 +323,7 @@ class CellCache {
    * 특정 셀의 캐시 제거
    */
   remove(cellId: string): void {
+    this.ensureCacheInitialized();
     this.cache.delete(cellId);
   }
 
@@ -306,6 +331,7 @@ class CellCache {
    * 전체 캐시 초기화
    */
   clear(): void {
+    this.ensureCacheInitialized();
     this.cache.clear();
   }
 
@@ -313,6 +339,7 @@ class CellCache {
    * 만료된 캐시 정리
    */
   cleanup(): void {
+    this.ensureCacheInitialized();
     const now = Date.now();
     for (const [key, value] of this.cache.entries()) {
       if (now - value.timestamp > this.TTL) {

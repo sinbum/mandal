@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import AuthLayout from '@/components/auth/AuthLayout';
 import AuthForm from '@/components/auth/AuthForm';
 import { signUpWithEmail, validateAuthForm } from '@/lib/auth/utils';
@@ -16,7 +18,15 @@ interface SignupFormData {
 }
 
 export default function SignupPage() {
+  const params = useParams();
+  const locale = params.locale as string;
   const navigation = useNavigation();
+  
+  // 다국어 번역 훅
+  const t = useTranslations('auth.signup');
+  const tAuth = useTranslations('auth');
+  const tErrors = useTranslations('auth.errors');
+  const tLoading = useTranslations('loading');
   
   const formState = useFormState<SignupFormData>({
     email: '',
@@ -36,7 +46,7 @@ export default function SignupPage() {
       formState.data.confirmPassword
     );
     if (validationError) {
-      toast.error(validationError);
+      toast.error(tErrors('passwordMismatch')); // 실제 에러에 맞게 매핑 필요
       formState.setLoading(false);
       return;
     }
@@ -48,14 +58,14 @@ export default function SignupPage() {
         throw new Error(result.error);
       }
       
-      toast.success(AUTH_MESSAGES.SIGNUP_SUCCESS);
+      toast.success(t('submit'));
       
       // 로그인 페이지로 이동
       setTimeout(() => {
-        navigation.navigateToLogin();
+        navigation.navigateToLogin(locale);
       }, 3000);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : AUTH_MESSAGES.SIGNUP_FAILED);
+      toast.error(err instanceof Error ? err.message : tErrors('signupFailed'));
     } finally {
       formState.setLoading(false);
     }
@@ -63,11 +73,12 @@ export default function SignupPage() {
   
   return (
     <AuthLayout 
-      title="회원가입" 
+      title={t('title')} 
       showBackButton 
-      onBackClick={navigation.navigateToLogin}
+      onBackClick={() => navigation.navigateToLogin(locale)}
     >
       <AuthForm
+        pageName="signup"
         email={formState.data.email}
         password={formState.data.password}
         confirmPassword={formState.data.confirmPassword}
@@ -77,12 +88,12 @@ export default function SignupPage() {
         onSubmit={handleSignUp}
         isLoading={formState.isLoading}
         error={formState.error}
-        submitLabel="회원가입"
-        loadingLabel={LOADING_STATES.SIGNUP}
+        submitLabel={t('submit')}
+        loadingLabel={tLoading('default')}
         alternativeAction={{
-          label: '이미 계정이 있으신가요?',
-          buttonText: '로그인하기',
-          onClick: navigation.navigateToLogin
+          label: t('hasAccount'),
+          buttonText: t('loginLink'),
+          onClick: () => navigation.navigateToLogin(locale)
         }}
       />
     </AuthLayout>

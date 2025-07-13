@@ -1,8 +1,10 @@
 import React from 'react';
+import {useTranslations} from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import InputField from '@/components/ui/InputField';
 
 interface AuthFormProps {
+  pageName: 'login' | 'signup';
   email: string;
   password: string;
   confirmPassword?: string;
@@ -22,6 +24,7 @@ interface AuthFormProps {
 }
 
 export default function AuthForm({
+  pageName,
   email,
   password,
   confirmPassword,
@@ -32,26 +35,28 @@ export default function AuthForm({
   isLoading,
   submitLabel,
   loadingLabel,
-  alternativeAction
+  alternativeAction,
 }: AuthFormProps) {
+  const t = useTranslations(`auth.${pageName}`);
+
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <InputField
         id="email"
-        label="이메일"
+        label={t('email')}
         value={email}
         onChange={onEmailChange}
-        placeholder="이메일 입력"
+        placeholder={t('email')}
         type="email"
         required
       />
       
       <InputField
         id="password"
-        label="비밀번호"
+        label={t('password')}
         value={password}
         onChange={onPasswordChange}
-        placeholder="비밀번호 입력"
+        placeholder={t('password')}
         type="password"
         required
       />
@@ -59,10 +64,10 @@ export default function AuthForm({
       {confirmPassword !== undefined && onConfirmPasswordChange && (
         <InputField
           id="confirmPassword"
-          label="비밀번호 확인"
+          label={t('confirmPassword')}
           value={confirmPassword}
           onChange={onConfirmPasswordChange}
-          placeholder="비밀번호 재입력"
+          placeholder={t('confirmPassword')}
           type="password"
           required
         />

@@ -7,6 +7,7 @@ import { MandalartCell } from '@/types/mandalart';
 import MandalartCard from './MandalartCard';
 import MandalartCardDesktop from './MandalartCardDesktop';
 import { ChevronUp, ChevronDown, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PremiumMandalartCardSliderProps {
   cells: MandalartCell[];
@@ -408,8 +409,8 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
         <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center">
           <div className="text-gray-500 text-sm">
             <ChevronUp className="w-4 h-4 mx-auto mb-1" />
-            <div className="text-xs">위로 스와이프 → 다음</div>
-            <div className="text-xs">아래로 스와이프 → 이전</div>
+            <div className="text-xs">{t('swipeUpHint')}</div>
+            <div className="text-xs">{t('swipeDownHint')}</div>
             <ChevronDown className="w-4 h-4 mx-auto mt-1" />
           </div>
         </div>

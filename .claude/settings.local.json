@@ -29,7 +29,10 @@
       "mcp__supabase__get_anon_key",
       "Bash(npx tsc:*)",
       "mcp__supabase__apply_migration",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(cp:*)",
+      "Bash(git restore:*)",
+      "Bash(timeout 10s npm run dev)"
     ],
     "deny": []
   }

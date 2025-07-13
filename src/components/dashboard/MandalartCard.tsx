@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { MandalartCell } from '@/types/mandalart';
 import {
   MoreVertical,
@@ -17,6 +17,7 @@ import {
   Star
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface MandalartCardProps {
   cell: MandalartCell;
@@ -25,54 +26,70 @@ interface MandalartCardProps {
   onEdit?: (cellId: string) => void;
 }
 
-const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) => {
+const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete, onEdit }) => {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const [showActions, setShowActions] = useState(false);
+  const t = useTranslations('mandalart');
 
-  // 진행률 계산 (실제 데이터 사용)
-  const progress = cell.progressInfo?.progressPercentage || 0;
-  const completedTasks = cell.progressInfo?.completedCells || 0;
-  const totalTasks = cell.progressInfo?.totalCells || 0;
-
-  // 색상 테마 결정
+  // 색상 테마
   const getThemeColors = (color?: string) => {
     if (color) {
       return {
         primary: color,
-        light: `${color}20`,
-        gradient: `linear-gradient(135deg, ${color} 0%, ${color}80 100%)`
+        light: `${color}15`,
+        gradient: `linear-gradient(135deg, ${color} 0%, ${color}90 100%)`,
+        shadow: `${color}40`
       };
     }
-
-    // 기본 테마들
+    
     const themes = [
-      { primary: '#6366f1', light: '#6366f120', gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' },
-      { primary: '#06b6d4', light: '#06b6d420', gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' },
-      { primary: '#10b981', light: '#10b98120', gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
-      { primary: '#f59e0b', light: '#f59e0b20', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
-      { primary: '#ef4444', light: '#ef444420', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }
+      { 
+        primary: '#6366f1', 
+        light: '#6366f115', 
+        gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        shadow: '#6366f140'
+      },
+      { 
+        primary: '#06b6d4', 
+        light: '#06b6d415', 
+        gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+        shadow: '#06b6d440'
+      },
+      { 
+        primary: '#10b981', 
+        light: '#10b98115', 
+        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        shadow: '#10b98140'
+      },
+      { 
+        primary: '#f59e0b', 
+        light: '#f59e0b15', 
+        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        shadow: '#f59e0b40'
+      }
     ];
-
+    
     return themes[index % themes.length];
   };
 
   const theme = getThemeColors(cell.color);
 
+  // 메뉴 액션 핸들러
   const handleMenuAction = (action: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setShowActions(false);
-
-    switch (action) {
-      case 'edit':
-        router.push(`/app/cell/${cell.id}`);
-        break;
-      case 'delete':
-        onDelete(cell.id, event);
-        break;
+    
+    if (action === 'edit' && onEdit) {
+      onEdit(cell.id);
+    } else if (action === 'delete') {
+      onDelete(cell.id, event);
     }
   };
 
+  // 즐겨찾기 토글
   const handleToggleFavorite = () => {
     const favorites = JSON.parse(localStorage.getItem('favoriteMandalarts') || '[]');
     const isFavorite = favorites.includes(cell.id);
@@ -80,12 +97,30 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
     if (isFavorite) {
       const newFavorites = favorites.filter((id: string) => id !== cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(newFavorites));
-      toast.success('즐겨찾기에서 제거되었습니다');
+      toast.success(t('mandalart.favorites.removed'));
     } else {
       favorites.push(cell.id);
       localStorage.setItem('favoriteMandalarts', JSON.stringify(favorites));
-      toast.success('즐겨찾기에 추가되었습니다');
+      toast.success(t('mandalart.favorites.added'));
     }
+  };
+
+  // 진행률 계산 (실제 데이터 사용)
+  const progress = cell.progressInfo?.progressPercentage || 0;
+  const completedTasks = cell.progressInfo?.completedCells || 0;
+  const totalTasks = cell.progressInfo?.totalCells || 0;
+
+  // 날짜 포맷팅 (가상 데이터)
+  const formatDate = () => {
+    const cellIdHash = cell.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const daysAgo = (cellIdHash % 30) + 1;
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
@@ -171,7 +206,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
                     >
                       <Edit3 size={14} />
-                      편집하기
+                      {t('board.edit')}
                     </button>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
@@ -179,7 +214,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                     >
                       <Trash2 size={14} />
-                      삭제하기
+                      {t('board.delete')}
                     </button>
                   </motion.div>
                 )}
@@ -187,7 +222,6 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
             </div>
           </div>
 
-          {/* 상태 배지 */}
           <div className="absolute top-3 left-3">
             <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm">
               {cell.isCompleted ? (
@@ -196,19 +230,19 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
                 <Circle size={12} className="text-white" />
               )}
               <span className="text-xs text-white font-medium">
-                {cell.isCompleted ? '완료' : '진행중'}
+                {cell.isCompleted ? t('cell.completed') : t('cell.inProgress')}
               </span>
             </div>
           </div>
         </div>
 
         {/* 메인 콘텐츠 */}
-        <Link href={`/app/cell/${cell.id}`} prefetch={true} className="block">
+        <Link href={`/${locale}/app/cell/${cell.id}`} prefetch={true} className="block">
           <div className="p-6 space-y-4">
             {/* 제목 */}
             <div>
               <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-gray-700 transition-colors">
-                {cell.topic || '새 만다라트'}
+                {cell.topic || t('board.newMandalart')}
               </h3>
               {cell.memo && (
                 <p className="text-sm text-gray-500 mt-1 line-clamp-2">
@@ -222,7 +256,7 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
                   <Target size={14} className="text-gray-400" />
-                  <span className="text-gray-600">진행률</span>
+                  <span className="text-gray-600">{t('cell.progress')}</span>
                 </div>
                 <span className="font-semibold text-gray-900">{progress}%</span>
               </div>
@@ -238,10 +272,10 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{completedTasks}/{totalTasks} 완료</span>
+                <span>{t('cell.completedTasks', { completed: completedTasks, total: totalTasks })}</span>
                 <div className="flex items-center gap-1">
                   <TrendingUp size={12} />
-                  <span>목표 달성 중</span>
+                  <span>{t('board.goalAchieving')}</span>
                 </div>
               </div>
             </div>
@@ -250,15 +284,15 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
             <div className="grid grid-cols-3 gap-3 pt-2">
               <div className="text-center">
                 <div className="text-lg font-bold text-gray-900">{totalTasks}</div>
-                <div className="text-xs text-gray-500">목표</div>
+                <div className="text-xs text-gray-500">{t('board.goals')}</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold" style={{ color: theme.primary }}>{completedTasks}</div>
-                <div className="text-xs text-gray-500">완료</div>
+                <div className="text-xs text-gray-500">{t('cell.completed')}</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-orange-500">{totalTasks - completedTasks}</div>
-                <div className="text-xs text-gray-500">남은</div>
+                <div className="text-xs text-gray-500">{t('board.remaining')}</div>
               </div>
             </div>
           </div>
@@ -269,11 +303,11 @@ const MandalartCard: React.FC<MandalartCardProps> = ({ cell, index, onDelete }) 
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Calendar size={12} />
-              <span>최근 업데이트</span>
+              <span>{t('board.lastUpdated')}: {formatDate()}</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.primary }}></div>
-              <span className="text-xs text-gray-500">활성</span>
+              <span className="text-xs text-gray-500">{t('active')}</span>
             </div>
           </div>
         </div>

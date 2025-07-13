@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations } from 'next-intl';
 import { CellEditorFormProps } from '@/types/mandalart';
 import { LIMITS } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
@@ -228,7 +229,7 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
             <CardHeader className="mb-4 relative">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">
-                  {isNewCell ? '새 셀 생성' : '셀 편집'}
+                  {isNewCell ? t('createNewCell') : t('editCell')}
                 </CardTitle>
                 {/* 색상 선택 동그라미 버튼 */}
                 <div className="relative" ref={colorPickerRef}>

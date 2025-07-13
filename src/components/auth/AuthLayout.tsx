@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import MobileLayout from '@/components/layout/MobileLayout';
 import HeaderBar from '@/components/layout/HeaderBar';
 
@@ -15,6 +16,9 @@ export default function AuthLayout({
   showBackButton = false, 
   onBackClick 
 }: AuthLayoutProps) {
+  const t = useTranslations('auth');
+  const tDashboard = useTranslations('dashboard');
+
   return (
     <MobileLayout
       header={
@@ -27,9 +31,9 @@ export default function AuthLayout({
     >
       <div className="p-4 flex flex-col h-full justify-center">
         <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">만다라트 플래너</h1>
+          <h1 className="text-xl font-bold text-gray-800 mb-1">{tDashboard('title')}</h1>
           <p className="text-sm text-gray-600">
-            {title === '로그인' ? '목표를 체계적으로 관리하는 만다라트 기법 플래너' : '새 계정 만들기'}
+            {title === t('login.title') ? tDashboard('empty.description') : t('signup.title')}
           </p>
         </div>
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">

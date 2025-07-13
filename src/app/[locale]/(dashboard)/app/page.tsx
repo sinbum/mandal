@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { mandalartAPI } from '@/services/mandalartService';
 import { MandalartCell } from '@/types/mandalart';
 import { Button } from '@/components/ui/Button';
@@ -32,7 +33,14 @@ import { cellCache } from '@/utils/cellCache';
  */
 export default function HomePage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const { user, loading: authLoading, isLoggedIn } = useAuth(); // 전역 인증 상태 사용
+  
+  // 다국어 번역 훅
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
+  const tMandalart = useTranslations('mandalart');
   const [rootCells, setRootCells] = useState<MandalartCell[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -62,7 +70,7 @@ export default function HomePage() {
         console.log('홈페이지 데이터 로딩 및 캐시 완료, 셀 개수:', cells.length);
       } catch (err) {
         console.error('데이터 로드 오류:', err);
-        toast.error('만다라트 목록을 불러오는데 실패했습니다');
+        toast.error(t('empty.description'));
       } finally {
         setIsLoading(false);
       }
@@ -102,8 +110,8 @@ export default function HomePage() {
     try {
       // 추가 인증 체크
       if (!user || !isLoggedIn) {
-        toast.error('로그인이 필요합니다');
-        router.push('/auth/login');
+        toast.error('로그인이 필요합니다'); // TODO: 번역 필요
+        router.push(`/${locale}/auth/login`);
         return;
       }
 
@@ -131,23 +139,23 @@ export default function HomePage() {
         cellCache.populateFromRootCells(updatedCells);
       }
 
-      toast.success('만다라트가 성공적으로 생성되었습니다');
+      toast.success(tCommon('success'));
       
       // 생성 후 해당 셀 페이지로 이동
-      router.push(`/app/cell/${rootCellId}`);
+      router.push(`/${locale}/app/cell/${rootCellId}`);
     } catch (err) {
       console.error('만다라트 생성 오류:', err);
       
       // 더 구체적인 에러 메시지 제공
       if (err instanceof Error) {
         if (err.message.includes('인증')) {
-          toast.error('로그인이 만료되었습니다. 다시 로그인해주세요');
-          router.push('/auth/login');
+          toast.error('로그인이 만료되었습니다. 다시 로그인해주세요'); // TODO: 번역 필요
+          router.push(`/${locale}/auth/login`);
         } else {
-          toast.error(`만다라트 생성 실패: ${err.message}`);
+          toast.error(`만다라트 생성 실패: ${err.message}`); // TODO: 번역 필요
         }
       } else {
-        toast.error('만다라트 생성에 실패했습니다');
+        toast.error(tCommon('error'));
       }
       
       setIsLoading(false);
@@ -158,6 +166,9 @@ export default function HomePage() {
   const openDeleteDialog = (cellId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    console.log('openDeleteDialog 호출됨, cellId:', cellId);
+    console.log('mandalartAPI:', mandalartAPI);
+    console.log('mandalartAPI.deleteMandalart:', mandalartAPI.deleteMandalart);
     setCellToDelete(cellId);
     setDeleteDialogOpen(true);
   };
@@ -166,6 +177,10 @@ export default function HomePage() {
   const confirmDelete = async () => {
     if (!cellToDelete) return;
 
+    console.log('confirmDelete 호출됨, cellToDelete:', cellToDelete);
+    console.log('mandalartAPI (confirmDelete):', mandalartAPI);
+    console.log('mandalartAPI.deleteMandalart (confirmDelete):', mandalartAPI.deleteMandalart);
+
     try {
       setIsLoading(true);
       setDeleteDialogOpen(false);
@@ -173,7 +188,7 @@ export default function HomePage() {
       // 해당 셀의 완전한 정보 찾기
       const cell = rootCells.find(cell => cell.id === cellToDelete);
       if (!cell) {
-        toast.error('삭제할 셀을 찾을 수 없습니다');
+        toast.error(tCommon('error'));
         setIsLoading(false);
         return;
       }
@@ -188,11 +203,11 @@ export default function HomePage() {
       const updatedCells = await mandalartAPI.fetchUserCells();
       setRootCells(updatedCells);
       
-      toast.success('만다라트가 성공적으로 삭제되었습니다');
+      toast.success(tCommon('success'));
       
     } catch (err) {
       console.error('만다라트 삭제 오류:', err);
-      toast.error('만다라트 삭제에 실패했습니다');
+      toast.error(tCommon('error'));
     } finally {
       setIsLoading(false);
       setCellToDelete(null);
@@ -242,11 +257,10 @@ export default function HomePage() {
             </div>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              만다라트 여정을 시작해보세요
+              {t('empty.title')}
             </h2>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              목표를 세분화하고 체계적으로 관리할 수 있는 <br />
-              강력한 만다라트 도구입니다
+              {t('empty.description')}
             </p>
             
             <motion.div
@@ -254,11 +268,11 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
             >
               <Button
-                onClick={() => handleCreateMandalart('첫 만다라트')}
+                onClick={() => handleCreateMandalart(t('createNew'))}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                첫 만다라트 만들기
+                {t('empty.button')}
               </Button>
             </motion.div>
           </motion.div>
@@ -280,14 +294,14 @@ export default function HomePage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>만다라트 삭제</AlertDialogTitle>
+            <AlertDialogTitle>{tMandalart('cell.delete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              이 만다라트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.
+              {t('deleteConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>삭제</AlertDialogAction>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>{tCommon('delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,0 +1,361 @@
+# Japanese translation file
+common:
+  save: "保存"
+  cancel: "キャンセル"
+  delete: "削除"
+  edit: "編集"
+  loading: "読み込み中..."
+  error: "エラーが発生しました"
+  success: "成功"
+  confirm: "確認"
+  close: "閉じる"
+  next: "次へ"
+  previous: "前へ"
+  submit: "送信"
+  search: "検索"
+  add: "追加"
+  remove: "削除"
+  update: "更新"
+
+slideUpPanel:
+  releaseToClose: "↓ 離して閉じる"
+  resizeHint: "↕ サイズ変更"
+  pullToClose: "引いて閉じる"
+
+auth:
+  login:
+    title: "ログイン"
+    email: "メール"
+    password: "パスワード"
+    submit: "ログイン"
+    forgotPassword: "パスワードをお忘れですか？"
+    noAccount: "アカウントをお持ちでない方"
+    signUpLink: "新規登録"
+# ... (rest of the file)
+  signup:
+    title: "新規登録"
+    email: "メール"
+    password: "パスワード"
+    confirmPassword: "パスワード確認"
+    submit: "新規登録"
+    hasAccount: "既にアカウントをお持ちの方"
+    loginLink: "ログイン"
+  errors:
+    invalidEmail: "無効なメールアドレスです"
+    passwordTooShort: "パスワードは6文字以上である必要があります"
+    passwordMismatch: "パスワードが一致しません"
+    loginFailed: "ログインに失敗しました"
+    signupFailed: "新規登録に失敗しました"
+
+dashboard:
+  title: "マンダラートプランナー"
+  welcome: "こんにちは、{name}さん！"
+  createNew: "新しいマンダラートを作成"
+  recentBoards: "最近のボード"
+  allBoards: "すべてのボード"
+  empty:
+    title: "まだマンダラートがありません"
+    description: "最初のマンダラートを作成して目標を体系的に管理しましょう"
+    button: "マンダラートを作成"
+  stats:
+    totalBoards: "総ボード数"
+    completedGoals: "完了した目標"
+    inProgress: "進行中"
+    completionRate: "完了率"
+
+mandalart:
+  board:
+    title: "マンダラートボード"
+    centerGoal: "中心目標"
+    subGoals: "サブ目標"
+    gridPosition: "グリッド位置 {position}"
+    edit: "編集"
+    delete: "削除"
+    newMandalart: "新しいマンダラート"
+    goalAchieving: "目標達成中"
+    goals: "目標"
+    remaining: "残り"
+    lastUpdated: "最終更新"
+    active: "アクティブ"
+  favorites:
+    added: "お気に入りに追加されました"
+    removed: "お気に入りから削除されました"
+  cell:
+    topic: "トピック"
+    memo: "メモ"
+    completed: "完了"
+    inProgress: "進行中"
+    progress: "進捗"
+    completedTasks: "{completed}/{total} 完了"
+    edit: "セルを編集"
+    delete: "セルを削除"
+    addChild: "サブセルを追加"
+    addHint: "クリックして新しいセルを追加"
+    addHintShort: "クリックして<br/>追加"
+    addAriaLabel: "マンダラートセルを追加"
+    cellAriaLabel: "マンダラートセル: {topic}"
+    hasChildren: "サブセルあり"
+    markAsCompleted: "完了としてマーク"
+    markAsInProgress: "進行中としてマーク"
+    empty: "空"
+    centerDescription: "これは中央セルです。編集はできません。"
+    emptyDescription: "このセルは空です。クリックして新しいコンテンツを追加してください。"
+    content: "内容"
+    created: "新しいセルが作成されました"
+    saved: "セルが保存されました"
+    deleted: "セルが削除されました"
+    createFailed: "新しいセルの作成に失敗しました"
+    deleteFailed: "セルの削除に失敗しました"
+    deleteError: "セル削除中にエラーが発生しました"
+    saveError: "セル保存中にエラーが発生しました"
+    noTitle: "タイトルなし"
+    deleteConfirm: "'{title}' セルを削除しますか？\n\nこの操作は元に戻すことができず、すべてのサブセルも一緒に削除されます."
+    deleteConfirmCurrent: "本当にこのセルを削除しますか？\n\nこの操作は元に戻すことができず、すべてのサブセルも一緒に削除されます."
+  form:
+    topicPlaceholder: "トピックを入力"
+    memoPlaceholder: "メモを入力（任意）"
+    colorSelect: "色を選択"
+    imageUpload: "画像をアップロード"
+  navigation:
+    goUp: "上に移動"
+    goBack: "戻る"
+    breadcrumb: "位置"
+  page:
+    notFound: "セルが見つかりません"
+    notFoundDescription: "リクエストされたセル情報が見つかりません"
+    errorOccurred: "エラーが発生しました"
+    cellNotFound: "セル情報が見つかりません"
+    loadFailed: "データの読み込みに失敗しました"
+
+settings:
+  title: "設定"
+  back: "戻る"
+  language:
+    title: "言語設定"
+    description: "アプリで使用する言語を選択してください"
+    korean: "한국어"
+    english: "English"
+    japanese: "日本語"
+  profile:
+    title: "プロフィール"
+    edit: "プロフィール編集"
+    current: "現在: {name}"
+    displayName: "表示名"
+    displayNamePlaceholder: "表示名を入力"
+    updateSuccess: "プロフィールが更新されました"
+    updateError: "プロフィールの更新に失敗しました"
+    editDialog:
+      title: "プロフィール編集"
+      description: "表示名を変更できます"
+  app:
+    title: "アプリ設定"
+    darkMode: "ダークモード"
+    notifications: "通知"
+    enabled: "有効"
+    disabled: "無効"
+    darkModeToggle:
+      enabled: "ダークモードが有効になりました"
+      disabled: "ダークモードが無効になりました"
+    notificationsToggle:
+      enabled: "通知が有効になりました"
+      disabled: "通知が無効になりました"
+  data:
+    title: "データ"
+    export: "データエクスポート"
+    exportDescription: "マンダラートデータをJSONファイルにエクスポート"
+    exportComingSoon: "データエクスポート機能は近日提供予定です"
+  account:
+    title: "アカウント"
+    delete: "アカウント削除"
+    deleteDescription: "すべてのデータが永久に削除されます"
+    deleteConfirm: "本当にアカウントを削除しますか？"
+    deleteWarning: "この操作は元に戻すことができず、すべてのマンダラートデータが永久に削除されます"
+    deleteComingSoon: "アカウント削除機能は近日提供予定です"
+    deleteDialog:
+      title: "アカウント削除"
+      description: "本当にアカウントを削除しますか？この操作は元に戻すことができず、すべてのマンダラートデータが永久に削除されます"
+  accountInfo:
+    title: "アカウント情報"
+    email: "メール"
+    joinDate: "登録日"
+  user:
+    defaultName: "ユーザー"
+  errors:
+    loadUserData: "ユーザーデータ読み込みエラー"
+    profileUpdate: "プロフィール更新中にエラーが発生しました"
+
+navigation:
+  home: "ホーム"
+  dashboard: "ダッシュボード"
+  settings: "設定"
+  profile: "プロフィール"
+  logout: "ログアウト"
+  menu: "メニュー"
+  mandalart: "マンダラート"
+  loggingOut: "ログアウト中..."
+  noRecentMandalart: "最近のマンダラートがありません"
+  logoutSuccess: "ログアウトが完了しました"
+  logoutError: "ログアウト中にエラーが発生しました"
+  logoutUnexpectedError: "ログアウト中に予想外のエラーが発生しました"
+  localStorageError: "ローカルストレージアクセスエラー"
+
+errors:
+  notFound: "ページが見つかりません"
+  serverError: "サーバーエラーが発生しました"
+  networkError: "ネットワーク接続を確認してください"
+  unauthorized: "ログインが必要です"
+  forbidden: "アクセス権限がありません"
+  breadcrumbBuild: "パンくずリストの構築に失敗しました"
+  errorOccurred: "エラーが発生しました"
+  retry: "再試行"
+  goBack: "戻る"
+
+loading:
+  default: "読み込み中..."
+  saving: "保存中..."
+  deleting: "削除中..."
+  uploading: "アップロード中..."
+  settings: "設定を読み込み中..."
+
+metadata:
+  title: "マンダラートプランナー"
+  description: "マンダラートプランナーは、目標達成のための体系的な計画をサポートするツールです。"
+
+app:
+  shortName: "マンダラート"
+
+dashboardLayout:
+  title: "ダッシュボード"
+  description: "マンダラートの目標を管理し、進捗を追跡してください"
+
+AppHeaderBar:
+  title: "アプリヘッダー"
+  description: "アプリケーションのトップヘッダーエリア"
+
+landing:
+  hero:
+    title:
+      part1: "目標を"
+      part2: "現実に"
+    subtitle: "体系的なマンダラート手法で大きな目標を小さなステップに分けて着実に達成していきましょう"
+    cta:
+      start: "始める"
+      login: "ログイン"
+    trustSignals:
+      - "無料利用"
+      - "簡単登録"
+      - "全機能利用可能"
+    demoSection:
+      title: "マンダラート目標設定"
+      subtitle: "一つの目標を8つの領域に細分化"
+      examples:
+        - "技術力"
+        - "ネットワーキング"
+        - "ポートフォリオ"
+        - "面接準備"
+        - "就職成功"
+        - "キャリア開発"
+        - "自己啓発"
+        - "業務能力"
+  
+  features:
+    title: "体系的な目標達成"
+    subtitle: "マンダラート手法を通じて目標を具体化し、継続的に実行できる環境を提供します"
+    items:
+      goal_breakdown:
+        title: "目標分解"
+        description: "大きな目標を実行可能な小さな単位に体系的に分解します"
+      progress_tracking:
+        title: "進捗追跡"
+        description: "各段階の進捗状況を視覚的に確認・管理できます"
+      collaboration:
+        title: "コラボレーション機能"
+        description: "チームメンバーと目標を共有し、一緒に達成していけます"
+      analytics:
+        title: "成果分析"
+        description: "目標達成率とパターンを分析して改善点を見つけられます"
+    cta:
+      start: "今すぐ始める"
+      free: "無料で始める"
+      cases: "成功事例を見る"
+  
+  testimonials:
+    title: "ユーザーの声"
+    subtitle: "マンダラートで目標を達成した実際のユーザーの体験をご確認ください"
+    items:
+      - name: "金民秀"
+        role: "フロントエンド開発者"
+        text: "マンダラートを使用してから目標が明確になり、実行力が大幅に向上しました。体系的なアプローチが本当に役立ちます。"
+        achievement: "6ヶ月でシニア開発者に昇進"
+      - name: "朴智英"
+        role: "プロダクトマネージャー"
+        text: "複雑なプロジェクトも段階的に分けて管理するとずっと効率的です。チーム全体が同じ方向を向くようになりました。"
+        achievement: "プロジェクト成功率40%向上"
+      - name: "李俊浩"
+        role: "起業家"
+        text: "スタートアップ運営にマンダラートを適用すると目標が具体化され、実行可能な計画が立てられました。"
+        achievement: "事業目標90%達成"
+      - name: "崔秀民"
+        role: "マーケティング専門家"
+        text: "個人目標から業務目標まですべてを体系的に管理できて満足しています。"
+        achievement: "マーケティング成果2倍増加"
+    stats:
+      title: "マンダラート使用統計"
+      achievement_rate:
+        value: "92%"
+        label: "目標達成率"
+      time_to_result:
+        value: "30日"
+        label: "初回成果まで"
+      active_users:
+        value: "1,000+"
+        label: "アクティブユーザー"
+  
+  cta:
+    title: "今すぐ始めましょう"
+    subtitle: "体系的な目標管理で夢を現実にしてみませんか"
+    buttons:
+      start: "無料で始める"
+      login: "ログイン"
+    features:
+      - "すべての機能を無料でご利用ください"
+      - "無料アカウント"
+      - "全機能"
+      - "いつでも解約可能"
+    social_proof: "1,000名以上のユーザーが目標を達成しています"
+    satisfaction: "満足度"
+  
+  footer:
+    brand_description: "体系的なマンダラート手法で目標を達成しましょう"
+    nav:
+      service: "サービス"
+      resources: "リソース"
+      start_free: "無料で始める"
+      features: "機能紹介"
+      success_stories: "成功事例"
+    links:
+      guide: "使用ガイド"
+      faq: "よくある質問"
+      privacy: "プライバシーポリシー"
+      terms: "利用規約"
+    copyright: "マンダラート. 全著作権保有"
+
+# PremiumMandalartCardSlider 翻訳
+slider:
+  create:
+    title: "新しいマンダラートを作成"
+    description: "マンダラートのタイトルを入力してください"
+    form:
+      title_label: "タイトル"
+      title_placeholder: "新しいマンダラート"
+      cancel: "キャンセル"
+      create: "作成"
+      creating: "作成中..."
+    card:
+      title: "新しいマンダラート作成"
+      description: "新しい目標を設定して\n夢を現実にしてみましょう"
+  navigation:
+    previous: "前へ"
+    next: "次へ"
+    swipeUpHint: "上にスワイプ"
+    swipeDownHint: "下にスワイプ"

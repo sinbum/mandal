@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { MandalartCell as MandalartCellType } from '@/types/mandalart';
 import { CELL_COLORS } from '@/lib/colors';
 import { cn } from '@/lib/utils';
@@ -426,8 +427,8 @@ const MandalartCell: React.FC<MandalartCellProps> = ({
                 onToggleComplete();
               }
             }}
-            aria-label={isCompleted ? '완료 상태 취소' : '완료 상태로 표시'}
-            title={isCompleted ? '완료 상태 취소' : '완료 상태로 표시'}
+            aria-label={isCompleted ? t('cancelCompletion') : t('markAsCompleted')}
+            title={isCompleted ? t('cancelCompletion') : t('markAsCompleted')}
           >
             <svg 
               className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" 

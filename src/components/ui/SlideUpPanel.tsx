@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { SlideUpPanelProps } from '@/types/ui';
 import { LAYOUT } from '@/lib/constants';
 import { savePanelHeight, getPanelHeight } from '@/utils/cookies';
@@ -13,6 +14,8 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
   height = LAYOUT.SLIDEUP_MIN_HEIGHT,
   className = '',
 }) => {
+  const t = useTranslations('common');
+  const tPanel = useTranslations('slideUpPanel');
   const panelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
@@ -249,7 +252,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
           {/* 드래그 힌트 (첫 방문 시에만 보이도록 하거나 선택적으로 표시) */}
           {!title && (
             <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
-              {isDragClosing ? '↓ 놓으면 닫힘' : '↕ 크기 조절'}
+              {isDragClosing ? tPanel('releaseToClose') : tPanel('resizeHint')}
             </div>
           )}
         </div>
@@ -261,7 +264,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
               {/* 드래그하여 닫기 힌트 */}
               {isDragClosing && (
                 <span className="ml-2 text-xs text-gray-500 animate-pulse">
-                  아래로 당겨서 닫기
+                  {tPanel('pullToClose')}
                 </span>
               )}
             </div>
@@ -269,7 +272,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
               type="button"
               className={slideUpStyles.closeButton}
               onClick={onClose}
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

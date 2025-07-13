@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { MandalartCell } from '@/types/mandalart';
 import { 
   MoreVertical, 
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface MandalartCardDesktopProps {
   cell: MandalartCell;
@@ -37,6 +39,8 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
   onDelete,
   onEdit 
 }) => {
+  const params = useParams();
+  const locale = params.locale as string;
   const [isHovered, setIsHovered] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
@@ -452,7 +456,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
         </div>
 
         {/* 메인 콘텐츠 */}
-        <Link href={`/app/cell/${cell.id}`} prefetch={true}>
+        <Link href={`/${locale}/app/cell/${cell.id}`} prefetch={true}>
           <div className="p-6 space-y-5">
             {/* 제목과 설명 */}
             <div>
@@ -516,7 +520,7 @@ const MandalartCardDesktop: React.FC<MandalartCardDesktopProps> = ({
               </div>
               <div className="flex items-center gap-1">
                 <Star size={14} className="text-yellow-400 fill-current" />
-                <span className="text-sm text-gray-600">즐겨찾기</span>
+                <span className="text-sm text-gray-600">{t('favorites')}</span>
               </div>
             </div>
           </div>

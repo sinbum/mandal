@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import HeaderBar from '@/components/layout/HeaderBar';
 import AnimatedButton from '@/components/animations/AnimatedButton';
 import HamburgerIcon from '@/components/animations/HamburgerIcon';
@@ -20,6 +21,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
   showBackButton = false,
   backHref = "/app"
 }) => {
+  const t = useTranslations('AppHeaderBar');
   const user = useUser(); // 전역 인증 상태 사용
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -54,7 +56,7 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
       // 실패 시 사용자 상태 복원
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-      toast.error('로그아웃 중 예상치 못한 오류가 발생했습니다');
+      toast.error(t('logoutUnexpectedError'));
     } finally {
       setIsLoggingOut(false);
     }

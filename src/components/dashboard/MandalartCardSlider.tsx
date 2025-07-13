@@ -6,6 +6,7 @@ import { MandalartCell } from '@/types/mandalart';
 import MandalartCard from './MandalartCard';
 import MandalartCardDesktop from './MandalartCardDesktop';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface MandalartCardSliderProps {
   cells: MandalartCell[];
@@ -196,7 +197,7 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
           {/* 스와이프 힌트 */}
           {totalItems > 1 && (
             <div className="text-center mt-4 text-sm text-gray-500">
-              좌우로 스와이프하여 다른 만다라트를 확인하세요
+              {t('swipeHint')}
             </div>
           )}
         </div>
@@ -293,7 +294,7 @@ const MandalartCardSlider: React.FC<MandalartCardSliderProps> = ({
           {/* 마우스 휠 힌트 */}
           {Math.ceil(totalItems / 3) > 1 && (
             <div className="text-center mt-4 text-sm text-gray-500">
-              마우스 휠을 사용하여 다른 만다라트를 확인하세요
+              {t('mouseWheelHint')}
             </div>
           )}
         </div>

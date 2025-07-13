@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import MandalartBoard from '@/components/dashboard/MandalartBoard';
 import MandalartBreadcrumbs from '@/components/dashboard/cells/MandalartBreadcrumbs';
 import useCellOperations from '@/hooks/useCellOperations';
@@ -25,9 +26,16 @@ import CellPageLayout from '@/components/layout/CellPageLayout';
  * 셀 ID를 기반으로 셀과 자식 셀을 표시합니다.
  */
 export default function CellPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const { id } = params as { id: string };
+  const locale = params.locale as string;
   const cellId = Array.isArray(id) ? id[0] : id;
   const router = useRouter();
+  
+  // 다국어 번역 훅
+  const t = useTranslations('mandalart');
+  const tCommon = useTranslations('common');
+  const tErrors = useTranslations('errors');
   
   const [currentCell, setCurrentCell] = useState<MandalartCell | null>(null);
   const [childCells, setChildCells] = useState<MandalartCell[]>([]);
@@ -190,13 +198,13 @@ export default function CellPage() {
           console.log('❌ [CellPage] 셀을 찾을 수 없음:', cellId);
           setCurrentCell(null);
           setChildCells([]);
-          setPageError('셀 정보를 찾을 수 없습니다');
+          setPageError(t('page.cellNotFound'));
         }
       } catch (err) {
         console.error('❌ [CellPage] 셀 페이지 데이터 로드 오류:', err);
         setCurrentCell(null);
         setChildCells([]);
-        setPageError('데이터 로드에 실패했습니다');
+        setPageError(t('page.loadFailed'));
       } finally {
         console.log('🔄 [CellPage] useEffect 종료 처리');
         setIsPending(false);
@@ -275,7 +283,7 @@ export default function CellPage() {
     if (cellId && currentCell) {
       // 현재 셀이 로드된 후 브레드크럼 경로 구성
       navigation.buildPathForCell(cellId).catch(err => {
-        console.error('브레드크럼 경로 구성 실패:', err);
+        console.error(tErrors('breadcrumbBuild'), err);
       });
     }
   }, [cellId, currentCell]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -359,15 +367,15 @@ export default function CellPage() {
         );
         
         if (!newCell) {
-          toast.error('새 셀 생성에 실패했습니다');
+          toast.error(t('cell.createFailed'));
           return;
         }
         
-        toast.success('새 셀이 생성되었습니다');
+        toast.success(t('cell.created'));
       } else {
         // 기존 셀인 경우: 업데이트
         await handleCellUpdate(updatedCell.id, updatedCell);
-        toast.success('셀이 저장되었습니다');
+        toast.success(t('cell.saved'));
       }
       
       // 편집 모드 종료
@@ -396,8 +404,8 @@ export default function CellPage() {
       setMostRecentMandalartCell(cellId);
       saveRecentMandalartCell(cellId);
     } catch (error) {
-      console.error('셀 저장 중 오류 발생:', error);
-      toast.error('셀 저장 중 오류가 발생했습니다');
+      console.error(t('cell.saveError'), error);
+      toast.error(t('cell.saveError'));
     }
   };
   
@@ -429,7 +437,7 @@ export default function CellPage() {
   const handleContextMenuDelete = async () => {
     if (!contextMenuCell) return;
     
-    const confirmDelete = window.confirm(`'${contextMenuCell.topic || '제목 없음'}' 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다.`);
+    const confirmDelete = window.confirm(t('cell.deleteConfirm', { title: contextMenuCell.topic || t('cell.noTitle') }));
     
     if (!confirmDelete) return;
     
@@ -437,14 +445,14 @@ export default function CellPage() {
       const success = await deleteCell(contextMenuCell.id);
       
       if (success) {
-        toast.success('셀이 삭제되었습니다');
+        toast.success(t('cell.deleted'));
         
         // 현재 페이지의 셀이 삭제된 경우 부모로 이동
         if (contextMenuCell.id === currentCell?.id) {
           if (currentCell.parentId) {
-            router.push(`/app/cell/${currentCell.parentId}`);
+            router.push(`/${locale}/app/cell/${currentCell.parentId}`);
           } else {
-            router.push('/app');
+            router.push(`/${locale}/app`);
           }
         } else {
           // 자식 셀이 삭제된 경우 캐시 무효화 후 목록 새로고침
@@ -464,11 +472,11 @@ export default function CellPage() {
           }
         }
       } else {
-        toast.error('셀 삭제에 실패했습니다');
+        toast.error(t('cell.deleteFailed'));
       }
     } catch (error) {
-      console.error('셀 삭제 중 오류 발생:', error);
-      toast.error('셀 삭제 중 오류가 발생했습니다');
+      console.error(t('cell.deleteError'), error);
+      toast.error(t('cell.deleteError'));
     }
   };
 
@@ -476,7 +484,7 @@ export default function CellPage() {
   const handleDeleteCell = async () => {
     if (!currentCell || isDeleting) return;
     
-    const confirmDelete = window.confirm('정말로 이 셀을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 모든 하위 셀도 함께 삭제됩니다.');
+    const confirmDelete = window.confirm(t('cell.deleteConfirmCurrent'));
     
     if (!confirmDelete) return;
     
@@ -486,20 +494,20 @@ export default function CellPage() {
       const success = await deleteCell(currentCell.id);
       
       if (success) {
-        toast.success('셀이 삭제되었습니다');
+        toast.success(t('cell.deleted'));
         
         // 부모 셀로 이동하거나 홈으로 이동
         if (currentCell.parentId) {
-          router.push(`/app/cell/${currentCell.parentId}`);
+          router.push(`/${locale}/app/cell/${currentCell.parentId}`);
         } else {
-          router.push('/app');
+          router.push(`/${locale}/app`);
         }
       } else {
-        toast.error('셀 삭제에 실패했습니다');
+        toast.error(t('cell.deleteFailed'));
       }
     } catch (error) {
-      console.error('셀 삭제 중 오류 발생:', error);
-      toast.error('셀 삭제 중 오류가 발생했습니다');
+      console.error(t('cell.deleteError'), error);
+      toast.error(t('cell.deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -525,7 +533,7 @@ export default function CellPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">오류 발생</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{t('page.errorOccurred')}</h1>
           <p className="text-gray-700">{pageError || error}</p>
         </div>
       </div>
@@ -537,8 +545,8 @@ export default function CellPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">셀을 찾을 수 없습니다</h1>
-          <p className="text-gray-700">요청하신 셀 정보를 찾을 수 없습니다.</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">{t('page.notFound')}</h1>
+          <p className="text-gray-700">{t('page.notFoundDescription')}</p>
         </div>
       </div>
     );
@@ -615,7 +623,7 @@ export default function CellPage() {
             onCreateCell={handleCreateCell}
             onNavigate={(cellId) => {
               // 자식 셀로 네비게이션 (클라이언트 사이드 라우팅)
-              router.push(`/app/cell/${cellId}`);
+              router.push(`/${locale}/app/cell/${cellId}`);
             }}
             onEditCell={setEditingCell}
             onLongPress={handleCellLongPress}
