@@ -41,7 +41,9 @@
       "Bash(task-master)",
       "mcp__task-master__get_tasks",
       "mcp__task-master__next_task",
-      "mcp__task-master__set_task_status"
+      "mcp__task-master__set_task_status",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   },
