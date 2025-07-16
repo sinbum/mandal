@@ -32,7 +32,13 @@
       "Bash(true)",
       "Bash(cp:*)",
       "Bash(git restore:*)",
-      "Bash(timeout 10s npm run dev)"
+      "Bash(timeout 10s npm run dev)",
+      "Bash(task-master init:*)",
+      "Bash(task-master list:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npx:*)",
+      "Bash(claude clear)",
+      "Bash(task-master)"
     ],
     "deny": []
   },
