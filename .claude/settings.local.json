@@ -38,7 +38,10 @@
       "Bash(npm cache clean:*)",
       "Bash(npx:*)",
       "Bash(claude clear)",
-      "Bash(task-master)"
+      "Bash(task-master)",
+      "mcp__task-master__get_tasks",
+      "mcp__task-master__next_task",
+      "mcp__task-master__set_task_status"
     ],
     "deny": []
   },
