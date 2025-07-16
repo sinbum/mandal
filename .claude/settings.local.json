@@ -35,5 +35,11 @@
       "Bash(timeout 10s npm run dev)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "task-master",
+    "notionApi",
+    "sequential-thinking",
+    "supabase"
+  ]
 }
