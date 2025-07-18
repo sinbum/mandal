@@ -20,6 +20,8 @@ common:
   create: "作成"
   creating: "作成中..."
   enterMemo: "メモを入力"
+  topic: "トピック"
+  enterText: "テキストを入力"
   high: "高"
   medium: "中"
   low: "低"
@@ -105,6 +107,13 @@ mandalart:
   active: "アクティブ"
   common:
     overallProgress: "全体進捗"
+    topic: "トピック"
+    enterText: "テキストを入力"
+    memo: "メモ"
+    enterMemo: "メモを入力"
+    cancel: "キャンセル"
+    create: "作成"
+    save: "保存"
   board:
     title: "マンダラートボード"
     centerGoal: "中心目標"

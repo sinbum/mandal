@@ -80,4 +80,5 @@ export interface MobileLayoutProps {
   header?: ReactNode;
   footer?: ReactNode;
   className?: string;
+  disableScroll?: boolean;
 }

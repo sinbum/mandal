@@ -54,9 +54,6 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
     }
   };
 
-  const handleProfileNavigation = () => {
-    router.push('/app/profile');
-  };
 
   return (
     <>
@@ -100,15 +97,6 @@ const AppHeaderBar: React.FC<AppHeaderBarProps> = ({
                 <span className="text-sm font-medium">{t('mandalart')}</span>
               </button>
 
-              <button 
-                onClick={handleProfileNavigation}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span className="text-sm font-medium">{t('profile')}</span>
-              </button>
 
               <button 
                 onClick={() => setDrawerOpen(!drawerOpen)}

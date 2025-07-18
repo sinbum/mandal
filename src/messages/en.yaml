@@ -20,6 +20,8 @@ common:
   create: "Create"
   creating: "Creating..."
   enterMemo: "Enter memo"
+  topic: "Topic"
+  enterText: "Enter text"
   high: "High"
   medium: "Medium"
   low: "Low"
@@ -105,6 +107,13 @@ mandalart:
   active: "Active"
   common:
     overallProgress: "Overall Progress"
+    topic: "Topic"
+    enterText: "Enter text"
+    memo: "Memo"
+    enterMemo: "Enter memo"
+    cancel: "Cancel"
+    create: "Create"
+    save: "Save"
   board:
     title: "Mandalart Board"
     centerGoal: "Center Goal"

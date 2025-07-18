@@ -399,7 +399,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
       </div>
 
       {/* 단순한 네비게이션 인디케이터 */}
-      <div className="flex justify-center items-center space-x-3 py-8">
+      <div className="flex justify-center items-center space-x-3 py-8 pb-20 sm:pb-8">
         {Array.from({ length: totalItems }).map((_, index) => (
           <button
             key={index}
@@ -415,7 +415,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
 
       {/* 단순한 스와이프 힌트 */}
       {isMobile && totalItems > 1 && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 text-center">
           <div className="text-gray-500 text-sm">
             <ChevronUp className="w-4 h-4 mx-auto mb-1" />
             <div className="text-xs">{t('swipeUpHint')}</div>

@@ -20,6 +20,8 @@ common:
   create: "생성"
   creating: "생성 중..."
   enterMemo: "멤모를 입력하세요"
+  topic: "주제"
+  enterText: "텍스트를 입력하세요"
   high: "높음"
   medium: "보통"
   low: "낮음"
@@ -105,6 +107,13 @@ mandalart:
   active: "활성"
   common:
     overallProgress: "전체 진행률"
+    topic: "주제"
+    enterText: "텍스트를 입력하세요"
+    memo: "메모"
+    enterMemo: "메모를 입력하세요"
+    cancel: "취소"
+    create: "생성"
+    save: "저장"
   board:
     title: "만다라트 보드"
     centerGoal: "중심 목표"

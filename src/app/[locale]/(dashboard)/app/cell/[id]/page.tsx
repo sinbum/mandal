@@ -557,6 +557,7 @@ export default function CellPage() {
       <MobileLayout
         header={<div className="hidden sm:block"><AppHeaderBar showBackButton backHref="/app" /></div>}
         footer={<div className="sm:hidden"><BottomBar /></div>}
+        disableScroll={true}
       >
 
       {/* 렌더링 조건 로깅 추가 */}

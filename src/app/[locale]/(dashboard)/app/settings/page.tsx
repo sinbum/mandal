@@ -11,6 +11,8 @@ import MobileLayout from '@/components/layout/MobileLayout';
 import BottomBar from '@/components/layout/BottomBar';
 import PageTransition from '@/components/animations/PageTransition';
 import InputField from '@/components/ui/InputField';
+import { Textarea } from '@/components/ui/TextArea';
+import ColorPalette from '@/components/ui/ColorPalette';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +51,10 @@ export default function SettingsPage() {
   const [profileEditModal, setProfileEditModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [newBio, setNewBio] = useState('');
+  const [themeColor, setThemeColor] = useState('#3B82F6');
+  const [newThemeColor, setNewThemeColor] = useState('#3B82F6');
   const supabase = createClient();
 
   useEffect(() => {
@@ -61,6 +67,19 @@ export default function SettingsPage() {
         if (user) {
           setDisplayName(user.user_metadata?.display_name || user.email?.split('@')[0] || t('user.defaultName'));
           setNewDisplayName(user.user_metadata?.display_name || user.email?.split('@')[0] || t('user.defaultName'));
+          
+          // 프로필 데이터 로드
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .single();
+
+          if (profile && !profileError) {
+            setBio(profile.bio || '');
+            setNewBio(profile.bio || '');
+            setThemeColor(profile.theme_color || '#3B82F6');
+            setNewThemeColor(profile.theme_color || '#3B82F6');
+          }
         }
         
         // Load settings from localStorage only on client side
@@ -115,16 +134,39 @@ export default function SettingsPage() {
     if (!user || !newDisplayName.trim()) return;
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      // 유저 메타데이터 업데이트
+      const { error: authError } = await supabase.auth.updateUser({
         data: { display_name: newDisplayName.trim() }
       });
 
-      if (error) {
+      if (authError) {
         toast.error(t('profile.updateError'));
         return;
       }
 
+      // 프로필 테이블 업데이트
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          display_name: newDisplayName.trim(),
+          bio: newBio,
+          theme_color: newThemeColor,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        toast.error(t('profile.updateError'));
+        return;
+      }
+
+      // 상태 업데이트
       setDisplayName(newDisplayName.trim());
+      setBio(newBio);
+      setThemeColor(newThemeColor);
       setProfileEditModal(false);
       toast.success(t('profile.updateSuccess'));
     } catch (error) {
@@ -153,7 +195,12 @@ export default function SettingsPage() {
           title: t('profile.edit'),
           description: t('profile.current', { name: displayName }),
           icon: <UserIcon size={20} />,
-          action: () => setProfileEditModal(true),
+          action: () => {
+            setNewDisplayName(displayName);
+            setNewBio(bio);
+            setNewThemeColor(themeColor);
+            setProfileEditModal(true);
+          },
           type: 'navigate' as const
         }
       ]
@@ -319,7 +366,7 @@ export default function SettingsPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             
-            <div className="py-4">
+            <div className="py-4 space-y-6">
               <InputField
                 id="displayName"
                 label={t('profile.displayName')}
@@ -328,6 +375,33 @@ export default function SettingsPage() {
                 placeholder={t('profile.displayNamePlaceholder')}
                 maxLength={50}
               />
+              
+              <div className="space-y-2">
+                <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                  {t('profile.bio')}
+                </label>
+                <Textarea
+                  id="bio"
+                  value={newBio}
+                  onChange={(e) => setNewBio(e.target.value)}
+                  className="min-h-[100px]"
+                  placeholder={t('profile.bioPlaceholder')}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t('profile.themeColor')}
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  {t('profile.themeColorDescription')}
+                </p>
+                <ColorPalette
+                  selectedColor={newThemeColor}
+                  onColorSelect={setNewThemeColor}
+                  className="mt-2"
+                />
+              </div>
             </div>
 
             <AlertDialogFooter>
