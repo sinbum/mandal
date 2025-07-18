@@ -4,10 +4,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { MandalartCell } from '@/types/mandalart';
-import MandalartCard from './MandalartCard';
-import MandalartCardDesktop from './MandalartCardDesktop';
-import { ChevronUp, ChevronDown, Plus } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Plus, MoreVertical, Edit3, Trash2, Circle, CheckCircle2 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface PremiumMandalartCardSliderProps {
   cells: MandalartCell[];
@@ -23,17 +22,17 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
   onCreateNew 
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // 번역 훅
   const t = useTranslations('slider');
-  const tBoard = useTranslations('board');
-  const tCommon = useTranslations('common');
+  const tMandalart = useTranslations('mandalart');
+  const locale = useLocale();
+  const router = useRouter();
   
   // 전체 아이템 수 (카드 + 새 만다라트 카드)
   const totalItems = cells.length + 1;
@@ -43,18 +42,6 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
     setTitle(t('create.form.title_placeholder'));
   }, [t]);
 
-  // 디바이스 감지
-  useEffect(() => {
-    const checkDevice = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 640);
-      setIsTablet(width >= 640 && width < 1024);
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
-  }, []);
 
   // 카드 전환 애니메이션 (단순화)
   const [springProps, api] = useSpring(() => ({
@@ -298,40 +285,207 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
 
     const cell = cells[currentIndex];
     
-    if (isMobile) {
-      return (
-        <div className="min-h-[500px] w-full">
-          <MandalartCard
-            cell={cell}
-            index={currentIndex}
-            onDelete={onDelete}
-            onEdit={onEdit}
-          />
+    // 색상 테마
+    const getThemeColors = (color?: string) => {
+      if (color) {
+        return {
+          primary: color,
+          light: `${color}15`,
+          gradient: `linear-gradient(135deg, ${color} 0%, ${color}90 100%)`,
+        };
+      }
+      
+      const themes = [
+        { 
+          primary: '#6366f1', 
+          light: '#6366f115', 
+          gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        },
+        { 
+          primary: '#06b6d4', 
+          light: '#06b6d415', 
+          gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+        },
+        { 
+          primary: '#10b981', 
+          light: '#10b98115', 
+          gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        },
+        { 
+          primary: '#f59e0b', 
+          light: '#f59e0b15', 
+          gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        }
+      ];
+      
+      return themes[currentIndex % themes.length];
+    };
+
+    const theme = getThemeColors(cell.color);
+    const progress = cell.progressInfo?.progressPercentage || 0;
+    const completedTasks = cell.progressInfo?.completedCells || 0;
+    const totalTasks = cell.progressInfo?.totalCells || 0;
+
+    // 카드 클릭 핸들러
+    const handleCardClick = () => {
+      router.push(`/${locale}/app/cell/${cell.id}`);
+    };
+
+    // 모든 디바이스에서 새 만다라트 카드와 동일한 레이아웃 사용
+    return (
+      <div className="w-full relative group">
+        {/* 내부 조명 효과 */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-60 group-active:opacity-60 transition-opacity duration-500 pointer-events-none -z-10"
+          style={{
+            background: `radial-gradient(ellipse at center, ${theme.primary}80 0%, ${theme.primary}50 30%, ${theme.primary}20 60%, transparent 80%)`,
+            filter: 'blur(25px)',
+            transform: 'scale(1.6)'
+          }}
+        />
+        
+        {/* 중간 글로우 효과 */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-40 group-active:opacity-40 transition-opacity duration-600 pointer-events-none -z-10"
+          style={{
+            background: `radial-gradient(ellipse at center, ${theme.primary}60 0%, ${theme.primary}25 50%, transparent 85%)`,
+            filter: 'blur(40px)',
+            transform: 'scale(2.2)'
+          }}
+        />
+        
+        {/* 외부 확산 조명 효과 */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-25 group-active:opacity-25 transition-opacity duration-800 pointer-events-none -z-10"
+          style={{
+            background: `radial-gradient(ellipse at center, ${theme.primary}40 0%, ${theme.primary}15 40%, ${theme.primary}08 70%, transparent 90%)`,
+            filter: 'blur(60px)',
+            transform: 'scale(3.0)'
+          }}
+        />
+        
+        <div 
+          className="relative w-full p-8 rounded-3xl border-2 border-gray-200 bg-white hover:border-blue-300 transition-all duration-300 min-h-[400px] flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md cursor-pointer select-none"
+          onClick={handleCardClick}
+        >
+          {/* 상단 액션 버튼들 */}
+          <div className="absolute top-4 right-4 flex gap-2 z-20">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowActions(!showActions);
+              }}
+              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:text-gray-800 transition-colors duration-200 flex items-center justify-center shadow-sm"
+            >
+              <MoreVertical size={14} />
+            </button>
+            
+            {/* 드롭다운 메뉴 */}
+            {showActions && (
+              <div className="absolute right-0 top-10 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-30">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowActions(false);
+                    onEdit?.(cell.id);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                >
+                  <Edit3 size={12} />
+                  {tMandalart('board.edit')}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowActions(false);
+                    onDelete(cell.id, e);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
+                >
+                  <Trash2 size={12} />
+                  {tMandalart('board.delete')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 상단 상태 표시 */}
+          <div className="absolute top-4 left-4 z-20">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/80 backdrop-blur-sm">
+              {cell.isCompleted ? (
+                <CheckCircle2 size={12} className="text-green-600" />
+              ) : (
+                <Circle size={12} className="text-gray-400" />
+              )}
+              <span className="text-xs font-medium text-gray-700">
+                {cell.isCompleted ? tMandalart('cell.completed') : tMandalart('cell.inProgress')}
+              </span>
+            </div>
+          </div>
+
+          {/* 헤더 - 그라디언트 배경 */}
+          <div
+            className="w-16 h-16 mb-6 rounded-full flex items-center justify-center shadow-xl"
+            style={{ background: theme.gradient }}
+          >
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L13.09 7.26L18 4L14.74 8.91L20 10L14.74 11.09L18 16L13.09 12.74L12 18L10.91 12.74L6 16L9.26 11.09L4 10L9.26 8.91L6 4L10.91 7.26L12 2Z" />
+            </svg>
+          </div>
+          
+          {/* 제목 */}
+          <h3 className="text-2xl font-bold text-gray-800 mb-3 line-clamp-2">
+            {cell.topic || '제목 없음'}
+          </h3>
+          
+          {/* 진행률 */}
+          <div className="w-full max-w-xs mb-4">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>진행률</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${progress}%`,
+                  background: theme.gradient
+                }}
+              />
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {completedTasks}/{totalTasks} 완료
+            </div>
+          </div>
+          
+          {/* 메모 (있을 경우) */}
+          {cell.memo && (
+            <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-4">
+              {cell.memo}
+            </p>
+          )}
+
+          {/* 통계 카드 */}
+          <div className="grid grid-cols-3 gap-3 w-full max-w-xs mt-4">
+            <div className="text-center">
+              <div className="text-lg font-bold text-gray-900">{totalTasks}</div>
+              <div className="text-xs text-gray-500">{tMandalart('board.goals')}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold" style={{ color: theme.primary }}>{completedTasks}</div>
+              <div className="text-xs text-gray-500">{tMandalart('cell.completed')}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-orange-500">{totalTasks - completedTasks}</div>
+              <div className="text-xs text-gray-500">{tMandalart('board.remaining')}</div>
+            </div>
+          </div>
         </div>
-      );
-    } else if (isTablet) {
-      return (
-        <div className="min-h-[400px] w-full">
-          <MandalartCard
-            cell={cell}
-            index={currentIndex}
-            onDelete={onDelete}
-            onEdit={onEdit}
-          />
-        </div>
-      );
-    } else {
-      return (
-        <div className="w-full max-w-md mx-auto">
-          <MandalartCardDesktop
-            cell={cell}
-            index={currentIndex}
-            onDelete={onDelete}
-            onEdit={onEdit}
-          />
-        </div>
-      );
-    }
+      </div>
+    );
   };
 
   // 간단한 프리뷰 카드들 (렌더링 최소화)
@@ -376,9 +530,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col" ref={containerRef}>
-      {/* 단순한 배경 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30" />
+    <div className="relative w-full min-h-screen flex flex-col select-none" ref={containerRef}>
 
       {/* 메인 카드 영역 */}
       <div 
@@ -398,32 +550,40 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
         </animated.div>
       </div>
 
-      {/* 단순한 네비게이션 인디케이터 */}
+      {/* 네비게이션 인디케이터 */}
       <div className="flex justify-center items-center space-x-3 py-8 pb-20 sm:pb-8">
-        {Array.from({ length: totalItems }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              index === currentIndex 
-                ? 'bg-blue-500 w-8' 
-                : 'bg-gray-300 hover:bg-gray-400'
-            }`}
-          />
-        ))}
+        {Array.from({ length: totalItems }).map((_, index) => {
+          const isActive = index === currentIndex;
+          const isCreateCard = index === cells.length;
+          
+          // 현재 카드의 테마 색상 가져오기
+          let activeColor = '#3b82f6'; // 기본 파란색
+          if (isActive) {
+            if (isCreateCard) {
+              activeColor = '#6366f1'; // 새 카드용 보라색
+            } else if (cells[index]?.color) {
+              activeColor = cells[index].color;
+            } else {
+              // 인덱스 기반 기본 테마 색상
+              const themes = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b'];
+              activeColor = themes[index % themes.length];
+            }
+          }
+          
+          return (
+            <button
+              key={index}
+              onClick={() => goToIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                isActive ? 'w-8' : 'hover:bg-gray-400'
+              }`}
+              style={{
+                backgroundColor: isActive ? activeColor : '#d1d5db'
+              }}
+            />
+          );
+        })}
       </div>
-
-      {/* 단순한 스와이프 힌트 */}
-      {isMobile && totalItems > 1 && (
-        <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 text-center">
-          <div className="text-gray-500 text-sm">
-            <ChevronUp className="w-4 h-4 mx-auto mb-1" />
-            <div className="text-xs">{t('swipeUpHint')}</div>
-            <div className="text-xs">{t('swipeDownHint')}</div>
-            <ChevronDown className="w-4 h-4 mx-auto mt-1" />
-          </div>
-        </div>
-      )}
 
       {/* 진행률 표시 */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
