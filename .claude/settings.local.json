@@ -45,15 +45,18 @@
       "Bash(npm test:*)",
       "Bash(npm run:*)",
       "Bash(chmod:*)",
-      "Bash(ssh-add:*)"
+      "Bash(ssh-add:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "task-master",
     "notionApi",
     "sequential-thinking",
     "supabase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

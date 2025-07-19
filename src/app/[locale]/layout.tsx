@@ -128,9 +128,7 @@ export default async function LocaleLayout({
           <LocaleProvider>
             <BrowserCompatibilityProvider />
             <Toaster position="top-center" />
-            <div className="min-h-screen bg-white">
-              {children}
-            </div>
+            {children}
           </LocaleProvider>
         </NextIntlClientProvider>
       </body>

@@ -3,7 +3,7 @@
 
 const HomePageSkeleton = () => {
   return (
-    <div className="relative w-full min-h-screen flex flex-col">
+    <div className="relative w-full min-h-[100dvh] flex flex-col">
       {/* 배경 */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30" />
 

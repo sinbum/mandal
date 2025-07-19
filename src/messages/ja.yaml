@@ -324,9 +324,6 @@ app:
   shortName: "マンダラート"
   name: "マンウォル"
 
-dashboardLayout:
-  title: "ダッシュボード"
-  description: "マンダラートの目標を管理し、進捗を追跡してください"
 
 AppHeaderBar:
   title: "アプリヘッダー"

@@ -21,7 +21,7 @@ const CellPageLayout: React.FC<CellPageLayoutProps> = ({
   className
 }) => {
   return (
-    <div className={cn("flex lg:flex-row flex-col h-[100dvh] sm:h-screen overflow-hidden", className)}>
+    <div className={cn("flex lg:flex-row flex-col min-h-[100dvh]", className)}>
       
       {/* 메인 콘텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -36,7 +36,7 @@ const CellPageLayout: React.FC<CellPageLayoutProps> = ({
           
           {/* 메인 콘텐츠 영역 */}
           <div className="flex-1 w-full flex items-start justify-center pt-8 sm:pt-4 pb-8 sm:pb-2 px-2 sm:p-4 min-h-0">
-            <div className="w-full max-w-[min(90vw,calc(100vh-8rem))] sm:max-w-[min(85vw,calc(100vh-10rem))] md:max-w-[min(80vw,calc(100vh-8rem))] lg:max-w-[min(60vw,calc(100vh-10rem))] xl:max-w-[min(55vw,calc(100vh-10rem))] 2xl:max-w-[min(50vw,calc(100vh-10rem))] mx-auto">
+            <div className="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto">
               
               {/* MandalartGrid와 동일한 래퍼 구조 */}
               <div className="relative h-full">

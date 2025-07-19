@@ -530,7 +530,7 @@ const PremiumMandalartCardSlider: React.FC<PremiumMandalartCardSliderProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col select-none" ref={containerRef}>
+    <div className="relative w-full min-h-[100dvh] flex flex-col select-none" ref={containerRef}>
 
       {/* 메인 카드 영역 */}
       <div 

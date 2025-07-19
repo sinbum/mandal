@@ -324,9 +324,6 @@ app:
   shortName: "만다라트"
   name: "만월"
 
-dashboardLayout:
-  title: "대시보드"
-  description: "나의 만다라트 목표들을 관리하고 진행상황을 확인하세요"
 
 AppHeaderBar:
   title: "앱 헤더"

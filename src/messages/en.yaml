@@ -324,9 +324,6 @@ app:
   shortName: "Mandalart"
   name: "Manwol"
 
-dashboardLayout:
-  title: "Dashboard"
-  description: "Manage your Mandalart goals and track progress"
 
 AppHeaderBar:
   title: "App Header"
