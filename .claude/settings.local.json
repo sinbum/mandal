@@ -48,7 +48,8 @@
       "Bash(ssh-add:*)",
       "Bash(tree:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:next-intl.dev)"
     ],
     "deny": []
   },
