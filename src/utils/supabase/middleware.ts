@@ -39,6 +39,17 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // 로케일 추출 (경로에서 첫 번째 세그먼트)
+  const pathname = request.nextUrl.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+  const locale = segments[0];
+  const supportedLocales = ['ko', 'en', 'ja'];
+  
+  // 로케일이 있는 경우 제거한 경로, 없으면 원본 경로 사용
+  const pathWithoutLocale = supportedLocales.includes(locale) 
+    ? '/' + segments.slice(1).join('/') 
+    : pathname;
+
   // 공개 경로들 (인증이 필요없는 페이지들)
   const publicPaths = [
     '/',  // 랜딩 페이지
@@ -54,9 +65,9 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/static') ||
       request.nextUrl.pathname.startsWith('/api') ||
       request.nextUrl.pathname.startsWith('/favicon.ico') ||
-      publicPaths.includes(request.nextUrl.pathname)
+      publicPaths.includes(pathWithoutLocale)
     ) {
-    return NextResponse.next()
+    return supabaseResponse
   }
 
   if (
@@ -64,7 +75,12 @@ export async function updateSession(request: NextRequest) {
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    // 로케일이 있으면 로케일을 유지하면서 리다이렉트
+    if (supportedLocales.includes(locale)) {
+      url.pathname = `/${locale}/auth/login`
+    } else {
+      url.pathname = '/auth/login'
+    }
     return NextResponse.redirect(url)
   }
 

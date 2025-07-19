@@ -10,20 +10,15 @@ export const routing = defineRouting({
   // 로케일 감지 방식 (URL 기반으로만 감지)
   localeDetection: false,
   
-  // 기본 로케일 경로에서 prefix 제거 
+  // 기본 로케일 경로에서도 prefix 사용 
   localePrefix: 'always',
   
   // 경로 이름 (동적 라우트 포함)
   pathnames: {
     '/': '/',
     '/app': '/app',
-    '/app/settings': '/app/settings',
-    '/app/profile': '/app/profile',
-    '/app/cell/[id]': {
-      ko: '/app/cell/[id]',
-      en: '/app/cell/[id]',
-      ja: '/app/cell/[id]'
-    },
+    '/app/settings': '/app/settings', 
+    '/app/cell/[id]': '/app/cell/[id]',
     '/auth/login': '/auth/login',
     '/auth/signup': '/auth/signup',
     '/auth/confirm': '/auth/confirm',

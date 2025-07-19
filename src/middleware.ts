@@ -39,11 +39,16 @@ export async function middleware(request: NextRequest) {
 
   // 2. 로케일이 포함된 경로에서 공개 경로 확인
   const updatedPathname = request.nextUrl.pathname;
-  const locale = updatedPathname.split('/')[1]; // /ko/auth/login -> ko
+  const segments = updatedPathname.split('/').filter(Boolean);
+  const locale = segments[0]; // /ko/auth/login -> ko
+  const supportedLocales = ['ko', 'en', 'ja'];
+  
   console.log('[Middleware] Detected locale:', locale, 'from path:', updatedPathname);
   
   // 로케일을 제거한 실제 경로
-  const pathWithoutLocale = updatedPathname.replace(`/${locale}`, '') || '/';
+  const pathWithoutLocale = supportedLocales.includes(locale) 
+    ? '/' + segments.slice(1).join('/') || '/'
+    : updatedPathname;
   
   // 공개 경로들 (인증이 필요없는 페이지들)
   const publicPaths = [
