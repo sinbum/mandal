@@ -213,12 +213,12 @@ const CellEditorForm: React.FC<CellEditorFormProps> = ({
     <>
       {/* 배경 오버레이 */}
       <div 
-        className="fixed inset-0 backdrop-blur-sm bg-black/50 animate-in fade-in duration-200"
+        className="fixed inset-0 backdrop-blur-sm bg-black/50 animate-in fade-in duration-200 z-40"
         onClick={onCancel}
       />
       {/* 모달 컨텐츠 */}
       <div 
-        className="fixed inset-0 flex justify-center p-4 overflow-y-auto pointer-events-none"
+        className="fixed inset-0 flex justify-center p-4 overflow-y-auto pointer-events-none z-50"
         style={getModalStyle()}
       >
         <Card 

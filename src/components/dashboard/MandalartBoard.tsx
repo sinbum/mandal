@@ -64,19 +64,17 @@ const MandalartBoard: React.FC<MandalartBoardProps> = ({
   };
 
   return (
-    <div className="w-full max-w-[min(90vw,calc(100vh-8rem))] sm:max-w-[min(85vw,calc(100vh-10rem))] md:max-w-[min(80vw,calc(100vh-8rem))] lg:max-w-[min(60vw,calc(100vh-10rem))] xl:max-w-[min(55vw,calc(100vh-10rem))] 2xl:max-w-[min(50vw,calc(100vh-10rem))] mx-auto">
-      <MandalartGrid
-        centerCell={centerCell}
-        cells={cells}
-        onCellClick={handleCellClick}
-        onCellHover={handleCellHover}
-        onCellUpdate={handleCellUpdate}
-        onToggleComplete={handleToggleComplete}
-        onEditCell={onEditCell}
-        onLongPress={onLongPress}
-        showProgressStats={showProgressStats}
-      />
-    </div>
+    <MandalartGrid
+      centerCell={centerCell}
+      cells={cells}
+      onCellClick={handleCellClick}
+      onCellHover={handleCellHover}
+      onCellUpdate={handleCellUpdate}
+      onToggleComplete={handleToggleComplete}
+      onEditCell={onEditCell}
+      onLongPress={onLongPress}
+      showProgressStats={showProgressStats}
+    />
   );
 };
 

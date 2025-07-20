@@ -4,11 +4,11 @@ export const routing = defineRouting({
   // 지원하는 모든 로케일 (ja로 표준화)
   locales: ['ko', 'en', 'ja'],
   
-  // 기본 로케일 (한국어)
-  defaultLocale: 'ko',
+  // 기본 로케일 (영어로 변경)
+  defaultLocale: 'en',
   
-  // 로케일 감지 방식 (URL 기반으로만 감지)
-  localeDetection: false,
+  // 로케일 감지 방식 (브라우저 언어 자동 감지 활성화)
+  localeDetection: true,
   
   // 기본 로케일 경로에서도 prefix 사용 
   localePrefix: 'always',

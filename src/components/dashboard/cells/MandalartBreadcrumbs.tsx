@@ -84,7 +84,7 @@ const MandalartBreadcrumbs: React.FC<MandalartBreadcrumbsProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between mb-4 mt-4 animate-in fade-in-50 duration-300">
+    <div className="flex items-center justify-between mb-2 mt-2 sm:mb-3 sm:mt-3 md:mb-3 md:mt-3 lg:mb-4 lg:mt-4 animate-in fade-in-50 duration-300">
       <div className="flex-1 min-w-0 mr-4">
         <Breadcrumb>
         <BreadcrumbList>

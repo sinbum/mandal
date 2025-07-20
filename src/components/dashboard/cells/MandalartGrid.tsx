@@ -281,7 +281,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
   });
   
   return (
-    <div className={cn("relative h-full", className)}>
+    <div className={cn("w-full h-full relative", className)}>
       
       {/* 로딩 상태 */}
       {loading && (
@@ -308,15 +308,15 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
         </div>
       )}
       
-      {/* 메인 컨테이너 */}
-      <div className="flex flex-col h-full gap-6">
+      {/* 메인 컨테이너 - 전체 화면 채우기 */}
+      <div className="flex flex-col h-full gap-4 sm:gap-6">
         
         {/* 그리드 영역 */}
         <div className="flex-1 flex flex-col">
-          {/* 그리드 통계 정보 - 데스크탑 사이드바가 없을 때만 표시 */}
+          {/* 그리드 통계 정보 - 데스크탑 사이드바가 없을 때만 표시, 브레드크럼과 간격 조정 */}
           {showProgressStats && (
-          <div className="mb-4 sm:mb-4 md:mb-4 lg:hidden text-center flex-shrink-0">
-            <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
+          <div className="mb-1 min-[481px]:mb-1.5 min-[601px]:mb-2 sm:mb-2 md:mb-2 lg:hidden text-center flex-shrink-0">
+            <div className="flex items-center justify-center gap-1 min-[481px]:gap-2 sm:gap-4 text-xs min-[481px]:text-sm sm:text-[clamp(0.875rem,1.5vw,2rem)] text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 sm:w-[clamp(0.75rem,1.2vw,1.5rem)] sm:h-[clamp(0.75rem,1.2vw,1.5rem)] bg-success rounded-full"></div>
                 <span>{t('cell.progress.completed', { count: cells.filter(cell => cell.isCompleted).length })}</span>
@@ -332,7 +332,7 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
             </div>
             
             {/* 진행률 표시 */}
-            <div className="mt-4 pt-2 sm:mt-4 max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
+            <div className="mt-1.5 pt-0.5 min-[481px]:mt-2 min-[481px]:pt-1 min-[601px]:mt-3 min-[601px]:pt-1.5 sm:mt-3 max-w-xs sm:max-w-[clamp(20rem,30vw,40rem)] mx-auto">
               <div className="flex items-center justify-between text-xs sm:text-[clamp(0.75rem,1.2vw,1.25rem)] text-muted-foreground mb-1 sm:mb-[0.5vh]">
                 <span>{t('cell.progressRate')}</span>
                 <span>{Math.round((cells.filter(cell => cell.isCompleted).length / 8) * 100)}%</span>
@@ -347,18 +347,24 @@ const MandalartGrid: React.FC<MandalartGridProps> = ({
           </div>
           )}
 
-          {/* 그리드 컨테이너 */}
-          <div className="flex-1 flex items-center justify-center pt-4 mt-4 sm:pt-0 sm:mt-0">
+          {/* 그리드 컨테이너 - 브레드크럼과의 간격 최적화 */}
+          <div className="flex-1 flex items-center justify-center pt-0 mt-0 min-[481px]:pt-0.5 min-[481px]:mt-0.5 min-[601px]:pt-1 min-[601px]:mt-1 sm:pt-0 sm:mt-0 md:pt-0.5 md:mt-0.5">
             <div 
               className={cn(
                 // 기본 그리드 스타일
                 "grid grid-cols-3 w-full",
-                "max-w-[min(90vw,calc(100vh-8rem))] sm:max-w-[min(85vw,calc(100vh-10rem))] md:max-w-[min(80vw,calc(100vh-8rem))] lg:max-w-[min(60vw,calc(100vh-10rem))] xl:max-w-[min(55vw,calc(100vh-10rem))] 2xl:max-w-[min(50vw,calc(100vh-10rem))]",
-                "max-h-[min(90vw,calc(100vh-8rem))] sm:max-h-[min(85vw,calc(100vh-10rem))] md:max-h-[min(80vw,calc(100vh-8rem))] lg:max-h-[min(60vw,calc(100vh-10rem))] xl:max-h-[min(55vw,calc(100vh-10rem))] 2xl:max-h-[min(50vw,calc(100vh-10rem))]",
+                // 컨테이너 기반 크기 계산 - absolute positioning 제거로 인한 변경
+                "w-full max-w-[min(95vw,90vh)] max-h-[min(95vw,90vh)]", // 기본: 매우 짧은 화면
+                "min-[481px]:max-w-[min(92vw,85vh)] min-[481px]:max-h-[min(92vw,85vh)]", // 481px 이상
+                "min-[601px]:max-w-[min(90vw,80vh)] min-[601px]:max-h-[min(90vw,80vh)]", // 601px 이상  
+                "md:max-w-[min(85vw,75vh)] md:max-h-[min(85vw,75vh)]", // 768px 이상
+                "lg:max-w-[min(70vw,80vh)] lg:max-h-[min(70vw,80vh)]", // 1024px 이상 (사이드바 고려)
+                "xl:max-w-[min(65vw,75vh)] xl:max-h-[min(65vw,75vh)]", // 1280px 이상
+                "2xl:max-w-[min(60vw,70vh)] 2xl:max-h-[min(60vw,70vh)]", // 1536px 이상
                 "aspect-square", // 정사각형 비율 유지
                 
-                // 간격 설정
-                "gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 2xl:gap-8",
+                // 간격 설정 - 짧은 화면에서 간격 최소화
+                "gap-1 min-[481px]:gap-1.5 min-[601px]:gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 2xl:gap-8",
                 
                 // 반응형 크기 조정
                 "text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl",

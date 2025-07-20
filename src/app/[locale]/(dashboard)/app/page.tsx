@@ -285,7 +285,7 @@ export default function HomePage() {
           </motion.div>
         </div>
       ) : (
-        <div className="absolute inset-0">
+        <div className="w-full h-full">
           {/* 프리미엄 만다라트 카드 슬라이더 */}
           <PremiumMandalartCardSlider
             cells={rootCells}

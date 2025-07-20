@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import LocaleTester from '@/components/debug/LocaleTester';
 import { APP_CONFIG } from '@/constants/app';
 import { routing } from '@/i18n/routing';
 import {NextIntlClientProvider} from 'next-intl';
@@ -129,6 +130,7 @@ export default async function LocaleLayout({
             <BrowserCompatibilityProvider />
             <Toaster position="top-center" />
             {children}
+            <LocaleTester />
           </LocaleProvider>
         </NextIntlClientProvider>
       </body>

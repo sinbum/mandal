@@ -129,3 +129,22 @@ docker-compose*
 
 # Documentation
 docs/
+
+# Task Master files
+.taskmaster/
+
+# Claude Code files
+.claude/
+
+# Test files
+__tests__/
+**/*.test.*
+**/*.spec.*
+jest.config.*
+cypress/
+.cypress/
+
+# Config files (keep essential build configs)
+.prettierrc*
+.prettierignore
+.eslintignore

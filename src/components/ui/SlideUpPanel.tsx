@@ -173,13 +173,13 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
 
   const slideUpStyles = {
     panel: `
-      fixed bottom-0 left-0 right-0
+      fixed bottom-0 left-0 right-0 z-modal
       rounded-t-2xl shadow-xl
       border-t border-l border-r border-gray-200
       ${className}
     `,
     overlay: `
-      fixed inset-0
+      fixed inset-0 z-overlay
     `,
     dragHandle: `
       w-12 h-2 mx-auto my-3 rounded-full bg-gray-300 cursor-ns-resize select-none
@@ -205,7 +205,7 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
       <motion.div 
         ref={overlayRef}
         className={slideUpStyles.overlay}
-        style={overlayStyle}
+        style={{ ...overlayStyle, zIndex: 1900 }}
         onClick={onClose}
         aria-hidden="true"
         initial={{ opacity: 0 }}
@@ -220,7 +220,8 @@ const SlideUpPanel: React.FC<SlideUpPanelProps> = ({
         style={{ 
           ...glassStyle,
           height: `${panelHeight}px`,
-          maxHeight: '90vh'
+          maxHeight: '90vh',
+          zIndex: 2000
         }}
         role="dialog"
         aria-modal="true"

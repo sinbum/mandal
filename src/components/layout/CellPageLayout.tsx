@@ -21,11 +21,11 @@ const CellPageLayout: React.FC<CellPageLayoutProps> = ({
   className
 }) => {
   return (
-    <div className={cn("flex lg:flex-row flex-col min-h-[100dvh]", className)}>
+    <div className={cn("flex lg:flex-row flex-col h-full w-full", className)}>
       
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-2 h-full flex flex-col max-w-none 2xl:max-w-8xl overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-2 flex flex-col max-w-none 2xl:max-w-8xl h-full">
           
           {/* 브레드크럼 영역 */}
           {breadcrumbs && (
@@ -34,15 +34,13 @@ const CellPageLayout: React.FC<CellPageLayoutProps> = ({
             </div>
           )}
           
-          {/* 메인 콘텐츠 영역 */}
-          <div className="flex-1 w-full flex items-start justify-center pt-8 sm:pt-4 pb-8 sm:pb-2 px-2 sm:p-4 min-h-0">
-            <div className="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto">
+          {/* 메인 콘텐츠 영역 - 홈페이지처럼 고정된 레이아웃 */}
+          <div className="flex-1 w-full flex items-center justify-center py-2 min-[481px]:py-3 min-[601px]:py-4 sm:py-6 lg:py-8 px-2 sm:px-4 overflow-hidden">
+            <div className="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto h-full">
               
-              {/* MandalartGrid와 동일한 래퍼 구조 */}
-              <div className="relative h-full">
-                <div className="flex flex-col h-full gap-6">
-                  {children}
-                </div>
+              {/* MandalartGrid 콘텐츠 래퍼 */}
+              <div className="flex flex-col gap-4 sm:gap-6 h-full">
+                {children}
               </div>
               
             </div>
