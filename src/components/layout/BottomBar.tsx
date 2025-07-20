@@ -22,6 +22,7 @@ const BottomBar: React.FC = () => {
   const params = useParams();
   const locale = params?.locale as string || 'ko';
   const [recentCellId, setRecentCellId] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const user = useUser(); // 전역 인증 상태 사용
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -31,6 +32,7 @@ const BottomBar: React.FC = () => {
 
   // 브라우저 환경에서만 실행되도록 useEffect 사용
   useEffect(() => {
+    setIsClient(true);
     try {
       // 최근 만다라트 셀 ID를 로컬 스토리지에서 가져오기
       const storedCellId = getMostRecentMandalartCell();
@@ -88,7 +90,7 @@ const BottomBar: React.FC = () => {
         </Link>
         
         <Link 
-          href={recentCellId ? `/${locale}/app/cell/${recentCellId}` : '#'}
+          href={isClient && recentCellId ? `/${locale}/app/cell/${recentCellId}` : '#'}
           className="flex flex-col items-center text-gray-600 hover:text-blue-600"
           onClick={handleMandalartClick}
         >

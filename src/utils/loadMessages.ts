@@ -15,7 +15,7 @@ export async function loadMessages(locale: string): Promise<Record<string, unkno
     if (!fs.existsSync(filePath)) {
       console.warn(`Translation file not found for locale: ${locale}`);
       // 기본 언어로 폴백
-      const fallbackPath = path.join(process.cwd(), 'src/messages', 'ko.yaml');
+      const fallbackPath = path.join(process.cwd(), 'src/messages', 'en.yaml');
       if (fs.existsSync(fallbackPath)) {
         const fallbackContents = fs.readFileSync(fallbackPath, 'utf8');
         return yaml.load(fallbackContents) as Record<string, unknown>;
@@ -47,7 +47,7 @@ export type SupportedLocale = typeof supportedLocales[number];
 /**
  * 기본 로케일
  */
-export const defaultLocale: SupportedLocale = 'ko';
+export const defaultLocale: SupportedLocale = 'en';
 
 /**
  * 로케일 유효성 검사
